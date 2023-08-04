@@ -1,0 +1,18 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: certalert
+spec:
+  groups:
+    - name: certalert
+      rules:
+        - alert: CertificateExpiringSoon
+          annotations:
+            description:
+              Certificate will expire in {{ $value | humanizeDuration }}
+              (instance {{ $labels.instance }})
+            summary: SSL certificate «{{ $labels.instance }}» expires soon
+          expr: certalert_certificate_epoch_seconds - time() < 86400 * 29
+          for: 5m
+          labels:
+            severity: warning

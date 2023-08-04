@@ -1,0 +1,113 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: certalert
+spec:
+  selector:
+    matchLabels:
+      app: certalert
+  template:
+    metadata:
+      labels:
+        app: certalert
+    spec:
+      #initContainers:
+      #  - name: extract-cert
+      #    image: openjdk:openjdk/22-ea-jdk-slim-bullseye
+      #    command: ["/bin/sh", "-c"]
+      #    envFrom:
+      #      - secretRef:
+      #          name: certalert-certificate-credentials
+      #    args: ["keytool -exportcert -keystore /certs/keystore -alias cert_alias -storepass $CERT_PASS -file /certs/my-cert.cer"]
+      #    volumeMounts:
+      #      - name: transfer
+      #        mountPath: /certs
+      containers:
+      - name: certalert
+        image: ghcr.io/containeroo/certalert:latest
+        resources: {}
+        ports:
+          - name: http
+            containerPort: 8080
+        args:
+          - --config=/config/certalert-config.yaml
+        envFrom:
+          - secretRef:
+              name: certalert-password-envs
+        volumeMounts:
+          - name: config
+            mountPath: /config
+          - name: transfer
+            mountPath: /transfer
+          - name: certalert-password-file
+            mountPath: /certs/secrets
+          - name: jks-broken-certificate
+            mountPath: /certs/jks/broken_certificate.jks
+            subPath: broken_certificate.jks
+          - name: jks-regular-certificate
+            mountPath: /certs/jks/regular_certificate.jks
+            subPath: regular_certificate.jks
+          - name: jks-chain-certificate
+            mountPath: /certs/jks/chain_certificate.jks
+            subPath: chain_certificate.jks
+          - name: p12-with-password-certificate
+            mountPath: /certs/p12/with_password_certificate.p12
+            subPath: with_password_certificate.p12
+          - name: p12-without-password-certificate
+            mountPath: /certs/p12/without_password_certificate.p12
+            subPath: without_password_certificate.p12
+          - name: p12-chain-certificate
+            mountPath: /certs/p12/chain_certificate.p12
+            subPath: chain_certificate.p12
+          - name: pem-broken-certificate
+            mountPath: /certs/pem/broken_certificate.pem
+            subPath: broken_certificate.pem
+          - name: pem-with-password-certificate
+            mountPath: /certs/pem/with_password_certificate.pem
+            subPath: with_password_certificate.pem
+          - name: pem-without-password-certificate
+            mountPath: /certs/pem/without_password_certificate.pem
+            subPath: without_password_certificate.pem
+          - name: pem-chain-certificate
+            mountPath: /certs/pem/chain_certificate.pem
+            subPath: chain_certificate.pem
+      volumes:
+        - name: config
+          configMap:
+            name: certalert-config
+        - name: transfer
+          emptyDir: {}
+        - name: certalert-password-file
+          secret:
+            secretName: certalert-password-file
+        - name: jks-broken-certificate
+          configMap:
+            name: jks-broken-certificate
+        - name: jks-regular-certificate
+          configMap:
+            name: jks-regular-certificate
+        - name: jks-chain-certificate
+          configMap:
+            name: jks-chain-certificate
+        - name: p12-with-password-certificate
+          configMap:
+            name: p12-with-password-certificate
+        - name: p12-without-password-certificate
+          configMap:
+            name: p12-without-password-certificate
+        - name: p12-chain-certificate
+          configMap:
+            name: p12-chain-certificate
+        - name: pem-broken-certificate
+          configMap:
+            name: pem-broken-certificate
+        - name: pem-with-password-certificate
+          configMap:
+            name: pem-with-password-certificate
+        - name: pem-without-password-certificate
+          configMap:
+            name: pem-without-password-certificate
+        - name: pem-chain-certificate
+          configMap:
+            name: pem-chain-certificate

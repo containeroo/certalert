@@ -1,0 +1,6 @@
+apiVersion: v1
+data:
+  broken_certificate.jks: broken
+kind: ConfigMap
+metadata:
+  name: jks-broken-certificate

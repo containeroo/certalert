@@ -1,0 +1,15 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: certalert
+  labels:
+    app: certalert
+spec:
+  selector:
+    matchLabels:
+      app: certalert
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 60m
