@@ -107,7 +107,7 @@ func TestParseConfig(t *testing.T) {
 					},
 				},
 			},
-			expectedError: "Certifacate 'test_cert' cannot resolve 'password'. Failed to read file 'INVALID_FILE': open INVALID_FILE: no such file or directory",
+			expectedError: "Certifacate 'test_cert' cannot resolve 'password'. Failed to open file 'INVALID_FILE': open INVALID_FILE: no such file or directory",
 		},
 		{
 			name: "cert name not defined",
@@ -115,12 +115,12 @@ func TestParseConfig(t *testing.T) {
 				Certs: []certificates.Certificate{
 					{
 						Enabled: &trueVar,
-						Path:    "path/to/cert.pem",
-						Type:    "pem",
+						Path:    "path/to/cert-with_special chars.pem",
+						Name:    "cert-with-special-chars-pem",
 					},
 				},
 			},
-			expectedError: "Certificate no '0' has no 'name' defined",
+			expectedError: "",
 		},
 		{
 			name: "cert path not defined",

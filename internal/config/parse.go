@@ -62,12 +62,16 @@ func ParseConfig(app *Config) (err error) {
 			continue
 		}
 
-		if cert.Name == "" {
-			return fmt.Errorf("Certificate no '%d' has no 'name' defined", idx)
-		}
-
 		if cert.Path == "" {
 			return fmt.Errorf("Certificate '%s' has no 'path' defined", cert.Name)
+		}
+
+		if cert.Name == "" {
+			file := filepath.Base(cert.Path)
+			name := strings.ReplaceAll(file, ".", "-")
+			name = strings.ReplaceAll(file, " ", "-")
+			name = strings.ReplaceAll(file, "_", "-")
+			cert.Name = name
 		}
 
 		if cert.Type == "" {
