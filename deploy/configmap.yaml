@@ -12,7 +12,7 @@ data:
     certs:
       - name: PEM - with_password
         path: /certs/pem/with_password_certificate.pem
-        password: env:PEM_PASSWORD
+        password: file:/certs/certalert.passwords:{PEM_PASSWORD}
       - name: PEM - without_password
         path: /certs/pem/without_password_certificate.pem
       - name: PEM - chain

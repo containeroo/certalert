@@ -31,7 +31,8 @@ spec:
           - name: http
             containerPort: 8080
         args:
-          - --config=/config/certalert-config.yaml
+          - serve
+          - --config=/config/config.yaml
         envFrom:
           - secretRef:
               name: certalert-password-envs
@@ -41,7 +42,8 @@ spec:
           - name: transfer
             mountPath: /transfer
           - name: certalert-password-file
-            mountPath: /certs/secrets
+            mountPath: /certs/certalert.passwords
+            subPath: certalert.passwords
           - name: jks-broken-certificate
             mountPath: /certs/jks/broken_certificate.jks
             subPath: broken_certificate.jks
@@ -72,6 +74,9 @@ spec:
           - name: pem-chain-certificate
             mountPath: /certs/pem/chain_certificate.pem
             subPath: chain_certificate.pem
+          - name: pem-chain-certificate-password
+            mountPath: /certs/pem/chain_certificate.password
+            subPath: chain_certificate.password
       volumes:
         - name: config
           configMap:
@@ -111,3 +116,6 @@ spec:
         - name: pem-chain-certificate
           configMap:
             name: pem-chain-certificate
+        - name: pem-chain-certificate-password
+          secret:
+            secretName: pem-chain-certificate-password
