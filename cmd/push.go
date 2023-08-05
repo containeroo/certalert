@@ -26,7 +26,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var all bool
+var pushAll bool
 
 // pushCmd represents the push command
 var pushCmd = &cobra.Command{
@@ -50,9 +50,14 @@ Examples:
 `,
 
 	Run: func(cmd *cobra.Command, args []string) {
-		if all {
+		if pushAll {
 			// Handle --all flag
-			if err := pushgateway.Send(config.App.Pushgateway.Address, config.App.Pushgateway.Job, config.App.Pushgateway.Auth, config.App.Certs); err != nil {
+			if err := pushgateway.Send(
+				config.App.Pushgateway.Address,
+				config.App.Pushgateway.Job,
+				config.App.Pushgateway.Auth,
+				config.App.Certs,
+				config.App.Pushgateway.InsecureSkipVerify); err != nil {
 				log.Panic(err)
 			}
 			return
@@ -70,7 +75,12 @@ Examples:
 			if err != nil {
 				log.Panic(err)
 			}
-			if err := pushgateway.Send(config.App.Pushgateway.Address, config.App.Pushgateway.Job, config.App.Pushgateway.Auth, []certificates.Certificate{*certificate}); err != nil {
+			if err := pushgateway.Send(
+				config.App.Pushgateway.Address,
+				config.App.Pushgateway.Job,
+				config.App.Pushgateway.Auth,
+				[]certificates.Certificate{*certificate},
+				config.App.Pushgateway.InsecureSkipVerify); err != nil {
 				log.Panic(err)
 			}
 		}
@@ -80,5 +90,6 @@ Examples:
 func init() {
 	rootCmd.AddCommand(pushCmd)
 
-	pushCmd.PersistentFlags().BoolVarP(&all, "all", "A", false, "Push all certificates")
+	pushCmd.PersistentFlags().BoolVarP(&pushAll, "all", "A", false, "Push all certificates")
+	pushCmd.PersistentFlags().BoolVarP(&config.App.Pushgateway.InsecureSkipVerify, "insecure-skip-verify", "i", false, "Skip TLS certificate verification")
 }

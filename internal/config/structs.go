@@ -20,10 +20,10 @@ type Server struct {
 
 // Pushgateway represents the pushgateway config
 type Pushgateway struct {
-	Address    string `yaml:"address"`
-	SkipVerify bool   `yaml:"skip_verify"`
-	Job        string `yaml:"job"`
-	Auth       Auth   `yaml:"auth"`
+	Address            string `yaml:"address"`
+	InsecureSkipVerify bool   `yaml:"insecureSkipVerify"`
+	Job                string `yaml:"job"`
+	Auth               Auth   `yaml:"auth"`
 }
 
 // Auth represents the pushgateway auth config

@@ -7,8 +7,8 @@ import (
 )
 
 // Send pushes the certificate information to the Pushgateway
-func Send(address, jobName string, auth config.Auth, certs []certificates.Certificate) error {
-	pusher := createPusher(address, jobName, auth)
+func Send(address string, jobName string, auth config.Auth, certs []certificates.Certificate, insecureSkipVerify bool) error {
+	pusher := createPusher(address, jobName, auth, insecureSkipVerify)
 
 	certificatesInfo, err := certificates.Process(certs)
 	if err != nil {
