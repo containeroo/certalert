@@ -12,20 +12,20 @@ for name in "${!certs[@]}";do
   password=${certs[$name]}
 
   # Generate private key with password if it's set
-  if [ -z "$password" ]; then
+  if [ -z "${password}" ]; then
     openssl genpkey -algorithm RSA -out ${name}_private_key.key
   else
-    openssl genpkey -algorithm RSA -out ${name}_private_key.key -pass pass:$password
+    openssl genpkey -algorithm RSA -out ${name}_private_key.key -pass pass:${password}
   fi
 
   # Generate the self-signed certificate
   openssl req -new -x509 -key ${name}_private_key.key -out ${name}_self_signed_certificate.crt -days 365 -subj "/CN=$name"
 
   # Export the certificate and private key to a PKCS12 (.p12) file
-  if [ -z "$password" ]; then
+  if [ -z "${password}" ]; then
     openssl pkcs12 -export -out ${name}_certificate.p12 -inkey ${name}_private_key.key -in ${name}_self_signed_certificate.crt -password pass:
   else
-    openssl pkcs12 -export -out ${name}_certificate.p12 -inkey ${name}_private_key.key -in ${name}_self_signed_certificate.crt -password pass:$password
+    openssl pkcs12 -export -out ${name}_certificate.p12 -inkey ${name}_private_key.key -in ${name}_self_signed_certificate.crt -password pass:${password}
   fi
 done
 

@@ -25,7 +25,7 @@ func TestExtractP12CertificatesInfo(t *testing.T) {
 				{
 					Name:    "TestCert",
 					Subject: "without_password",
-					Epoch:   1722688212,
+					Epoch:   1722860367,
 					Type:    "p12",
 				},
 			},
@@ -39,7 +39,7 @@ func TestExtractP12CertificatesInfo(t *testing.T) {
 				{
 					Name:    "TestCert",
 					Subject: "with_password",
-					Epoch:   1722688213,
+					Epoch:   1722860367,
 					Type:    "p12",
 				},
 			},
@@ -67,25 +67,25 @@ func TestExtractP12CertificatesInfo(t *testing.T) {
 				{
 					Name:    "TestCert",
 					Subject: "chain",
-					Epoch:   1722688212,
+					Epoch:   1722860367,
 					Type:    "p12",
 				},
 				{
 					Name:    "TestCert",
 					Subject: "chain",
-					Epoch:   1722688212,
+					Epoch:   1722860367,
 					Type:    "p12",
 				},
 				{
 					Name:    "TestCert",
 					Subject: "chain",
-					Epoch:   1722688212,
+					Epoch:   1722860367,
 					Type:    "p12",
 				},
 				{
 					Name:    "TestCert",
 					Subject: "chain",
-					Epoch:   1722688212,
+					Epoch:   1722860367,
 					Type:    "p12",
 				},
 			},
