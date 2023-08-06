@@ -17,6 +17,7 @@ package cmd
 
 import (
 	"certalert/internal/config"
+	"fmt"
 	"os"
 
 	log "github.com/sirupsen/logrus"
@@ -25,8 +26,12 @@ import (
 	"github.com/spf13/viper"
 )
 
+const (
+	version = "v0.0.1"
+)
+
 var cfgFile string
-var verbose, silent bool
+var verbose, silent, printVersion bool
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -39,7 +44,10 @@ var rootCmd = &cobra.Command{
 	2. Use the 'serve' command to start a server that provides a '/metrics' endpoint for Prometheus to scrape.
 
 	For a full list of commands and options, use 'certalert --help'.
-	`, PersistentPreRun: func(cmd *cobra.Command, args []string) {
+	`,
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		// Enter here before any subcommand is executed
+
 		if verbose {
 			log.SetLevel(log.DebugLevel)
 			log.Debugf("Verbose output enabled")
@@ -48,8 +56,22 @@ var rootCmd = &cobra.Command{
 			log.Debugf("Silent output enabled")
 		}
 
+		if printVersion {
+			fmt.Println("CertAlert version:", version)
+			os.Exit(0)
+		}
+
 		if err := config.ParseConfig(&config.App); err != nil {
 			log.Fatalf("Error parsing config file: %v", err)
+		}
+	},
+	Run: func(cmd *cobra.Command, args []string) {
+		// Enter here if no subcommand is specified
+		if printVersion {
+			fmt.Println("CertAlert version:", version)
+			os.Exit(0)
+		} else {
+			cmd.Help()
 		}
 	},
 }
@@ -68,6 +90,9 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "verbose output")
 	rootCmd.PersistentFlags().BoolVarP(&silent, "silent", "s", false, "silent output")
 	rootCmd.MarkFlagsMutuallyExclusive("verbose", "silent")
+
+	rootCmd.PersistentFlags().BoolVarP(&printVersion, "version", "V", false, "print version and exit")
+
 }
 
 // initConfig reads in config file and ENV variables if set.
