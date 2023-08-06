@@ -2,6 +2,7 @@ package utils
 
 import (
 	"os"
+	"strings"
 	"testing"
 )
 
@@ -101,5 +102,35 @@ func TestIsInList(t *testing.T) {
 
 	if IsInList("four", list) {
 		t.Fatalf("'four' should not be in list")
+	}
+}
+
+func TestCheckFileAccessibility(t *testing.T) {
+	// 1. File doesn't exist
+	nonExistentPath := "./tmp/nonexistentfile12345"
+	err := CheckFileAccessibility(nonExistentPath)
+	if err == nil || !strings.HasPrefix(err.Error(), "File does not exist:") {
+		t.Errorf("Expected a 'File does not exist' error, got '%v'", err)
+	}
+
+	// 2. File exists but isn't readable
+	tmpFile, err := os.CreateTemp("", "testfile")
+	if err != nil {
+		t.Fatalf("Failed to create temp file: %v", err)
+	}
+	defer tmpFile.Close()
+	defer os.Remove(tmpFile.Name())
+
+	os.Chmod(tmpFile.Name(), 0222) // Write-only permissions
+	err = CheckFileAccessibility(tmpFile.Name())
+	if err == nil {
+		t.Errorf("Expected a 'failed to open file' error, got nil")
+	}
+
+	// 3. File exists and is readable
+	os.Chmod(tmpFile.Name(), 0444) // Read-only permissions
+	err = CheckFileAccessibility(tmpFile.Name())
+	if err != nil {
+		t.Errorf("Expected no error for readable file, got %v", err)
 	}
 }

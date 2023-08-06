@@ -66,6 +66,10 @@ func ParseConfig(app *Config) (err error) {
 			return fmt.Errorf("Certificate '%s' has no 'path' defined", cert.Name)
 		}
 
+		if err := utils.CheckFileAccessibility(cert.Path); err != nil {
+			return fmt.Errorf("Certificate '%s' has an invalid 'path'. %s", cert.Name, err)
+		}
+
 		if cert.Name == "" {
 			file := filepath.Base(cert.Path)
 			name := strings.ReplaceAll(file, ".", "-")

@@ -75,3 +75,23 @@ func IsInList(value string, list []string) bool {
 	}
 	return false
 }
+
+// CheckFileAccessibility checks if a file exists and is accessible
+func CheckFileAccessibility(filePath string) error {
+	// Check if the file exists
+	if _, err := os.Stat(filePath); err != nil {
+		if os.IsNotExist(err) {
+			return fmt.Errorf("File does not exist: %s", filePath)
+		}
+		return fmt.Errorf("Error stating file '%s': %v", filePath, err)
+	}
+
+	// Try to open the file to check for readability
+	file, err := os.Open(filePath)
+	if err != nil {
+		return fmt.Errorf("Failed to open file '%s': %v", filePath, err)
+	}
+	file.Close() // Close immediately after opening, as we just want to check readability.
+
+	return nil
+}
