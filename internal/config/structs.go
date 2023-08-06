@@ -7,38 +7,38 @@ var App Config
 
 // Config represents the config file
 type Config struct {
-	Server      Server                     `yaml:"server"`
-	Pushgateway Pushgateway                `yaml:"pushgateway"`
-	Certs       []certificates.Certificate `yaml:"certs"`
+	Server      Server                     `json:"server"`
+	Pushgateway Pushgateway                `json:"pushgateway"`
+	Certs       []certificates.Certificate `json:"certs"`
 }
 
 // Server represents the server config
 type Server struct {
-	Hostname string `yaml:"hostname"`
-	Port     int    `yaml:"port"`
+	Hostname string `json:"hostname"`
+	Port     int    `json:"port"`
 }
 
 // Pushgateway represents the pushgateway config
 type Pushgateway struct {
-	Address            string `yaml:"address"`
-	InsecureSkipVerify bool   `yaml:"insecureSkipVerify"`
-	Job                string `yaml:"job"`
-	Auth               Auth   `yaml:"auth"`
+	Address            string `json:"address"`
+	InsecureSkipVerify bool   `json:"insecureSkipVerify"`
+	Job                string `json:"job"`
+	Auth               Auth   `json:"auth"`
 }
 
 // Auth represents the pushgateway auth config
 type Auth struct {
-	Basic  Basic  `yaml:"basic,omitempty"`
-	Bearer Bearer `yaml:"bearer,omitempty"`
+	Basic  Basic  `json:"basic,omitempty"`
+	Bearer Bearer `json:"bearer,omitempty"`
 }
 
 // Basic represents the pushgateway basic auth config
 type Basic struct {
-	Password string `yaml:"password"`
-	Username string `yaml:"username"`
+	Password string `json:"password"`
+	Username string `json:"username"`
 }
 
 // Bearer represents the pushgateway bearer auth config
 type Bearer struct {
-	Token string `yaml:"token"`
+	Token string `json:"token"`
 }
