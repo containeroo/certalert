@@ -2,7 +2,7 @@
 
 # define an associative array
 declare -A certs
-certs=( ["with_password"]="password" ["without_password"]="" ["chain"]="password" ["intermediate"]="password" ["root"]="password" )
+certs=( ["with_password"]="password" ["without_password"]="" ["intermediate"]="password" ["root"]="password" ["final"]="password" )
 
 mkdir -p ./tests/certs/p12
 pushd ./tests/certs/p12
@@ -13,28 +13,31 @@ for name in "${!certs[@]}";do
 
   # Generate private key with password if it's set
   if [ -z "${password}" ]; then
-    openssl genpkey -algorithm RSA -out ${name}_private_key.key
+    openssl genpkey -algorithm RSA -out ${name}.key
   else
-    openssl genpkey -algorithm RSA -out ${name}_private_key.key -pass pass:${password}
+    openssl genpkey -algorithm RSA -out ${name}.key -pass pass:${password}
   fi
+  echo "Generated ${name}.key"
 
   # Generate the self-signed certificate
-  openssl req -new -x509 -key ${name}_private_key.key -out ${name}_self_signed_certificate.crt -days 365 -subj "/CN=$name"
+  openssl req -new -x509 -key ${name}.key -out ${name}.crt -days 365 -subj "/CN=$name"
+  echo "Generated ${name}.crt"
 
   # Export the certificate and private key to a PKCS12 (.p12) file
   if [ -z "${password}" ]; then
-    openssl pkcs12 -export -out ${name}_certificate.p12 -inkey ${name}_private_key.key -in ${name}_self_signed_certificate.crt -password pass:
+    openssl pkcs12 -export -out ${name}.p12 -inkey ${name}.key -in ${name}.crt -password pass:
   else
-    openssl pkcs12 -export -out ${name}_certificate.p12 -inkey ${name}_private_key.key -in ${name}_self_signed_certificate.crt -password pass:${password}
+    openssl pkcs12 -export -out ${name}.p12 -inkey ${name}.key -in ${name}.crt -password pass:${password}
   fi
+  echo "Generated ${name}.p12"
 done
 
 # create broken p12 file
-echo "broken" > broken_certificate.p12
+echo "broken" > broken.p12
 
 
 # create p12 file with a certificate chain
-cat chain_self_signed_certificate.crt intermediate_self_signed_certificate.crt root_self_signed_certificate.crt > chain.crt
-openssl pkcs12 -export -out chain_certificate.p12 -inkey chain_private_key.key -in chain_self_signed_certificate.crt -certfile chain.crt -password pass:password
+cat final.crt intermediate.crt root.crt > chain.crt
+openssl pkcs12 -export -out chain.p12 -inkey final.key -in final.crt -certfile chain.crt -password pass:password
 
 popd

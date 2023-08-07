@@ -19,13 +19,13 @@ func TestExtractPEMCertificatesInfo(t *testing.T) {
 	testCases := []testCase{
 		{
 			Name:     "Test PEM certificate with no password",
-			FilePath: "../../tests/certs/pem/without_password_certificate.pem",
+			FilePath: "../../tests/certs/pem/without_password.pem",
 			Password: "",
 			ExpectedResults: []CertificateInfo{
 				{
 					Name:    "TestCert",
 					Subject: "without_password",
-					Epoch:   1722860237,
+					Epoch:   1722926985,
 					Type:    "pem",
 				},
 			},
@@ -33,13 +33,13 @@ func TestExtractPEMCertificatesInfo(t *testing.T) {
 		},
 		{
 			Name:     "Test PEM certificate with password",
-			FilePath: "../../tests/certs/pem/with_password_certificate.pem",
+			FilePath: "../../tests/certs/pem/with_password.pem",
 			Password: "password",
 			ExpectedResults: []CertificateInfo{
 				{
 					Name:    "TestCert",
 					Subject: "with_password",
-					Epoch:   1722860237,
+					Epoch:   1722926986,
 					Type:    "pem",
 				},
 			},
@@ -47,20 +47,20 @@ func TestExtractPEMCertificatesInfo(t *testing.T) {
 		},
 		{
 			Name:            "Test PEM certificate witch is broken",
-			FilePath:        "../../tests/certs/pem/broken_certificate.pem",
+			FilePath:        "../../tests/certs/pem/broken.pem",
 			Password:        "",
 			ExpectedResults: []CertificateInfo{},
 			ExpectedError:   "Failed to decode certificate 'TestCert'",
 		},
 		{
 			Name:     "Test PEM certificate with wrong password",
-			FilePath: "../../tests/certs/pem/with_password_certificate.pem",
+			FilePath: "../../tests/certs/pem/with_password.pem",
 			Password: "wrong",
 			ExpectedResults: []CertificateInfo{
 				{
 					Name:    "TestCert",
 					Subject: "with_password",
-					Epoch:   1722860237,
+					Epoch:   1722926986,
 					Type:    "pem",
 				},
 			},
@@ -68,25 +68,25 @@ func TestExtractPEMCertificatesInfo(t *testing.T) {
 		},
 		{
 			Name:     "Test PEM certificate with chain",
-			FilePath: "../../tests/certs/pem/chain_certificate.pem",
+			FilePath: "../../tests/certs/pem/chain.pem",
 			Password: "password",
 			ExpectedResults: []CertificateInfo{
 				{
 					Name:    "TestCert",
-					Subject: "chain",
-					Epoch:   1722860237,
+					Subject: "final",
+					Epoch:   1722926985,
 					Type:    "pem",
 				},
 				{
 					Name:    "TestCert",
-					Subject: "chain",
-					Epoch:   1722860237,
+					Subject: "intermediate",
+					Epoch:   1722926986,
 					Type:    "pem",
 				},
 				{
 					Name:    "TestCert",
-					Subject: "chain",
-					Epoch:   1722860237,
+					Subject: "root",
+					Epoch:   1722926986,
 					Type:    "pem",
 				},
 			},
@@ -126,7 +126,9 @@ func TestExtractPEMCertificatesInfo(t *testing.T) {
 				// Find the certificate in the returned slice
 				var extractedCert CertificateInfo
 				for _, cert := range certs {
-					if cert.Name == expectedCert.Name {
+					if cert.Name == expectedCert.Name &&
+						cert.Subject == expectedCert.Subject &&
+						cert.Type == expectedCert.Type {
 						extractedCert = cert
 						break
 					}
