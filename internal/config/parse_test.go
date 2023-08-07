@@ -60,7 +60,7 @@ func TestParseConfig(t *testing.T) {
 				Certs: []certificates.Certificate{
 					{
 						Name:     "test_cert",
-						Path:     "path/to/cert.pem",
+						Path:     "../../tests/certs/pem/chain.pem",
 						Type:     "pem",
 						Password: fmt.Sprintf("file:%s", passwordFileName),
 						Enabled:  &trueVar,
@@ -101,7 +101,7 @@ func TestParseConfig(t *testing.T) {
 					{
 						Name:     "test_cert",
 						Enabled:  &trueVar,
-						Path:     "path/to/cert.pem",
+						Path:     "../../tests/certs/p12/root.p12",
 						Type:     "pem",
 						Password: "file:INVALID_FILE",
 					},
@@ -115,8 +115,7 @@ func TestParseConfig(t *testing.T) {
 				Certs: []certificates.Certificate{
 					{
 						Enabled: &trueVar,
-						Path:    "path/to/cert-with_special chars.pem",
-						Name:    "cert-with-special-chars-pem",
+						Path:    "../../tests/certs/pem/final.pem",
 					},
 				},
 			},
@@ -143,7 +142,7 @@ func TestParseConfig(t *testing.T) {
 					{
 						Name:    "test_cert",
 						Enabled: &trueVar,
-						Path:    "path/to/cert",
+						Path:    "../../tests/certs/p12/no_extension",
 					},
 				},
 			},
@@ -156,7 +155,7 @@ func TestParseConfig(t *testing.T) {
 					{
 						Name:    "test_cert",
 						Enabled: &trueVar,
-						Path:    "path/to/cert.invalid",
+						Path:    "../../tests/certs/pem/without_password.pem",
 						Type:    "invalid",
 					},
 				},
@@ -170,7 +169,7 @@ func TestParseConfig(t *testing.T) {
 					{
 						Name:    "test_cert",
 						Enabled: &trueVar,
-						Path:    "path/to/cert.invalid",
+						Path:    "../../tests/certs/pem/cert.invalid",
 					},
 				},
 			},
@@ -183,7 +182,7 @@ func TestParseConfig(t *testing.T) {
 					{
 						Name:    "test_cert",
 						Enabled: &trueVar,
-						Path:    "path/to/cert.p12",
+						Path:    "../../tests/certs/p12/chain.p12",
 					},
 				},
 			},
@@ -195,7 +194,6 @@ func TestParseConfig(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			setEnvVars(envs)
 
-			fmt.Println("test name:", testCase.name)
 			err := ParseConfig(testCase.config)
 
 			unsetEnvVars(envs)
