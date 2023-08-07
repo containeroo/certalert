@@ -12,4 +12,9 @@ You need `openssl` and `keytool` installed.
 
 ## ConfigMaps
 
-`ConfigMaps` with certificates can be created with kustomize: `kustomize build tests/certs -o deploy`
+`ConfigMaps` with certificates can be created with kustomize:
+
+```sh
+cd tests/certs
+kustomize build tests/certs -o deploy/certs/
+```
