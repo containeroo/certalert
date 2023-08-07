@@ -14,15 +14,25 @@ spec:
     spec:
       #initContainers:
       #  - name: extract-cert
-      #    image: openjdk:openjdk/22-ea-jdk-slim-bullseye
-      #    command: ["/bin/sh", "-c"]
+      #    image: openjdk:11
+      #    command: ["/bin/bash"]
+      #    args: 
+      #      - -c
+      #      - >-
+      #        keytool -importkeystore \
+      #        -srckeystore /certs/mytruststore.jks \
+      #        -destkeystore /transfer/mytruststore.p12 \
+      #        -deststoretype PKCS12 \
+      #        -srcstorepass <YOUR_SRC_PASSWORD> \
+      #        -deststorepass <YOUR_DEST_PASSWORD>
       #    envFrom:
       #      - secretRef:
       #          name: certalert-certificate-credentials
-      #    args: ["keytool -exportcert -keystore /certs/keystore -alias cert_alias -storepass $CERT_PASS -file /certs/my-cert.cer"]
       #    volumeMounts:
       #      - name: transfer
-      #        mountPath: /certs
+      #        mountPath: /transfer
+      #      - name: mytruststore-secret
+      #        mountPath: /certs/
       containers:
       - name: certalert
         image: ghcr.io/containeroo/certalert:latest
@@ -119,3 +129,6 @@ spec:
         - name: pem-chain-certificate-password
           secret:
             secretName: pem-chain-certificate-password
+       #- name: mytrustore-secret
+       #  secret:
+       #    secretName: mytrustore-secret
