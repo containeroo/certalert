@@ -27,7 +27,7 @@ func NewMetrics() *Metrics {
 				Name: CertalertMetricName,
 				Help: CertalertMetricHelp,
 			},
-			[]string{"name", "subject", "type"},
+			[]string{"instance", "subject", "type"},
 		),
 	}
 	reg.Register(m.CertificateEpoch)
