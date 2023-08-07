@@ -2,12 +2,15 @@ package handlers
 
 import (
 	"certalert/internal/config"
-	"log"
 	"net/http"
+
+	log "github.com/sirupsen/logrus"
 )
 
 // ReloadHandler is a handler function that reloads the application configuration
 func ReloadHandler(w http.ResponseWriter, r *http.Request) {
+	log.Debugf("Force reloading configuration")
+
 	if err := config.ParseConfig(&config.App); err != nil {
 		log.Fatalf("Unable to parse config: %s", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
