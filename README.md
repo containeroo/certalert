@@ -8,7 +8,7 @@ Additionally, `certalert` also supports forwarding the expiration date epoch dir
 
 ## Certificate Management
 
-Certificates can be defined with properties such as their `name`, `path`, `type`, and an optional `password`. You have the flexibility to enable or disable specific certificate checks. Additionally, the type of certificate can either be manually defined or determined by the system based on the file extension.
+Certificates can be defined with properties such as their `name`, `path`, `type`, and an optional `password`. You have the flexibility to enable or disable specific certificate checks. Additionally, the `type` of certificate can either be manually defined or determined by the system based on the file extension.
 
 Credentials, such as `passwords`, can be specified in multiple ways: `plain text`, an `environment variable`, or a `file` containing the credentials. For files with multiple key-value pairs, a specific key can be chosen by appending `:{KEY}` at the end of the file path. See `Providing Credentials` for more details.
 
@@ -20,21 +20,24 @@ Just like the certificate password, these credentials can also be provided as `p
 
 ## Configuration
 
+The certificates must be configured in a file. The config file can be `yaml`, `json` or `toml`. The config file should be loaded automatically if changed. Please check the log output to control if the automatic config reload works in your environment. The endpont `/-/reload` also reloads the configuration.
+
 ### Pushgateway
 
 Below are the available properties for the `Pushgateway` and its nested types:
 
-- **Pushgateway**
-  - **Address**: This property specifies the URL of the Pushgateway server.
-  - **Job**: This property defines the job label to be attached to pushed metrics.
-  - **Auth**: This nested structure holds the authentication details needed for the Pushgateway server. It supports two types of authentication: `Basic` and `Bearer`.
+- **pushgateway**
+  - **address**: The URL of the Pushgateway server.
+  - **job**: The job label to be attached to pushed metrics.
+  - **insecureSkipVerify** Skip TLS certificate verification. Defaults to `false`.
+  - **auth**: This nested structure holds the authentication details needed for the Pushgateway server. It supports two types of authentication: `Basic` and `Bearer`.
 
-- **Auth**
-  - **Basic**: This nested structure holds the basic authentication details.
-    - **Username**: This is the username used for basic authentication.
-    - **Password**: This is the password used for basic authentication.
-  - **Bearer**: This nested structure holds the bearer authentication details.
-    - **Token**: This is the bearer token used for bearer authentication.
+- **auth**
+  - **basic**: This nested structure holds the basic authentication details.
+    - **username**: Username used for basic authentication.
+    - **password**: Password used for basic authentication.
+  - **bearer**: This nested structure holds the bearer authentication details.
+    - **token**: Bearer token used for bearer authentication.
 
 Please ensure each property is correctly configured to prevent any unexpected behaviors. Remember to provide necessary authentication details under the `Auth` structure based on the type of authentication your Pushgateway server uses.
 
@@ -42,11 +45,11 @@ Please ensure each property is correctly configured to prevent any unexpected be
 
 Here are the available properties for the certificate:
 
-- **Name**: This refers to the unique identifier of the certificate. It's used for distinguishing between different certificates. If not provided, it defaults to the certificate's filename, replacing all spaces (` `), dots (`.`) and underlines (`_`) with a dash (`-`).
-- **Enabled**: This toggle enables or disables this check. By default, it is set to `true`.
-- **Path**: This specifies the location of the certificate file in your system.
-- **Type**: This denotes the type of the certificate. If it's not explicitly specified, the system will attempt to determine the type based on the file extension. Allowed types are: p12, pkcs12, pfx, pem, crt and jks.
-- **Password**: This optional property allows you to set the password for the certificate.
+- **name**: This refers to the unique identifier of the certificate. It's used for distinguishing between different certificates. If not provided, it defaults to the certificate's filename, replacing all spaces (` `), dots (`.`) and underlines (`_`) with a dash (`-`).
+- **enabled**: This toggle enables or disables this check. By default, it is set to `true`.
+- **path**: This specifies the location of the certificate file in your system.
+- **type**: This denotes the type of the certificate. If it's not explicitly specified, the system will attempt to determine the type based on the file extension. Allowed types are: p12, pkcs12, pfx, pem, crt and jks.
+- **password**: This optional property allows you to set the password for the certificate.
 
 #### Providing Credentials
 
@@ -66,6 +69,7 @@ __Example__
 ---
 pushgateway:
   address: http://pushgateway.monitoring.svc.cluster.local:9091
+  insecureSkipVerify: false
   job: certalert
 certs:
   - name: PEM - without_password
@@ -97,8 +101,9 @@ certs:
 
 certalert provides the following web-accessible endpoints:
 
-| Endpoint   | Purpose                                                                             |
-| :--------- | :---------------------------------------------------------------------------------- |
-| `/`        | Fetches and displays all the certificates in a tabular format                       |
-| `/config`  | Provides the currently active configuration file. Plaintext passwords are redacted. |
-| `/metrics` | Delivers metrics for Prometheus to scrape                                           |
+| Endpoint    | Purpose                                                                             |
+| :---------- | :---------------------------------------------------------------------------------- |
+| `/`         | Fetches and displays all the certificates in a tabular format                       |
+| `/-/reload` | Reloads the configuration                                                           |
+| `/config`   | Provides the currently active configuration file. Plaintext passwords are redacted. |
+| `/metrics`  | Delivers metrics for Prometheus to scrape                                           |
