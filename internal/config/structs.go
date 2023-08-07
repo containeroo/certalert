@@ -28,8 +28,8 @@ type Pushgateway struct {
 
 // Auth represents the pushgateway auth config
 type Auth struct {
-	Basic  Basic  `json:"basic,omitempty" yaml:"enabled,omitempty"`
-	Bearer Bearer `json:"bearer,omitempty" yaml:"enabled,omitempty"`
+	Basic  Basic  `json:"basic,omitempty" yaml:"basic,omitempty"`
+	Bearer Bearer `json:"bearer,omitempty" yaml:"bearer,omitempty"`
 }
 
 // Basic represents the pushgateway basic auth config

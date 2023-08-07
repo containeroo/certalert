@@ -47,7 +47,7 @@ the configuration if changes are detected.
 		viper.OnConfigChange(func(e fsnotify.Event) {
 			log.Infof("Config file changed: %s", e.Name)
 
-			if err := viper.ReadInConfig(); err != nil {
+			if err := config.ReadConfigFile(viper.ConfigFileUsed(), &config.App); err != nil {
 				log.Fatalf("Unable to read config: %s", err)
 			}
 

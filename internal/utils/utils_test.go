@@ -134,3 +134,78 @@ func TestCheckFileAccessibility(t *testing.T) {
 		t.Errorf("Expected no error for readable file, got %v", err)
 	}
 }
+
+type NestedStruct struct {
+	InnerField string
+}
+
+type TestStruct struct {
+	Field1 string
+	Field2 NestedStruct
+}
+
+func TestHasKey(t *testing.T) {
+	tests := []struct {
+		name   string
+		input  interface{}
+		key    string
+		expect bool
+	}{
+		{
+			name:   "simple map key exists",
+			input:  map[string]int{"key1": 1, "key2": 2},
+			key:    "key1",
+			expect: true,
+		},
+		{
+			name:   "simple map key does not exist",
+			input:  map[string]int{"key1": 1, "key2": 2},
+			key:    "key3",
+			expect: false,
+		},
+		{
+			name:   "nested map key exists",
+			input:  map[string]map[string]int{"key1": {"nestedKey": 1}},
+			key:    "key1.nestedKey",
+			expect: true,
+		},
+		{
+			name:   "nested map key does not exist",
+			input:  map[string]map[string]int{"key1": {"nestedKey": 1}},
+			key:    "key1.wrongKey",
+			expect: false,
+		},
+		{
+			name:   "struct key exists",
+			input:  TestStruct{Field1: "value1", Field2: NestedStruct{InnerField: "inner"}},
+			key:    "Field1",
+			expect: true,
+		},
+		{
+			name:   "struct key does not exist",
+			input:  TestStruct{Field1: "value1", Field2: NestedStruct{InnerField: "inner"}},
+			key:    "Field3",
+			expect: false,
+		},
+		{
+			name:   "nested struct key exists",
+			input:  TestStruct{Field1: "value1", Field2: NestedStruct{InnerField: "inner"}},
+			key:    "Field2.InnerField",
+			expect: true,
+		},
+		{
+			name:   "nested struct key does not exist",
+			input:  TestStruct{Field1: "value1", Field2: NestedStruct{InnerField: "inner"}},
+			key:    "Field2.WrongField",
+			expect: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := HasKey(tt.input, tt.key); got != tt.expect {
+				t.Errorf("Expected %v for key '%s', but got %v", tt.expect, tt.key, got)
+			}
+		})
+	}
+}

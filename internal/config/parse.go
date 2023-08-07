@@ -58,6 +58,7 @@ func ParseConfig(app *Config) (err error) {
 
 	for idx, cert := range app.Certs {
 		if cert.Enabled != nil && !*cert.Enabled {
+			app.Certs[idx] = cert // update the certificate in the slice (maybe has changed from enabled to disabled)
 			log.Debugf("Skip certificate '%s' because is disabled", cert.Name)
 			continue
 		}

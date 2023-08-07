@@ -3,6 +3,7 @@ package handlers
 import (
 	"bytes"
 	"certalert/internal/config"
+	"certalert/internal/utils"
 	"net/http"
 	"strings"
 
@@ -27,16 +28,27 @@ func ConfigHandler(w http.ResponseWriter, r *http.Request) {
 	// copy config and remove sensitive data
 	configCopy := config.App
 
-	configCopy.Pushgateway.Address = redactVariable(configCopy.Pushgateway.Address)
-	configCopy.Pushgateway.Auth.Basic.Username = redactVariable(configCopy.Pushgateway.Auth.Basic.Username)
-	configCopy.Pushgateway.Auth.Basic.Password = redactVariable(configCopy.Pushgateway.Auth.Basic.Password)
-	configCopy.Pushgateway.Auth.Bearer.Token = redactVariable(configCopy.Pushgateway.Auth.Bearer.Token)
+	if utils.HasKey(configCopy.Pushgateway, "Address") {
+		configCopy.Pushgateway.Address = redactVariable(configCopy.Pushgateway.Address)
+	}
+
+	if utils.HasKey(configCopy.Pushgateway, "Basic.Username") {
+		configCopy.Pushgateway.Auth.Basic.Username = redactVariable(configCopy.Pushgateway.Auth.Basic.Username)
+	}
+
+	if utils.HasKey(configCopy.Pushgateway, "Basic.Password") {
+		configCopy.Pushgateway.Auth.Basic.Password = redactVariable(configCopy.Pushgateway.Auth.Basic.Password)
+	}
+
+	if utils.HasKey(configCopy.Pushgateway, "Bearer.Token") {
+		configCopy.Pushgateway.Auth.Bearer.Token = redactVariable(configCopy.Pushgateway.Auth.Bearer.Token)
+	}
 
 	for idx, cert := range configCopy.Certs {
 		configCopy.Certs[idx].Password = redactVariable(cert.Password)
 	}
 
-	if err := yamlEncoder.Encode(&config.App); err != nil {
+	if err := yamlEncoder.Encode(&configCopy); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
