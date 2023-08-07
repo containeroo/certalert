@@ -13,6 +13,13 @@ func ReloadHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	if err := config.RedactConfig(&config.App); err != nil {
+		log.Fatalf("Unable to redact config: %s", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("Configuration reloaded successfully"))
 }
