@@ -27,38 +27,38 @@ func validateAuthConfig(authConfig Auth) error {
 }
 
 // ParseConfig parse the config file and resolves variables
-func ParseConfig(app *Config) (err error) {
-	app.Pushgateway.Address, err = utils.ResolveVariable(app.Pushgateway.Address)
+func ParseConfig(config *Config) (err error) {
+	config.Pushgateway.Address, err = utils.ResolveVariable(config.Pushgateway.Address)
 	if err != nil {
 		return fmt.Errorf("Failed to resolve address for pushgateway: %v", err)
 	}
 
-	if err := validateAuthConfig(app.Pushgateway.Auth); err != nil {
+	if err := validateAuthConfig(config.Pushgateway.Auth); err != nil {
 		return err
 	}
 
-	app.Pushgateway.Auth.Basic.Password, err = utils.ResolveVariable(app.Pushgateway.Auth.Basic.Password)
+	config.Pushgateway.Auth.Basic.Password, err = utils.ResolveVariable(config.Pushgateway.Auth.Basic.Password)
 	if err != nil {
 		return fmt.Errorf("Failed to resolve password for pushgateway: %v", err)
 	}
 
-	app.Pushgateway.Auth.Bearer.Token, err = utils.ResolveVariable(app.Pushgateway.Auth.Bearer.Token)
+	config.Pushgateway.Auth.Bearer.Token, err = utils.ResolveVariable(config.Pushgateway.Auth.Bearer.Token)
 	if err != nil {
 		return fmt.Errorf("Failed to resolve token for pushgateway: %v", err)
 	}
 
-	if app.Pushgateway.Job == "" {
-		app.Pushgateway.Job = "certalert"
+	if config.Pushgateway.Job == "" {
+		config.Pushgateway.Job = "certalert"
 	} else {
-		app.Pushgateway.Job, err = utils.ResolveVariable(app.Pushgateway.Job)
+		config.Pushgateway.Job, err = utils.ResolveVariable(config.Pushgateway.Job)
 		if err != nil {
 			return fmt.Errorf("Failed to resolve job for pushgateway: %v", err)
 		}
 	}
 
-	for idx, cert := range app.Certs {
+	for idx, cert := range config.Certs {
 		if cert.Enabled != nil && !*cert.Enabled {
-			app.Certs[idx] = cert // update the certificate in the slice (maybe has changed from enabled to disabled)
+			config.Certs[idx] = cert // update the certificate in the slice (maybe has changed from enabled to disabled)
 			log.Debugf("Skip certificate '%s' because is disabled", cert.Name)
 			continue
 		}
@@ -108,7 +108,7 @@ func ParseConfig(app *Config) (err error) {
 		}
 		cert.Password = pw
 
-		app.Certs[idx] = cert
+		config.Certs[idx] = cert
 	}
 
 	return nil

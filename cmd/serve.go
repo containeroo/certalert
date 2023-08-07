@@ -20,6 +20,7 @@ import (
 	"certalert/internal/server"
 
 	"github.com/fsnotify/fsnotify"
+	"github.com/jinzhu/copier"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -54,8 +55,21 @@ the configuration if changes are detected.
 			if err := config.ParseConfig(&config.App); err != nil {
 				log.Fatalf("Unable to parse config: %s", err)
 			}
+
+			copier.Copy(&config.AppCopy, &config.App) // perform a deep copy
+			// update the config copy with the new values
+			if err := config.RedactConfig(&config.App); err != nil {
+				log.Fatalf("Unable to redact config: %s", err)
+			}
+
 		})
 		viper.WatchConfig()
+
+		copier.Copy(&config.AppCopy, &config.App) // perform a deep copy
+		// this is only necessary if starting the web server
+		if err := config.RedactConfig(&config.AppCopy); err != nil {
+			log.Fatalf("Unable to redact config: %s", err)
+		}
 
 		server.RunServer(config.App.Server.Hostname, config.App.Server.Port)
 	},
