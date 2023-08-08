@@ -28,7 +28,7 @@ type Pushgateway struct {
 	Address            string `json:"address"`
 	InsecureSkipVerify bool   `json:"insecureSkipVerify"`
 	Job                string `json:"job"`
-	Auth               Auth   `json:"auth"`
+	Auth               Auth   `json:"auth,omitempty" yaml:"auth,omitempty"`
 }
 
 // Auth represents the pushgateway auth config
