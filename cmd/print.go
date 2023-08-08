@@ -53,7 +53,7 @@ to quickly create a Cobra application.`,
 
 		if printAll {
 			// Handle --all flag
-			output, err := print.EvaluateOutputFormat(outputFormat, config.App.Certs)
+			output, err := print.EvaluateOutputFormat(outputFormat, config.App.Certs, config.FailOnError)
 			if err != nil {
 				log.Error(err)
 				os.Exit(1)
@@ -81,7 +81,7 @@ to quickly create a Cobra application.`,
 		}
 
 		// Print the certificates
-		output, err := print.EvaluateOutputFormat(outputFormat, certs)
+		output, err := print.EvaluateOutputFormat(outputFormat, certs, config.FailOnError)
 		if err != nil {
 			log.Error(err)
 			os.Exit(1)

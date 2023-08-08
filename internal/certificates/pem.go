@@ -4,14 +4,24 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
-
-	log "github.com/sirupsen/logrus"
 )
 
-// ExtractPEMCertificatesInfo reads the PEM file, extracts certificate information, and returns a list of CertificateInfo
-func ExtractPEMCertificatesInfo(name string, certData []byte, password string) ([]CertificateInfo, error) {
+// ExtractPEMCertificatesInfo extracts certificate information from the given PEM data
+func ExtractPEMCertificatesInfo(name string, certData []byte, password string, failOnError bool) ([]CertificateInfo, error) {
 	var certInfoList []CertificateInfo
 	var counter int
+
+	handleError := func(errMsg string) error {
+		if failOnError {
+			return fmt.Errorf(errMsg)
+		}
+		certInfoList = append(certInfoList, CertificateInfo{
+			Name:  name,
+			Type:  "pem",
+			Error: errMsg,
+		})
+		return nil
+	}
 
 	// Decode PEM and extract certificates
 	for {
@@ -22,22 +32,24 @@ func ExtractPEMCertificatesInfo(name string, certData []byte, password string) (
 
 		// if block is a private key, try to parse it
 		if block.Type == "PRIVATE KEY" {
+			var err error
 			if password != "" {
-				_, err := x509.DecryptPEMBlock(block, []byte(password))
-				if err != nil {
-					log.Warningf("Failed to decrypt private key '%s': %v", name, err)
-				}
+				_, err = x509.DecryptPEMBlock(block, []byte(password))
 			} else {
-				_, err := x509.ParsePKCS8PrivateKey(block.Bytes)
-				if err != nil {
-					log.Warningf("Failed to parse private key '%s': %v", name, err)
+				_, err = x509.ParsePKCS8PrivateKey(block.Bytes)
+			}
+			if err != nil {
+				if handleError(fmt.Sprintf("Failed to parse/decrypt private key '%s': %v", name, err)) != nil {
+					return certInfoList, err
 				}
+				certData = rest
+				continue
 			}
 		}
 
 		// skip if is not a certificate
 		if block.Type != "CERTIFICATE" {
-			certData = rest // Move to the next PEM block
+			certData = rest
 			continue
 		}
 
@@ -45,7 +57,11 @@ func ExtractPEMCertificatesInfo(name string, certData []byte, password string) (
 
 		cert, err := x509.ParseCertificate(block.Bytes)
 		if err != nil {
-			return nil, fmt.Errorf("Failed to parse certificate '%s': %w", name, err)
+			if handleError(fmt.Sprintf("Failed to parse certificate '%s': %v", name, err)) != nil {
+				return certInfoList, err
+			}
+			certData = rest
+			continue
 		}
 
 		subject := cert.Subject.CommonName
@@ -64,8 +80,10 @@ func ExtractPEMCertificatesInfo(name string, certData []byte, password string) (
 
 		certData = rest // Move to the next PEM block
 	}
-	if certInfoList == nil {
-		return nil, fmt.Errorf("Failed to decode certificate '%s'", name)
+	if len(certInfoList) == 0 {
+		if err := handleError(fmt.Sprintf("Failed to decode any certificate in '%s'", name)); err != nil {
+			return certInfoList, err
+		}
 	}
 
 	return certInfoList, nil

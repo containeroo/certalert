@@ -5,8 +5,8 @@ import (
 	"fmt"
 )
 
-func EvaluateOutputFormat(outputFormat string, certs []certificates.Certificate) (string, error) {
-	certificatesInfo, err := certificates.Process(certs)
+func EvaluateOutputFormat(outputFormat string, certs []certificates.Certificate, failOnError bool) (string, error) {
+	certificatesInfo, err := certificates.Process(certs, failOnError)
 	if err != nil {
 		return "", err
 	}

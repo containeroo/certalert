@@ -11,6 +11,7 @@ const tpl = `
 <!DOCTYPE html>
 <html>
 <head>
+		<meta charset="UTF-8">
     <style>
 		#myTable {
 			border-collapse: collapse;
@@ -33,12 +34,18 @@ const tpl = `
 		#myTable tr.header {
 			background-color: #BDB76B;
 		}
+
+		/* Add hover effect for error symbol */
+		.error-symbol:hover {
+				opacity: 0.7;
+		}
 	</style>
 </head>
 <body>
 	<table id="myTable">
         <thead>
             <tr class="header">
+								<th></th>
                 <th>Name</th>
                 <th>Subject</th>
                 <th>Type</th>
@@ -48,6 +55,13 @@ const tpl = `
         <tbody>
             {{range .}}
             <tr>
+								<td>
+										{{if .Error}}
+												<span class="error-symbol" title="{{.Error}}" style="color: red;">✖</span>
+										{{else}}
+												<span style="color: green;">✔</span>
+										{{end}}
+								</td>
                 <td>{{.Name}}</td>
                 <td>{{.Subject}}</td>
                 <td>{{.Type}}</td>

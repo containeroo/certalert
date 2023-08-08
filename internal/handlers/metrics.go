@@ -11,7 +11,7 @@ import (
 )
 
 func MetricsHandler(w http.ResponseWriter, r *http.Request) {
-	certificateInfos, err := certificates.Process(config.App.Certs)
+	certificateInfos, err := certificates.Process(config.App.Certs, config.FailOnError)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

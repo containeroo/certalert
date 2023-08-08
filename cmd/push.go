@@ -57,7 +57,8 @@ Examples:
 				config.App.Pushgateway.Job,
 				config.App.Pushgateway.Auth,
 				config.App.Certs,
-				config.App.Pushgateway.InsecureSkipVerify); err != nil {
+				config.App.Pushgateway.InsecureSkipVerify,
+				config.FailOnError); err != nil {
 				log.Panic(err)
 			}
 			return
@@ -80,7 +81,8 @@ Examples:
 				config.App.Pushgateway.Job,
 				config.App.Pushgateway.Auth,
 				[]certificates.Certificate{*certificate},
-				config.App.Pushgateway.InsecureSkipVerify); err != nil {
+				config.App.Pushgateway.InsecureSkipVerify,
+				config.FailOnError); err != nil {
 				log.Panic(err)
 			}
 		}

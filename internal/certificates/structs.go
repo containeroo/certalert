@@ -19,6 +19,7 @@ type CertificateInfo struct {
 	Subject string `json:"subject"`
 	Epoch   int64  `json:"epoch"`
 	Type    string `json:"type"`
+	Error   string `json:"error,omitempty"`
 }
 
 // ExpiryAsTime returns the expiry date as a time.Time

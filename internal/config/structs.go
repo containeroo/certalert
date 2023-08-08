@@ -8,6 +8,8 @@ var App Config
 // ConfigCopy represents the config file with sensitive data redacted
 var AppCopy Config
 
+var FailOnError bool
+
 // Config represents the config file
 type Config struct {
 	Server      Server                     `json:"server"`

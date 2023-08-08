@@ -80,7 +80,7 @@ func TestExtractJKSCertificatesInfo(t *testing.T) {
 			if err != nil {
 				t.Errorf("Failed to read certificate file '%s': %v", tc.Name, err)
 			}
-			certs, err := ExtractJKSCertificatesInfo("TestCert", certData, tc.Password)
+			certs, err := ExtractJKSCertificatesInfo("TestCert", certData, tc.Password, true)
 
 			if tc.ExpectedError == "" && err != nil {
 				t.Errorf("Test case '%s': unexpected error: %v", tc.Name, err)

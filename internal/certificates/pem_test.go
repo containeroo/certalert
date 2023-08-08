@@ -50,7 +50,7 @@ func TestExtractPEMCertificatesInfo(t *testing.T) {
 			FilePath:        "../../tests/certs/pem/broken.pem",
 			Password:        "",
 			ExpectedResults: []CertificateInfo{},
-			ExpectedError:   "Failed to decode certificate 'TestCert'",
+			ExpectedError:   "Failed to decode any certificate in 'TestCert'",
 		},
 		{
 			Name:     "Test PEM certificate with wrong password",
@@ -69,7 +69,7 @@ func TestExtractPEMCertificatesInfo(t *testing.T) {
 		{
 			Name:     "Test PEM certificate with chain",
 			FilePath: "../../tests/certs/pem/chain.pem",
-			Password: "password",
+			Password: "",
 			ExpectedResults: []CertificateInfo{
 				{
 					Name:    "TestCert",
@@ -102,7 +102,7 @@ func TestExtractPEMCertificatesInfo(t *testing.T) {
 			if err != nil {
 				t.Errorf("Failed to read certificate file '%s': %v", tc.Name, err)
 			}
-			certs, err := ExtractPEMCertificatesInfo("TestCert", certData, tc.Password)
+			certs, err := ExtractPEMCertificatesInfo("TestCert", certData, tc.Password, true)
 
 			if tc.ExpectedError == "" && err != nil {
 				t.Errorf("Test case '%s': unexpected error: %v", tc.Name, err)

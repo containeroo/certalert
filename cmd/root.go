@@ -91,6 +91,7 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&silent, "silent", "s", false, "silent output")
 	rootCmd.MarkFlagsMutuallyExclusive("verbose", "silent")
 
+	rootCmd.PersistentFlags().BoolVarP(&config.FailOnError, "fail-on-error", "f", false, "fail on error")
 	rootCmd.PersistentFlags().BoolVarP(&printVersion, "version", "V", false, "print version and exit")
 
 }

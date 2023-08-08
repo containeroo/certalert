@@ -101,7 +101,7 @@ func TestExtractP12CertificatesInfo(t *testing.T) {
 			if err != nil {
 				t.Errorf("Failed to read certificate file '%s': %v", tc.Name, err)
 			}
-			certs, err := ExtractP12CertificatesInfo("TestCert", certData, tc.Password)
+			certs, err := ExtractP12CertificatesInfo("TestCert", certData, tc.Password, true)
 
 			if tc.ExpectedError == "" && err != nil {
 				t.Errorf("Test case '%s': unexpected error: %v", tc.Name, err)
