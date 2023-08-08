@@ -6,6 +6,78 @@ On invocation of the `/metrics` endpoint by Prometheus, the tool performs a real
 
 Additionally, `certalert` also supports forwarding the expiration date epoch directly to a Pushgateway server, offering flexibility and control over monitoring workflows.
 
+## Usage
+
+The primary function is to utilize the `serve` command to initiate a web server that displays metrics for Prometheus to retrieve.
+
+## Global Flags
+
+- `-c, --config`: Specify the path to a config file (Default is `$HOME/.certalert.yaml`).
+- `-v, --verbose`: Enable verbose output.
+- `-s, --silent`: Enable silent mode, only showing errors.
+- `-f, --fail-on-error`: Fail on error.
+- `-V, --version`: Print the current version and exit.
+
+### Basic Commands
+
+1. **serve**: Launches a web server to expose certificate metrics.
+
+    ```bash
+    certalert serve [flags]
+    ```
+
+    Flags:
+    - `-H, --hostname`: Specify the hostname to listen on (Default: `localhost`).
+    - `-p, --port`: Specify the port to listen on (Default: `8080`).
+
+    Examples:
+
+    ```bash
+    # Launch the web server on localhost:8080.
+    certalert serve --hostname localhost --port 8080
+    ```
+
+
+2. **print**: Prints information about the certificates.
+
+    ```bash
+    certalert print [CERTIFICATE_NAME...] [flags]
+    ```
+
+    Flags:
+    - `-A, --all`: Prints all certificates.
+    - `-o, --output`: Specify the output format. Supported formats: `text`, `json`, `yaml`.
+
+    Examples:
+
+    ```bash
+    # Print all certificates in JSON format.
+    certalert print --all --output json
+
+    # Print a specific certificate named 'example-cert' in the default format.
+    certalert print example-cert
+    ```
+
+3. **push**: Push certificate expiration as an epoch to a Prometheus Pushgateway instance.
+
+    ```bash
+    certalert push [CERTIFICATE_NAME...] [flags]
+    ```
+
+    Flags:
+    - `-A, --all`: Push all certificates.
+    - `-i, --insecure-skip-verify`: Skip TLS certificate verification.
+
+    Examples:
+
+    ```bash
+    # Push metadata for all certificates.
+    certalert push --all
+
+    # Push metadata for a specific certificate named 'example-cert'.
+    certalert push example-cert
+    ```
+
 ## Certificate Management
 
 Certificates can be defined with properties such as their `name`, `path`, `type`, and an optional `password`. You have the flexibility to enable or disable specific certificate checks. Additionally, the `type` of certificate can either be manually defined or determined by the system based on the file extension.
