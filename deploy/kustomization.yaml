@@ -6,6 +6,7 @@ resources:
   - deployment.yaml
   - prometheusrule.yaml
   - secret.yaml
+  - service.yaml
   - servicemonitor.yaml
 #patches:
 #  - path: patch-deployment.yaml
