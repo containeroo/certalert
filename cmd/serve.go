@@ -25,6 +25,8 @@ import (
 	"github.com/spf13/viper"
 )
 
+var listenAddress string
+
 // serveCmd represents the serve command
 var serveCmd = &cobra.Command{
 	Use:   "serve",
@@ -77,13 +79,17 @@ Endpoints:
 			log.Fatalf("Unable to redact config: %s", err)
 		}
 
-		server.RunServer(config.App.Server.Hostname, config.App.Server.Port)
+		hostname, port, err := config.ExtractHostAndPort(listenAddress)
+		if err != nil {
+			log.Fatalf("Unable to extract hostname and port: %s", err)
+		}
+
+		server.RunServer(hostname, port)
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(serveCmd)
 
-	serveCmd.Flags().StringVarP(&config.App.Server.Hostname, "hostname", "H", "localhost", "Hostname to listen on")
-	serveCmd.Flags().IntVarP(&config.App.Server.Port, "port", "p", 8080, "Port to listen on")
+	serveCmd.Flags().StringVar(&listenAddress, "listen-address", ":8080", "The address to listen on for HTTP requests.")
 }

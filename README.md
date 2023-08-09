@@ -27,8 +27,7 @@ The primary function is to utilize the `serve` command to initiate a web server 
     ```
 
     Flags:
-    - `-H, --hostname`: Specify the hostname to listen on (Default: `localhost`).
-    - `-p, --port`: Specify the port to listen on (Default: `8080`).
+    - `--listen-address`: The address to listen on for HTTP requests. (Default: `:8080`).
 
     Examples:
 

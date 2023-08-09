@@ -21,6 +21,7 @@ spec:
           args:
             - serve
             - --config=/config/config.yaml
+            - --listen-address=0.0.0.0:8080
           envFrom:
             - secretRef:
                 name: certalert-password-envs

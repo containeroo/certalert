@@ -1,6 +1,10 @@
 package config
 
-import "certalert/internal/certificates"
+import (
+	"certalert/internal/certificates"
+	"net"
+	"strconv"
+)
 
 // DeepCopy returns a deep copy of the config
 func (c Config) DeepCopy() Config {
@@ -41,4 +45,19 @@ func (c Config) DeepCopy() Config {
 	newConfig.Certs = newCerts
 
 	return newConfig
+}
+
+// ExtractHostAndPort extracts the hostname and port from the listen address
+func ExtractHostAndPort(address string) (string, int, error) {
+	host, portStr, err := net.SplitHostPort(address)
+	if err != nil {
+		return "", 0, err
+	}
+
+	port, err := strconv.Atoi(portStr)
+	if err != nil {
+		return "", 0, err
+	}
+
+	return host, port, nil
 }
