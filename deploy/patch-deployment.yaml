@@ -1,0 +1,20 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: certalert
+spec:
+  template:
+    spec:
+      initContainers:
+        - name: crt-maker
+          args:
+            - -c
+            - "/tmp/crt-maker.sh /jks /transfer"
+          volumeMounts:
+            - name: certs
+              mountPath: /jks
+      volumes:
+        - name: certs
+          secret:
+            secretName: additional-jks-certs
