@@ -11,6 +11,7 @@ func ExtractPEMCertificatesInfo(name string, certData []byte, password string, f
 	var certInfoList []CertificateInfo
 	var counter int
 
+	// handleError is a helper function to handle failOnError
 	handleError := func(errMsg string) error {
 		if failOnError {
 			return fmt.Errorf(errMsg)

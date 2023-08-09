@@ -28,6 +28,7 @@ func NewRouter() *mux.Router {
 	router.HandleFunc("/", handlers.HomeHandler).Methods("GET", "POST")
 	router.HandleFunc("/-/reload", handlers.ReloadHandler).Methods("GET", "POST")
 	router.HandleFunc("/config", handlers.ConfigHandler).Methods("GET", "POST")
+	router.HandleFunc("/healthz", handlers.HealthzHandler).Methods("GET", "POST")
 	router.Handle("/metrics", http.HandlerFunc(handlers.MetricsHandler)).Methods("GET", "POST")
 
 	return router

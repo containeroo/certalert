@@ -40,6 +40,14 @@ Example:
 
 The serve command also watches for changes in the application configuration file and reloads
 the configuration if changes are detected.
+
+Endpoints:
+	- /: Home page
+	- /-/reload: Reload the configuration file
+	- /config: View the current configuration
+	- /healthz: Health check endpoint
+	- /metrics: Metrics endpoint
+
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 

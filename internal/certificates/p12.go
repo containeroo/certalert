@@ -12,6 +12,7 @@ import (
 func ExtractP12CertificatesInfo(name string, certData []byte, password string, failOnError bool) ([]CertificateInfo, error) {
 	var certInfoList []CertificateInfo
 
+	// handleError is a helper function to handle failOnError
 	handleError := func(errMsg string) error {
 		if failOnError {
 			return fmt.Errorf(errMsg)

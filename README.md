@@ -179,3 +179,4 @@ certalert provides the following web-accessible endpoints:
 | `/-/reload` | Reloads the configuration                                                           |
 | `/config`   | Provides the currently active configuration file. Plaintext passwords are redacted. |
 | `/metrics`  | Delivers metrics for Prometheus to scrape                                           |
+| `/healthz`  | Get health status                                                                   |
