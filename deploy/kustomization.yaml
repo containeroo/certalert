@@ -8,11 +8,11 @@ resources:
   - secret.yaml
   - service.yaml
   - servicemonitor.yaml
-#patches:
-#  - path: patch-deployment.yaml
-#    target:
-#      kind: Deployment
-#      name: certalert
+patches:
+  - path: patch-deployment.yaml
+    target:
+      kind: Deployment
+      name: certalert
 configMapGenerator:
   - name: crt-maker
     files:

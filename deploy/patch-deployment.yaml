@@ -8,13 +8,27 @@ spec:
     spec:
       initContainers:
         - name: crt-maker
+          image: openjdk:11
+          command: ["/bin/bash"]
           args:
             - -c
             - "/tmp/crt-maker.sh /jks /transfer"
+          envFrom:
+            - secretRef:
+                name: certalert-password-envs
           volumeMounts:
+            - name: crt-maker
+              mountPath: /tmp/crt-maker.sh
+              subPath: crt-maker.sh
+            - name: transfer
+              mountPath: /transfer
             - name: certs
               mountPath: /jks
       volumes:
+        - name: crt-maker
+          configMap:
+            name: crt-maker
+            defaultMode: 0755
         - name: certs
-          secret:
-            secretName: additional-jks-certs
+          configMap:
+            name: additional-jks-certs
