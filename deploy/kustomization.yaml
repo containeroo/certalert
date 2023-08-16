@@ -14,8 +14,8 @@ patches:
       kind: Deployment
       name: certalert
 configMapGenerator:
-  - name: crt-maker
+  - name: crt-makr
     files:
-      - crt-maker.sh
+      - crt-makr.sh
 generatorOptions:
   disableNameSuffixHash: true
