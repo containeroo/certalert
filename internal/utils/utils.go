@@ -7,6 +7,11 @@ import (
 	"strings"
 )
 
+// BoolPtr returns a pointer to a bool
+func BoolPtr(b bool) *bool {
+	return &b
+}
+
 // IsInList checks if a value is in a list
 func IsInList(value string, list []string) bool {
 	for _, v := range list {

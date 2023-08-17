@@ -27,24 +27,49 @@ func validateAuthConfig(authConfig Auth) error {
 }
 
 // ParseConfig parse the config file and resolves variables
-func ParseConfig(config *Config) (err error) {
+func ParseConfig(config *Config, failOnError bool) (err error) {
+	handleCertError := func(cert certificates.Certificate, idx int, errMsg string) error {
+		cert.Valid = utils.BoolPtr(false)
+		if failOnError {
+			config.Certs[idx] = cert
+			return fmt.Errorf(errMsg)
+		}
+		log.Warn(errMsg)
+		return nil
+	}
+	handerPushgatewayError := func(errMsg string) error {
+		if failOnError {
+			return fmt.Errorf(errMsg)
+		}
+		log.Warn(errMsg)
+		return nil
+	}
+
 	config.Pushgateway.Address, err = utils.ResolveVariable(config.Pushgateway.Address)
 	if err != nil {
-		return fmt.Errorf("Failed to resolve address for pushgateway: %v", err)
+		if err := handerPushgatewayError(fmt.Sprintf("Failed to resolve address for pushgateway: %v", err)); err != nil {
+			return err
+		}
 	}
 
 	if err := validateAuthConfig(config.Pushgateway.Auth); err != nil {
-		return err
+		if err := handerPushgatewayError(err.Error()); err != nil {
+			return err
+		}
 	}
 
 	config.Pushgateway.Auth.Basic.Password, err = utils.ResolveVariable(config.Pushgateway.Auth.Basic.Password)
 	if err != nil {
-		return fmt.Errorf("Failed to resolve password for pushgateway: %v", err)
+		if err := handerPushgatewayError(fmt.Sprintf("Failed to resolve password for pushgateway: %v", err)); err != nil {
+			return err
+		}
 	}
 
 	config.Pushgateway.Auth.Bearer.Token, err = utils.ResolveVariable(config.Pushgateway.Auth.Bearer.Token)
 	if err != nil {
-		return fmt.Errorf("Failed to resolve token for pushgateway: %v", err)
+		if err := handerPushgatewayError(fmt.Sprintf("Failed to resolve token for pushgateway: %v", err)); err != nil {
+			return err
+		}
 	}
 
 	if config.Pushgateway.Job == "" {
@@ -52,7 +77,9 @@ func ParseConfig(config *Config) (err error) {
 	} else {
 		config.Pushgateway.Job, err = utils.ResolveVariable(config.Pushgateway.Job)
 		if err != nil {
-			return fmt.Errorf("Failed to resolve job for pushgateway: %v", err)
+			if err := handerPushgatewayError(fmt.Sprintf("Failed to resolve job for pushgateway: %v", err)); err != nil {
+				return err
+			}
 		}
 	}
 
@@ -64,11 +91,15 @@ func ParseConfig(config *Config) (err error) {
 		}
 
 		if cert.Path == "" {
-			return fmt.Errorf("Certificate '%s' has no 'path' defined", cert.Name)
+			if err := handleCertError(cert, idx, fmt.Sprintf("Certificate '%s' has no 'path' defined", cert.Name)); err != nil {
+				return err
+			}
 		}
 
 		if err := utils.CheckFileAccessibility(cert.Path); err != nil {
-			return fmt.Errorf("Certificate '%s' has an invalid 'path'. %s", cert.Name, err)
+			if err := handleCertError(cert, idx, fmt.Sprintf("Certificate '%s' is not accessible: %v", cert.Name, err)); err != nil {
+				return err
+			}
 		}
 
 		if cert.Name == "" {
@@ -94,22 +125,28 @@ func ParseConfig(config *Config) (err error) {
 				if ext != "" {
 					reason = fmt.Sprintf("unclear file extension (%s).", ext)
 				}
-
-				return fmt.Errorf("Certificate '%s' has no 'type' defined. Type can't be inferred due to the %s", cert.Name, reason)
+				errMsg := fmt.Sprintf("Certificate '%s' has no 'type' defined. Type can't be inferred due to the %s", cert.Name, reason)
+				if err := handleCertError(cert, idx, errMsg); err != nil {
+					return err
+				}
 			}
 		}
 		if !utils.IsInList(cert.Type, certificates.ValidTypes) {
-			return fmt.Errorf("Certificate '%s' has an invalid 'type'. Must be one of: %s", cert.Name, strings.Join(certificates.ValidTypes, ", "))
+			if err := handleCertError(cert, idx, fmt.Sprintf("Certificate '%s' has an invalid 'type'. Must be one of: %s", cert.Name, strings.Join(certificates.ValidTypes, ", "))); err != nil {
+				return err
+			}
 		}
 
 		pw, err := utils.ResolveVariable(cert.Password)
 		if err != nil {
-			return fmt.Errorf("Certifacate '%s' cannot resolve 'password'. %v", cert.Name, err)
+			if err := handleCertError(cert, idx, fmt.Sprintf("Certifacate '%s' has a non resolvable 'password'. %v", cert.Name, err)); err != nil {
+				return err
+			}
 		}
 		cert.Password = pw
 
 		config.Certs[idx] = cert
-	}
 
+	}
 	return nil
 }

@@ -2,6 +2,7 @@ package config
 
 import (
 	"certalert/internal/certificates"
+	"certalert/internal/utils"
 	"fmt"
 	"os"
 	"strings"
@@ -43,7 +44,6 @@ func TestParseConfig(t *testing.T) {
 		"BEARER_TOKEN":        "token",
 	}
 	passwordFileName := createTempFile("password", t)
-	var trueVar = true
 
 	testCases := []struct {
 		name          string
@@ -63,7 +63,7 @@ func TestParseConfig(t *testing.T) {
 						Path:     "../../tests/certs/pem/chain.pem",
 						Type:     "pem",
 						Password: fmt.Sprintf("file:%s", passwordFileName),
-						Enabled:  &trueVar,
+						Enabled:  utils.BoolPtr(true),
 					},
 				},
 			},
@@ -100,21 +100,21 @@ func TestParseConfig(t *testing.T) {
 				Certs: []certificates.Certificate{
 					{
 						Name:     "test_cert",
-						Enabled:  &trueVar,
+						Enabled:  utils.BoolPtr(true),
 						Path:     "../../tests/certs/p12/root.p12",
 						Type:     "pem",
 						Password: "file:INVALID_FILE",
 					},
 				},
 			},
-			expectedError: "Certifacate 'test_cert' cannot resolve 'password'. Failed to open file 'INVALID_FILE': open INVALID_FILE: no such file or directory",
+			expectedError: "Certifacate 'test_cert' has a non resolvable 'password'. Failed to open file 'INVALID_FILE': open INVALID_FILE: no such file or directory",
 		},
 		{
 			name: "cert name not defined",
 			config: &Config{
 				Certs: []certificates.Certificate{
 					{
-						Enabled: &trueVar,
+						Enabled: utils.BoolPtr(true),
 						Path:    "../../tests/certs/pem/final.pem",
 					},
 				},
@@ -128,7 +128,7 @@ func TestParseConfig(t *testing.T) {
 					{
 
 						Name:    "test_cert",
-						Enabled: &trueVar,
+						Enabled: utils.BoolPtr(true),
 						Type:    "pem",
 					},
 				},
@@ -141,7 +141,7 @@ func TestParseConfig(t *testing.T) {
 				Certs: []certificates.Certificate{
 					{
 						Name:    "test_cert",
-						Enabled: &trueVar,
+						Enabled: utils.BoolPtr(true),
 						Path:    "../../tests/certs/p12/no_extension",
 					},
 				},
@@ -154,7 +154,7 @@ func TestParseConfig(t *testing.T) {
 				Certs: []certificates.Certificate{
 					{
 						Name:    "test_cert",
-						Enabled: &trueVar,
+						Enabled: utils.BoolPtr(true),
 						Path:    "../../tests/certs/pem/without_password.pem",
 						Type:    "invalid",
 					},
@@ -168,7 +168,7 @@ func TestParseConfig(t *testing.T) {
 				Certs: []certificates.Certificate{
 					{
 						Name:    "test_cert",
-						Enabled: &trueVar,
+						Enabled: utils.BoolPtr(true),
 						Path:    "../../tests/certs/pem/cert.invalid",
 					},
 				},
@@ -181,7 +181,7 @@ func TestParseConfig(t *testing.T) {
 				Certs: []certificates.Certificate{
 					{
 						Name:    "test_cert",
-						Enabled: &trueVar,
+						Enabled: utils.BoolPtr(true),
 						Path:    "../../tests/certs/p12/chain.p12",
 					},
 				},
@@ -194,7 +194,7 @@ func TestParseConfig(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			setEnvVars(envs)
 
-			err := ParseConfig(testCase.config)
+			err := ParseConfig(testCase.config, true)
 
 			unsetEnvVars(envs)
 

@@ -61,7 +61,7 @@ Endpoints:
 				log.Fatalf("Unable to read config: %s", err)
 			}
 
-			if err := config.ParseConfig(&config.App); err != nil {
+			if err := config.ParseConfig(&config.App, config.FailOnError); err != nil {
 				log.Fatalf("Unable to parse config: %s", err)
 			}
 

@@ -8,6 +8,7 @@ var ValidTypes = []string{"p12", "pkcs12", "pfx", "pem", "crt", "jks"}
 type Certificate struct {
 	Name     string `json:"name"`
 	Enabled  *bool  `json:"enabled,omitempty" yaml:"enabled,omitempty"`
+	Valid    *bool  `json:"-" yaml:"-"`
 	Path     string `json:"path"`
 	Password string `json:"password"`
 	Type     string `json:"type"`
