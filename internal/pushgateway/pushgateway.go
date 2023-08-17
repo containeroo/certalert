@@ -4,15 +4,25 @@ import (
 	"certalert/internal/certificates"
 	"certalert/internal/config"
 	"fmt"
+	"net/url"
+
+	log "github.com/sirupsen/logrus"
 )
 
 // Send pushes the certificate information to the Pushgateway
 func Send(address string, jobName string, auth config.Auth, certs []certificates.Certificate, insecureSkipVerify bool, failOnError bool) error {
+	if address == "" {
+		return fmt.Errorf("Pushgateway address is empty")
+	}
+
+	if _, err := url.Parse(address); err != nil {
+		return fmt.Errorf("Invalid pushgateway address '%s': %w", address, err)
+	}
+
 	pusher := createPusher(address, jobName, auth, insecureSkipVerify)
 
 	certificatesInfo, err := certificates.Process(certs, failOnError)
 	if err != nil {
-		// err is only returned if failOnError is true
 		return fmt.Errorf("Failed to process certificates: %w", err)
 	}
 
@@ -20,6 +30,8 @@ func Send(address string, jobName string, auth config.Auth, certs []certificates
 		if err := pushToGateway(pusher, certificateInfo); err != nil {
 			return fmt.Errorf("Failed to push certificate info to gateway: %w", err)
 		}
+		log.Debugf("Pushed certificate '%s' (%s, %s, %s) expiration epoch '%d'", certificateInfo.Name, certificateInfo.Name, certificateInfo.Type, certificateInfo.Subject, certificateInfo.Epoch)
 	}
+
 	return nil
 }

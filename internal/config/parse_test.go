@@ -70,6 +70,20 @@ func TestParseConfig(t *testing.T) {
 			expectedError: "",
 		},
 		{
+			name: "missing_address",
+			config: &Config{
+				Pushgateway: Pushgateway{},
+			},
+		},
+		{
+			name: "invalid_address",
+			config: &Config{
+				Pushgateway: Pushgateway{
+					Address: "invalid",
+				},
+			},
+		},
+		{
 			name: "Auth error",
 			config: &Config{
 				Pushgateway: Pushgateway{

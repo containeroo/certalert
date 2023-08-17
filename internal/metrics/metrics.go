@@ -6,30 +6,26 @@ import (
 
 var PromMetrics Metrics
 
-const (
-	CertalertMetricName = "certalert_certificate_epoch_seconds"
-	CertalertMetricHelp = "The epoch of the certificate"
+var (
+	CertificateEpoch = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "certalert_certificate_epoch_seconds",
+			Help: "The epoch of the certificate",
+		},
+		[]string{"instance", "subject", "type"},
+	)
 )
 
-// Metrics holds all prometheus metrics and the custom registry
 type Metrics struct {
-	Registry         *prometheus.Registry
-	CertificateEpoch *prometheus.GaugeVec
+	Registry *prometheus.Registry
 }
 
 // NewMetrics registers all prometheus metrics
 func NewMetrics() *Metrics {
-	reg := prometheus.NewRegistry() // Create a new registry
-	m := &Metrics{
-		Registry: reg, // Store the registry in the Metrics struct
-		CertificateEpoch: prometheus.NewGaugeVec(
-			prometheus.GaugeOpts{
-				Name: CertalertMetricName,
-				Help: CertalertMetricHelp,
-			},
-			[]string{"instance", "subject", "type"},
-		),
+	reg := prometheus.NewRegistry()
+	reg.Register(CertificateEpoch) // Register the global metric
+
+	return &Metrics{
+		Registry: reg,
 	}
-	reg.Register(m.CertificateEpoch)
-	return m
 }

@@ -18,7 +18,7 @@ func MetricsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, ci := range certificateInfos {
-		metrics.PromMetrics.CertificateEpoch.With(
+		metrics.CertificateEpoch.With(
 			prometheus.Labels{
 				"instance": ci.Name,
 				"subject":  ci.Subject,

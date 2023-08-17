@@ -4,6 +4,7 @@ import (
 	"certalert/internal/certificates"
 	"certalert/internal/utils"
 	"fmt"
+	"net/url"
 	"path/filepath"
 	"reflect"
 	"strings"
@@ -45,12 +46,18 @@ func ParseConfig(config *Config, failOnError bool) (err error) {
 		return nil
 	}
 
-	config.Pushgateway.Address, err = utils.ResolveVariable(config.Pushgateway.Address)
+	resolvedAddress, err := utils.ResolveVariable(config.Pushgateway.Address)
 	if err != nil {
 		if err := handerPushgatewayError(fmt.Sprintf("Failed to resolve address for pushgateway: %v", err)); err != nil {
 			return err
 		}
 	}
+	if _, err := url.Parse(resolvedAddress); err != nil {
+		if err := handerPushgatewayError(fmt.Sprintf("Invalid pushgateway address '%s': %v", resolvedAddress, err)); err != nil {
+			return err
+		}
+	}
+	config.Pushgateway.Address = resolvedAddress
 
 	if err := validateAuthConfig(config.Pushgateway.Auth); err != nil {
 		if err := handerPushgatewayError(err.Error()); err != nil {

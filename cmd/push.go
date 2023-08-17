@@ -59,7 +59,7 @@ Examples:
 				config.App.Certs,
 				config.App.Pushgateway.InsecureSkipVerify,
 				config.FailOnError); err != nil {
-				log.Panic(err)
+				log.Fatal(err)
 			}
 			return
 		}

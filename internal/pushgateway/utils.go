@@ -8,32 +8,23 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/push"
 )
 
-// createPusher creates a new pusher with the necessary configuration
 func createPusher(address, job string, auth config.Auth, insecureSkipVerify bool) *push.Pusher {
-	certificateExpirationEpoch := prometheus.NewGaugeVec(
-		prometheus.GaugeOpts{
-			Name: metrics.CertalertMetricName,
-			Help: metrics.CertalertMetricHelp,
-		},
-		[]string{},
-	)
-
-	// Configure the HTTP client to skip certificate verification if needed
 	var httpClient *http.Client
 	if insecureSkipVerify {
 		tr := &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 		}
 		httpClient = &http.Client{Transport: tr}
+	} else {
+		httpClient = &http.Client{}
 	}
 
 	pusher := push.New(address, job).
-		Collector(certificateExpirationEpoch).
-		Client(httpClient) // Set the custom HTTP client
+		Collector(metrics.CertificateEpoch).
+		Client(httpClient)
 
 	if auth.Bearer.Token != "" {
 		pusher = pusher.BasicAuth("Bearer", auth.Bearer.Token)
@@ -44,12 +35,9 @@ func createPusher(address, job string, auth config.Auth, insecureSkipVerify bool
 	return pusher
 }
 
-// pushToGateway pushes the certificate information to the Pushgateway
 func pushToGateway(pusher *push.Pusher, cert certificates.CertificateInfo) error {
-	pusher = pusher.
-		Grouping("instance", cert.Name).
-		Grouping("type", cert.Type).
-		Grouping("subject", cert.Subject)
+	gauge := metrics.CertificateEpoch.WithLabelValues(cert.Name, cert.Type, cert.Subject)
+	gauge.Set(float64(cert.Epoch)) // Assuming CertificateInfo has a field called ExpirationEpoch
 
 	if err := pusher.Push(); err != nil {
 		return fmt.Errorf("Could not push to Pushgateway: %w", err)
