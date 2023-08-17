@@ -33,7 +33,7 @@ The primary function is to utilize the `serve` command to initiate a web server 
 
     ```bash
     # Launch the web server on localhost:8080.
-    certalert serve --hostname localhost --port 8080
+    certalert serve --listen-address localhost:8080
     ```
 
 
