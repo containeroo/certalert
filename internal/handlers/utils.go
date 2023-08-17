@@ -5,6 +5,7 @@ import (
 	"certalert/internal/certificates"
 	"log"
 	"text/template"
+	"time"
 )
 
 const tpl = `
@@ -65,7 +66,7 @@ const tpl = `
                 <td>{{.Name}}</td>
                 <td>{{.Subject}}</td>
                 <td>{{.Type}}</td>
-                <td>{{.ExpiryAsTime.Format "2006-01-02"}}</td>
+                <td>{{ formatTime .ExpiryAsTime "2006-01-02"}}</td>
             </tr>
             {{end}}
         </tbody>
@@ -75,9 +76,20 @@ const tpl = `
 
 `
 
+func formatTime(t time.Time, format string) string {
+	if t.IsZero() {
+		return "-"
+	}
+	return t.Format(format)
+}
+
 // renderCertificateInfo renders the certificate information as HTML
 func renderCertificateInfo(certInfo []certificates.CertificateInfo) string {
-	t, err := template.New("certInfo").Parse(tpl)
+	funcMap := template.FuncMap{
+		"formatTime": formatTime,
+	}
+
+	t, err := template.New("certInfo").Funcs(funcMap).Parse(tpl)
 	if err != nil {
 		log.Fatal(err)
 	}
