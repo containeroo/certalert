@@ -10,8 +10,8 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// outputAsYaml converts the output to yaml
-func outputAsYaml(output interface{}) (string, error) {
+// convertToYaml converts the output to yaml
+func convertToYaml(output interface{}) (string, error) {
 	var b bytes.Buffer
 	yamlEncoder := yaml.NewEncoder(&b)
 	yamlEncoder.SetIndent(2)
@@ -21,8 +21,8 @@ func outputAsYaml(output interface{}) (string, error) {
 	return b.String(), nil
 }
 
-// outputAsJson converts the output to json
-func outputAsJson(output interface{}) (string, error) {
+// convertToJson converts the output to json
+func convertToJson(output interface{}) (string, error) {
 	var b bytes.Buffer
 	jsonEncoder := json.NewEncoder(&b)
 	jsonEncoder.SetIndent("", "  ") // set indent to 2 spaces
@@ -32,15 +32,15 @@ func outputAsJson(output interface{}) (string, error) {
 	return b.String(), nil
 }
 
-func outputAsText(data interface{}) (string, error) {
+// ConvertToTable converts the provided data to a table format.
+func convertToTable(data interface{}) (string, error) {
 	var output bytes.Buffer
 	table := tablewriter.NewWriter(&output)
 
-	// Assuming data is a slice; get its first item
 	s := reflect.ValueOf(data)
 
 	if s.Kind() != reflect.Slice {
-		return "", fmt.Errorf("Expect a slice but got %s", s.Kind())
+		return "", fmt.Errorf("Expected input of type slice for tabular conversion but received %s", s.Kind())
 	}
 
 	if s.Len() == 0 {
@@ -48,8 +48,10 @@ func outputAsText(data interface{}) (string, error) {
 	}
 
 	firstItem := s.Index(0)
+	numFields := firstItem.NumField()
 	var headers []string
-	for i := 0; i < firstItem.NumField(); i++ {
+
+	for i := 0; i < numFields; i++ {
 		headers = append(headers, firstItem.Type().Field(i).Tag.Get("json"))
 	}
 	table.SetHeader(headers)
@@ -57,7 +59,7 @@ func outputAsText(data interface{}) (string, error) {
 	for i := 0; i < s.Len(); i++ {
 		item := s.Index(i)
 		var row []string
-		for j := 0; j < item.NumField(); j++ {
+		for j := 0; j < numFields; j++ {
 			field := item.Field(j)
 			row = append(row, fmt.Sprintf("%v", field.Interface()))
 		}
@@ -72,7 +74,7 @@ func outputAsText(data interface{}) (string, error) {
 	table.SetHeaderAlignment(tablewriter.ALIGN_LEFT)
 	table.SetAlignment(tablewriter.ALIGN_LEFT)
 
-	table.Render() // Sends the formatted table to the output buffer.
+	table.Render()
 
 	return output.String(), nil
 }

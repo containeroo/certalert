@@ -53,7 +53,7 @@ to quickly create a Cobra application.`,
 
 		if printAll {
 			// Handle --all flag
-			output, err := print.EvaluateOutputFormat(outputFormat, config.App.Certs, config.FailOnError)
+			output, err := print.ConvertCertificatesToFormat(outputFormat, config.App.Certs, config.FailOnError)
 			if err != nil {
 				log.Error(err)
 				os.Exit(1)
@@ -81,7 +81,7 @@ to quickly create a Cobra application.`,
 		}
 
 		// Print the certificates
-		output, err := print.EvaluateOutputFormat(outputFormat, certs, config.FailOnError)
+		output, err := print.ConvertCertificatesToFormat(outputFormat, certs, config.FailOnError)
 		if err != nil {
 			log.Error(err)
 			os.Exit(1)
@@ -95,7 +95,7 @@ func init() {
 
 	printCmd.PersistentFlags().BoolVarP(&printAll, "all", "A", false, "Prints all certificates")
 
-	printCmd.Flags().StringVarP(&outputFormat, "output", "o", "", fmt.Sprintf("Output format. One of: %s", strings.Join(supportedOutputFormats, "|")))
+	printCmd.Flags().StringVarP(&outputFormat, "output", "o", "text", fmt.Sprintf("Output format. One of: %s", strings.Join(supportedOutputFormats, "|")))
 	printCmd.RegisterFlagCompletionFunc("output", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		return supportedOutputFormats, cobra.ShellCompDirectiveDefault
 	})

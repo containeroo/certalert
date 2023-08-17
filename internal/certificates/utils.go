@@ -24,6 +24,11 @@ func Process(certificates []Certificate, failOnError bool) (certificatesInfo []C
 			log.Debugf("Skip certificate '%s' as it is disabled", cert.Name)
 			continue
 		}
+		if cert.Valid != nil && !*cert.Valid {
+			log.Debugf("Skip certificate '%s' as it is not valid", cert.Name)
+			continue
+		}
+
 		log.Debugf("Processing certificate '%s'", cert.Name)
 
 		var certificateInfo []CertificateInfo
@@ -39,6 +44,8 @@ func Process(certificates []Certificate, failOnError bool) (certificatesInfo []C
 			certificateInfo, err = ExtractPEMCertificatesInfo(cert.Name, certData, cert.Password, failOnError)
 		case "jks":
 			certificateInfo, err = ExtractJKSCertificatesInfo(cert.Name, certData, cert.Password, failOnError)
+		case "custom":
+			certificateInfo, err = ExtractCustomCertificatesInfo(cert.Name, certData, cert.Password, failOnError)
 		default:
 			// Cannot happen, as the config is validated before
 			// Only here to make the linter happy :)
