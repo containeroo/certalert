@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 
 	pkcs12 "software.sslmate.com/src/go-pkcs12"
 )
@@ -17,6 +18,7 @@ func ExtractP12CertificatesInfo(name string, certData []byte, password string, f
 		if failOnError {
 			return fmt.Errorf(errMsg)
 		}
+		log.Warningf("Failed to extract certificate information: %v", errMsg)
 		certInfoList = append(certInfoList, CertificateInfo{
 			Name:  name,
 			Type:  "p12",

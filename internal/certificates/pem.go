@@ -4,6 +4,8 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
+
+	log "github.com/sirupsen/logrus"
 )
 
 // ExtractPEMCertificatesInfo extracts certificate information from the given PEM data
@@ -16,6 +18,7 @@ func ExtractPEMCertificatesInfo(name string, certData []byte, password string, f
 		if failOnError {
 			return fmt.Errorf(errMsg)
 		}
+		log.Warningf("Failed to extract certificate information: %v", errMsg)
 		certInfoList = append(certInfoList, CertificateInfo{
 			Name:  name,
 			Type:  "pem",

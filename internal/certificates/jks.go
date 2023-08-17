@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/pavlo-v-chernykh/keystore-go/v4"
+	log "github.com/sirupsen/logrus"
 )
 
 func ExtractJKSCertificatesInfo(name string, certData []byte, password string, failOnError bool) ([]CertificateInfo, error) {
@@ -16,6 +17,7 @@ func ExtractJKSCertificatesInfo(name string, certData []byte, password string, f
 		if failOnError {
 			return fmt.Errorf(errMsg)
 		}
+		log.Warningf("Failed to extract certificate information: %v", errMsg)
 		certInfoList = append(certInfoList, CertificateInfo{
 			Name:  name,
 			Type:  "jks",
