@@ -36,7 +36,6 @@ The primary function is to utilize the `serve` command to initiate a web server 
     certalert serve --listen-address localhost:8080
     ```
 
-
 2. **print**: Prints information about the certificates.
 
     ```bash
