@@ -4,7 +4,6 @@ go 1.20
 
 require (
 	github.com/fsnotify/fsnotify v1.6.0
-	github.com/gi8lino/go-pkcs12 v0.0.2
 	github.com/gorilla/mux v1.8.0
 	github.com/kataras/tablewriter v0.0.0-20180708051242-e063d29b7c23
 	github.com/pavlo-v-chernykh/keystore-go/v4 v4.4.1

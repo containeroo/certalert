@@ -3,8 +3,8 @@ package certificates
 import (
 	"fmt"
 
-	pkcs12 "github.com/gi8lino/go-pkcs12"
 	log "github.com/sirupsen/logrus"
+	pkcs12 "software.sslmate.com/src/go-pkcs12"
 )
 
 // ExtractP12CertificatesInfo reads the P12 file, extracts certificate information, and returns a list of CertificateInfo

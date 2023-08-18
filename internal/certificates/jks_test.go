@@ -19,7 +19,7 @@ func TestExtractJKSCertificatesInfo(t *testing.T) {
 	testCases := []testCase{
 		{
 			Name:            "Test JKS certificate - broken",
-			FilePath:        "../../tests/certs/jks/broken_certificate.jks",
+			FilePath:        "../../tests/certs/jks/broken.jks",
 			Password:        "password",
 			ExpectedResults: []CertificateInfo{},
 			ExpectedError:   "Failed to load JKS file 'TestCert': got invalid magic",
@@ -27,7 +27,7 @@ func TestExtractJKSCertificatesInfo(t *testing.T) {
 		{
 			Name:     "Test JKS certificate - valid",
 			FilePath: "../../tests/certs/jks/regular.jks",
-			Password: "changeit",
+			Password: "password",
 			ExpectedResults: []CertificateInfo{
 				{
 					Name:    "TestCert",
@@ -41,7 +41,7 @@ func TestExtractJKSCertificatesInfo(t *testing.T) {
 		{
 			Name:     "Test JKS certificate - valid chain",
 			FilePath: "../../tests/certs/jks/chain.jks",
-			Password: "changeit",
+			Password: "password",
 			ExpectedResults: []CertificateInfo{
 				{
 					Name:    "TestCert",
