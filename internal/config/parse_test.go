@@ -5,6 +5,7 @@ import (
 	"certalert/internal/utils"
 	"fmt"
 	"os"
+	"sort"
 	"strings"
 	"testing"
 )
@@ -44,6 +45,8 @@ func TestParseConfig(t *testing.T) {
 		"BEARER_TOKEN":        "token",
 	}
 	passwordFileName := createTempFile("password", t)
+	sortedFileExtensions := utils.MapKeys(certificates.FileExtensionsToType)
+	sort.Strings(sortedFileExtensions)
 
 	testCases := []struct {
 		name          string
@@ -174,7 +177,7 @@ func TestParseConfig(t *testing.T) {
 					},
 				},
 			},
-			expectedError: fmt.Sprintf("Certificate 'test_cert' has an invalid 'type'. Must be one of: %s", strings.Join(utils.MapKeys(certificates.FileExtensionsToType), ", ")),
+			expectedError: fmt.Sprintf("Certificate 'test_cert' has an invalid 'type'. Must be one of: %s", strings.Join(sortedFileExtensions, ", ")),
 		},
 		{
 			name: "cert type guessed invalid",

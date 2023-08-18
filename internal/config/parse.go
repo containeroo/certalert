@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"path/filepath"
 	"reflect"
+	"sort"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
@@ -91,6 +92,7 @@ func ParseConfig(config *Config, failOnError bool) (err error) {
 	}
 
 	validFileExtensionTypes := utils.MapKeys(certificates.FileExtensionsToType)
+	sort.Strings(validFileExtensionTypes) // sort the list to have a deterministic order
 
 	for idx, cert := range config.Certs {
 		if cert.Enabled != nil && !*cert.Enabled {
@@ -128,7 +130,7 @@ func ParseConfig(config *Config, failOnError bool) (err error) {
 			} else {
 				reason := "missing file extension."
 				if ext != "" {
-					reason = fmt.Sprintf("unclear file extension (%s).", ext)
+					reason = fmt.Sprintf("unclear file extension (.%s).", ext)
 				}
 				errMsg := fmt.Sprintf("Certificate '%s' has no 'type' defined. Type can't be inferred due to the %s", cert.Name, reason)
 				return handleCertError(cert, idx, errMsg)
