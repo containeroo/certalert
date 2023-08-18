@@ -27,7 +27,7 @@ func TestExtractJKSCertificatesInfo(t *testing.T) {
 		{
 			Name:     "Test JKS certificate - valid",
 			FilePath: "../../tests/certs/jks/regular.jks",
-			Password: "password",
+			Password: "changeit",
 			ExpectedResults: []CertificateInfo{
 				{
 					Name:    "TestCert",
@@ -41,7 +41,7 @@ func TestExtractJKSCertificatesInfo(t *testing.T) {
 		{
 			Name:     "Test JKS certificate - valid chain",
 			FilePath: "../../tests/certs/jks/chain.jks",
-			Password: "password",
+			Password: "changeit",
 			ExpectedResults: []CertificateInfo{
 				{
 					Name:    "TestCert",
