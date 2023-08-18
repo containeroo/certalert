@@ -22,6 +22,15 @@ func IsInList(value string, list []string) bool {
 	return false
 }
 
+// MapKeys returns the keys of a map as a slice
+func MapKeys(m map[string]string) []string {
+	var keys []string
+	for k := range m {
+		keys = append(keys, k)
+	}
+	return keys
+}
+
 // CheckFileAccessibility checks if a file exists and is accessible
 func CheckFileAccessibility(filePath string) error {
 	// Check if the file exists

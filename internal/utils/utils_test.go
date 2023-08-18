@@ -2,6 +2,8 @@ package utils
 
 import (
 	"os"
+	"reflect"
+	"sort"
 	"strings"
 	"testing"
 )
@@ -18,34 +20,79 @@ func TestIsInList(t *testing.T) {
 	}
 }
 
+func TestMapKeys(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    map[string]string
+		expected []string
+	}{
+		{
+			name:     "empty map",
+			input:    map[string]string{},
+			expected: nil,
+		},
+		{
+			name:     "single key-value pair",
+			input:    map[string]string{"key1": "value1"},
+			expected: []string{"key1"},
+		},
+		{
+			name:     "multiple key-value pairs",
+			input:    map[string]string{"key1": "value1", "key2": "value2", "key3": "value3"},
+			expected: []string{"key1", "key2", "key3"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := MapKeys(tt.input)
+			sort.Strings(got)
+			sort.Strings(tt.expected)
+			if !reflect.DeepEqual(got, tt.expected) {
+				t.Errorf("%s for input %v, expected %v, but got %v", tt.name, tt.input, tt.expected, got)
+			}
+		})
+	}
+}
+
 func TestCheckFileAccessibility(t *testing.T) {
-	// 1. File doesn't exist
-	nonExistentPath := "./tmp/nonexistentfile12345"
-	err := CheckFileAccessibility(nonExistentPath)
-	if err == nil || !strings.HasPrefix(err.Error(), "File does not exist:") {
-		t.Errorf("Expected a 'File does not exist' error, got '%v'", err)
-	}
+	t.Run("File doesn't exist", func(t *testing.T) {
+		nonExistentPath := "./tmp/nonexistentfile12345"
+		err := CheckFileAccessibility(nonExistentPath)
+		if err == nil || !strings.HasPrefix(err.Error(), "File does not exist:") {
+			t.Errorf("Expected a 'File does not exist' error, got '%v'", err)
+		}
+	})
 
-	// 2. File exists but isn't readable
-	tmpFile, err := os.CreateTemp("", "testfile")
-	if err != nil {
-		t.Fatalf("Failed to create temp file: %v", err)
-	}
-	defer tmpFile.Close()
-	defer os.Remove(tmpFile.Name())
+	t.Run("File exists but isn't readable", func(t *testing.T) {
+		tmpFile, err := os.CreateTemp("", "testfile")
+		if err != nil {
+			t.Fatalf("Failed to create temp file: %v", err)
+		}
+		defer tmpFile.Close()
+		defer os.Remove(tmpFile.Name())
 
-	os.Chmod(tmpFile.Name(), 0222) // Write-only permissions
-	err = CheckFileAccessibility(tmpFile.Name())
-	if err == nil {
-		t.Errorf("Expected a 'failed to open file' error, got nil")
-	}
+		os.Chmod(tmpFile.Name(), 0222) // Write-only permissions
+		err = CheckFileAccessibility(tmpFile.Name())
+		if err == nil {
+			t.Errorf("Expected a 'failed to open file' error, got nil")
+		}
+	})
 
-	// 3. File exists and is readable
-	os.Chmod(tmpFile.Name(), 0444) // Read-only permissions
-	err = CheckFileAccessibility(tmpFile.Name())
-	if err != nil {
-		t.Errorf("Expected no error for readable file, got %v", err)
-	}
+	t.Run("File exists and is readable", func(t *testing.T) {
+		tmpFile, err := os.CreateTemp("", "testfile")
+		if err != nil {
+			t.Fatalf("Failed to create temp file: %v", err)
+		}
+		defer tmpFile.Close()
+		defer os.Remove(tmpFile.Name())
+
+		os.Chmod(tmpFile.Name(), 0444) // Read-only permissions
+		err = CheckFileAccessibility(tmpFile.Name())
+		if err != nil {
+			t.Errorf("Expected no error for readable file, got %v", err)
+		}
+	})
 }
 
 type NestedStruct struct {

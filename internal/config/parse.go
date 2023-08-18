@@ -90,6 +90,8 @@ func ParseConfig(config *Config, failOnError bool) (err error) {
 		}
 	}
 
+	validFileExtensionTypes := utils.MapKeys(certificates.FileExtensionsToType)
+
 	for idx, cert := range config.Certs {
 		if cert.Enabled != nil && !*cert.Enabled {
 			config.Certs[idx] = cert // update the certificate in the slice (maybe has changed from enabled to disabled)
@@ -118,30 +120,23 @@ func ParseConfig(config *Config, failOnError bool) (err error) {
 		}
 
 		if cert.Type == "" {
-			// try to guess the type based on the file extension
-			ext := filepath.Ext(cert.Path)
-			switch ext {
-			case ".p12", ".pkcs12", ".pfx":
-				cert.Type = "p12"
-			case ".pem", ".crt":
-				cert.Type = "pem"
-			case ".jks":
-				cert.Type = "jks"
-			default:
+			ext := filepath.Ext(cert.Path)     // try to guess the type based on the file extension
+			ext = strings.TrimPrefix(ext, ".") // remove the dot
+
+			if inferredType, ok := certificates.FileExtensionsToType[ext]; ok {
+				cert.Type = inferredType
+			} else {
 				reason := "missing file extension."
 				if ext != "" {
 					reason = fmt.Sprintf("unclear file extension (%s).", ext)
 				}
 				errMsg := fmt.Sprintf("Certificate '%s' has no 'type' defined. Type can't be inferred due to the %s", cert.Name, reason)
-				if err := handleCertError(cert, idx, errMsg); err != nil {
-					return err
-				}
+				return handleCertError(cert, idx, errMsg)
 			}
 		}
-		if !utils.IsInList(cert.Type, certificates.ValidTypes) {
-			if err := handleCertError(cert, idx, fmt.Sprintf("Certificate '%s' has an invalid 'type'. Must be one of: %s", cert.Name, strings.Join(certificates.ValidTypes, ", "))); err != nil {
-				return err
-			}
+
+		if !utils.IsInList(cert.Type, validFileExtensionTypes) {
+			return handleCertError(cert, idx, fmt.Sprintf("Certificate '%s' has an invalid 'type'. Must be one of: %s", cert.Name, strings.Join(validFileExtensionTypes, ", ")))
 		}
 
 		pw, err := utils.ResolveVariable(cert.Password)

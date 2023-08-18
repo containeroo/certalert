@@ -37,22 +37,17 @@ func Process(certificates []Certificate, failOnError bool) (certificatesInfo []C
 			return nil, fmt.Errorf("Failed to read certificate file '%s': %w", cert.Path, err)
 		}
 
-		switch cert.Type {
-		case "p12", "pkcs12", "pfx":
-			certificateInfo, err = ExtractP12CertificatesInfo(cert.Name, certData, cert.Password, failOnError)
-		case "pem", "crt":
-			certificateInfo, err = ExtractPEMCertificatesInfo(cert.Name, certData, cert.Password, failOnError)
-		case "jks":
-			certificateInfo, err = ExtractJKSCertificatesInfo(cert.Name, certData, cert.Password, failOnError)
-		default:
-			// Cannot happen, as the config is validated before
-			// Only here to make the linter happy :)
+		extractFunc, found := ExtractionFunctions[cert.Type]
+		if !found {
 			return nil, fmt.Errorf("Unknown certificate type '%s'", cert.Type)
 		}
+
+		certificateInfo, err = extractFunc(cert.Name, certData, cert.Password, failOnError)
 		if err != nil {
 			// err is only returned if failOnError is true
 			return nil, fmt.Errorf("Error extracting certificate information: %v", err)
 		}
+
 		certificatesInfo = append(certificatesInfo, certificateInfo...)
 	}
 

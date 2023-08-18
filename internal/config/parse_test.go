@@ -174,7 +174,7 @@ func TestParseConfig(t *testing.T) {
 					},
 				},
 			},
-			expectedError: fmt.Sprintf("Certificate 'test_cert' has an invalid 'type'. Must be one of: %s", strings.Join(certificates.ValidTypes, ", ")),
+			expectedError: fmt.Sprintf("Certificate 'test_cert' has an invalid 'type'. Must be one of: %s", strings.Join(utils.MapKeys(certificates.FileExtensionsToType), ", ")),
 		},
 		{
 			name: "cert type guessed invalid",

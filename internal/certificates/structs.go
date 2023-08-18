@@ -1,8 +1,34 @@
 package certificates
 
-import "time"
+import (
+	"time"
+)
 
-var ValidTypes = []string{"p12", "pkcs12", "pfx", "pem", "crt", "jks"}
+type ExtractFunction func(name string, certData []byte, password string, failOnError bool) ([]CertificateInfo, error)
+
+var ExtractionFunctions = map[string]ExtractFunction{
+	"p12":    ExtractP12CertificatesInfo,
+	"pkcs12": ExtractP12CertificatesInfo,
+	"pfx":    ExtractP12CertificatesInfo,
+	"pem":    ExtractPEMCertificatesInfo,
+	"crt":    ExtractPEMCertificatesInfo,
+	"jks":    ExtractJKSCertificatesInfo,
+	"p7":     ExtractP7CertificatesInfo,
+	"p7b":    ExtractP7CertificatesInfo,
+	"p7c":    ExtractP7CertificatesInfo,
+}
+
+var FileExtensionsToType = map[string]string{
+	"p12":    "p12",
+	"pkcs12": "p12",
+	"pfx":    "p12",
+	"pem":    "pem",
+	"crt":    "pem",
+	"jks":    "jks",
+	"p7":     "p7",
+	"p7b":    "p7",
+	"p7c":    "p7",
+}
 
 // Certificate represents a certificate configuration
 type Certificate struct {
