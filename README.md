@@ -179,25 +179,36 @@ certalert provides the following web-accessible endpoints:
 | `/metrics`  | Delivers metrics for Prometheus to scrape                                           |
 | `/healthz`  | Get health status                                                                   |
 
-## Supported Certificate Types
+## Supported Certificate Formats
+
+The certificate format is inferred from its file extension. However, you can override this automatic detection by specifying the `type` field.
 
 ### JKS (Java KeyStore)
 
-Java KeyStores (JKS) are used to store private keys and the associated certificates securely. They are primarily utilized within Java-based applications for a variety of security purposes.
+JKS or Java KeyStores provide a secure mechanism to store private keys and their corresponding certificates. These are predominantly used within Java applications for various security functionalities.
 
-`certalert` tries to extract the certificates and the certificate chains.
+In `certalert`, the primary task is to retrieve certificates and their respective chains from JKS files.
 
-**Detected file extensions**:
+**Recognized file extensions**:
 
 - `.jks`
 
+### TrustStore
+
+TrustStores are repositories that store trusted certificates, ensuring secure communications and verification of resources. They play an integral role in the realm of security, specifically in validating certificate chains.
+
+**Recognized file extensions**:
+
+- `.ts`
+- `.truststore`
+
 ### P7B (PKCS#7)
 
-P7B, also known as `PKCS#7`, is a format used to store certificate chains and, optionally, the associated private key. It's a widely recognized standard for wrapping up certificates.
+P7B, also identified as `PKCS#7`, is a widely-accepted format for storing certificate chains. In some cases, it might also encompass the associated private key. 
 
-`certalert` only tries to extract the certificates. It warns if there are other components inside.
+With `certalert`, the focus is exclusively on extracting certificates. Should there be additional components, a warning is prompted.
 
-**Detected file extensions**:
+**Recognized file extensions**:
 
 - `.p7`
 - `.p7b`
@@ -205,11 +216,11 @@ P7B, also known as `PKCS#7`, is a format used to store certificate chains and, o
 
 ### P12 (PKCS#12)
 
-PKCS#12 (P12) is a binary format used to store the server certificate, any intermediate certificates, and the private key in one encryptable file. They are often used to export and import certificates and private keys.
+The binary format PKCS#12, commonly referred to as P12, is designed to encapsulate the server certificate, intermediary certificates, and the private key into a single encryptable entity. This format simplifies the processes of certificate and private key export/import.
 
-`certalert` will extract private keys and certificates with the given password. It will fail if the password is not correct.
+Using the specified password, `certalert` retrieves both private keys and certificates from P12 files. Incorrect password inputs lead to failures.
 
-**Detected file extensions**:
+**Recognized file extensions**:
 
 - `.p12`
 - `.pkcs12`
@@ -217,9 +228,9 @@ PKCS#12 (P12) is a binary format used to store the server certificate, any inter
 
 ### PEM (Privacy Enhanced Mail)
 
-PEM format is a de-facto file format for storing and sending cryptographic keys and certificates. It's recognized by its `-----BEGIN CERTIFICATE-----` and `-----END CERTIFICATE-----` delimiters.
+PEM, a predominant file format, is instrumental in storing and transmitting cryptographic keys and certificates. It's discernible by its unique delimiters, `-----BEGIN CERTIFICATE-----` and `-----END CERTIFICATE-----`.
 
-**Detected file extensions**:
+**Recognized file extensions**:
 
 - `.pem`
 - `.crt`

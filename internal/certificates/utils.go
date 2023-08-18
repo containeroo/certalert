@@ -37,7 +37,7 @@ func Process(certificates []Certificate, failOnError bool) (certificatesInfo []C
 			return nil, fmt.Errorf("Failed to read certificate file '%s': %w", cert.Path, err)
 		}
 
-		extractFunc, found := ExtractionFunctions[cert.Type]
+		extractFunc, found := TypeToExtractionFunction[cert.Type]
 		if !found {
 			return nil, fmt.Errorf("Unknown certificate type '%s'", cert.Type)
 		}
