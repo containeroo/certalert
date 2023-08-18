@@ -12,6 +12,7 @@ require (
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/viper v1.16.0
 	github.com/stretchr/testify v1.8.3
+	go.mozilla.org/pkcs7 v0.0.0-20210826202110-33d05740a352
 	gopkg.in/yaml.v3 v3.0.1
 	software.sslmate.com/src/go-pkcs12 v0.2.1
 )
