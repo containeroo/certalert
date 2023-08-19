@@ -193,6 +193,14 @@ In `certalert`, the primary task is to retrieve certificates and their respectiv
 
 - `.jks`
 
+Check if the file is really a Java Keystore:
+
+```sh
+keytool -list -v -keystore CERT.jks -storepass PASSWORD
+```
+
+If the `Keystore type` is `PKCS12`, you have to set the `type` to `p12`
+
 ### TrustStore
 
 TrustStores are repositories that store trusted certificates, ensuring secure communications and verification of resources. They play an integral role in the realm of security, specifically in validating certificate chains.

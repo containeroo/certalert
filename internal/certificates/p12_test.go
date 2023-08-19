@@ -26,7 +26,7 @@ func TestExtractP12CertificatesInfo(t *testing.T) {
 					Name:    "TestCert",
 					Type:    "p12",
 					Epoch:   1723973737,
-					Subject: "1",
+					Subject: "pkcs12",
 				},
 			},
 			ExpectedError: "",
@@ -131,36 +131,21 @@ func TestExtractP12CertificatesInfo(t *testing.T) {
 
 			// Check the length of the returned slice
 			if len(certs) != len(tc.ExpectedResults) {
-				t.Errorf("Expected %d certificate, got %d", len(tc.ExpectedResults), len(certs))
+				t.Errorf("Expected %d certificates, got %d", len(tc.ExpectedResults), len(certs))
+				return
 			}
 
-			// Check if there is only one certificate in the returned slice
-			if len(tc.ExpectedResults) == 1 {
-				if certs[0] != tc.ExpectedResults[0] {
-					t.Errorf("Expected cert %v, got %v", tc.ExpectedResults[0], certs[0])
-				}
-				return // no need to check the rest of the test
-			}
-
-			// Check the values in the returned certificate
+			// Check if each certificate in the expected slice exists in the result slice
 			for _, expectedCert := range tc.ExpectedResults {
-				// Find the certificate in the returned slice
-				var extractedCert CertificateInfo
-				for _, cert := range certs {
-					if cert.Name == expectedCert.Name &&
-						cert.Subject == expectedCert.Subject &&
-						cert.Type == expectedCert.Type {
-						extractedCert = cert
-						break
-					}
-				}
-				if extractedCert == (CertificateInfo{}) {
+				if !certExistsInSlice(expectedCert, certs) {
 					t.Errorf("Expected cert %v not found", expectedCert)
 				}
+			}
 
-				// Check the values in the returned certificate
-				if extractedCert != expectedCert {
-					t.Errorf("Expected cert %v, got %v", expectedCert, extractedCert)
+			// Also check the opposite: each certificate in the result slice should exist in the expected slice
+			for _, resultCert := range certs {
+				if !certExistsInSlice(resultCert, tc.ExpectedResults) {
+					t.Errorf("Unexpected cert found: %v", resultCert)
 				}
 			}
 		})

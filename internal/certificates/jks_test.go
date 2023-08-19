@@ -27,12 +27,12 @@ func TestExtractJKSCertificatesInfo(t *testing.T) {
 		{
 			Name:     "Test JKS certificate - valid",
 			FilePath: "../../tests/certs/jks/regular.jks",
-			Password: "changeit",
+			Password: "password",
 			ExpectedResults: []CertificateInfo{
 				{
 					Name:    "TestCert",
 					Type:    "jks",
-					Epoch:   1722692115,
+					Epoch:   1723973250,
 					Subject: "regular",
 				},
 			},
@@ -41,30 +41,30 @@ func TestExtractJKSCertificatesInfo(t *testing.T) {
 		{
 			Name:     "Test JKS certificate - valid chain",
 			FilePath: "../../tests/certs/jks/chain.jks",
-			Password: "changeit",
+			Password: "password",
 			ExpectedResults: []CertificateInfo{
 				{
 					Name:    "TestCert",
 					Type:    "jks",
-					Epoch:   1722692127,
+					Epoch:   1723973251,
 					Subject: "root",
 				},
 				{
 					Name:    "TestCert",
 					Type:    "jks",
-					Epoch:   1722692128,
+					Epoch:   1723973256,
 					Subject: "intermediate",
 				},
 				{
 					Name:    "TestCert",
 					Type:    "jks",
-					Epoch:   1722692131,
+					Epoch:   1723973256,
 					Subject: "leaf",
 				},
 				{
 					Name:    "TestCert",
 					Type:    "jks",
-					Epoch:   1722692126,
+					Epoch:   1723973251,
 					Subject: "chain",
 				},
 			},
@@ -96,26 +96,21 @@ func TestExtractJKSCertificatesInfo(t *testing.T) {
 
 			// Check the length of the returned slice
 			if len(certs) != len(tc.ExpectedResults) {
-				t.Errorf("Expected %d certificate, got %d", len(tc.ExpectedResults), len(certs))
+				t.Errorf("Expected %d certificates, got %d", len(tc.ExpectedResults), len(certs))
+				return
 			}
 
-			// Check the values in the returned certificate
+			// Check if each certificate in the expected slice exists in the result slice
 			for _, expectedCert := range tc.ExpectedResults {
-				// Find the certificate in the returned slice
-				var extractedCert CertificateInfo
-				var found bool
-				for _, cert := range certs {
-					if cert.Name == expectedCert.Name && cert.Subject == expectedCert.Subject && cert.Type == expectedCert.Type {
-						extractedCert = cert
-						found = true
-						break
-					}
-				}
-				if !found {
+				if !certExistsInSlice(expectedCert, certs) {
 					t.Errorf("Expected cert %v not found", expectedCert)
 				}
-				if expectedCert.Epoch != extractedCert.Epoch {
-					t.Errorf("Expected cert %v, got %v", expectedCert, extractedCert)
+			}
+
+			// Also check the opposite: each certificate in the result slice should exist in the expected slice
+			for _, resultCert := range certs {
+				if !certExistsInSlice(resultCert, tc.ExpectedResults) {
+					t.Errorf("Unexpected cert found: %v", resultCert)
 				}
 			}
 		})

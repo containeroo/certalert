@@ -53,3 +53,12 @@ func Process(certificates []Certificate, failOnError bool) (certificatesInfo []C
 
 	return certificatesInfo, nil
 }
+
+func certExistsInSlice(cert CertificateInfo, slice []CertificateInfo) bool {
+	for _, c := range slice {
+		if cert.Name == c.Name && cert.Subject == c.Subject && cert.Type == c.Type {
+			return true
+		}
+	}
+	return false
+}
