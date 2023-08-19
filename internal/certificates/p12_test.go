@@ -18,6 +18,20 @@ func TestExtractP12CertificatesInfo(t *testing.T) {
 	// Define test cases
 	testCases := []testCase{
 		{
+			Name:     "Test JKS certificate - JKS with pkcs12",
+			FilePath: "../../tests/certs/jks/pkcs12.jks",
+			Password: "password",
+			ExpectedResults: []CertificateInfo{
+				{
+					Name:    "TestCert",
+					Type:    "p12",
+					Epoch:   1723973737,
+					Subject: "1",
+				},
+			},
+			ExpectedError: "",
+		},
+		{
 			Name:     "Test P12 certificate with no password",
 			FilePath: "../../tests/certs/p12/without_password.p12",
 			Password: "",
@@ -118,6 +132,14 @@ func TestExtractP12CertificatesInfo(t *testing.T) {
 			// Check the length of the returned slice
 			if len(certs) != len(tc.ExpectedResults) {
 				t.Errorf("Expected %d certificate, got %d", len(tc.ExpectedResults), len(certs))
+			}
+
+			// Check if there is only one certificate in the returned slice
+			if len(tc.ExpectedResults) == 1 {
+				if certs[0] != tc.ExpectedResults[0] {
+					t.Errorf("Expected cert %v, got %v", tc.ExpectedResults[0], certs[0])
+				}
+				return // no need to check the rest of the test
 			}
 
 			// Check the values in the returned certificate
