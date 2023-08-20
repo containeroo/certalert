@@ -9,9 +9,10 @@ data:
     certs:
       - name: JKS chain
         path: /certs/jks/chain.jks
-        file: /certs/certalert.passwords:{jks_password}
+        password: file:/certs/certalert.passwords:{jks_password}
       - name: JKS regular
         path: /certs/jks/regular.jks
+        password: file:/certs/certalert.passwords:{jks_password}
       - name: P7 regular
         path: /certs/p7/cert1.p7b
       - name: P7 my domain
