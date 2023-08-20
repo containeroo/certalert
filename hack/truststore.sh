@@ -30,13 +30,10 @@ keytool -importcert -file /certs/root.crt -alias root -keystore /certs/chain.jks
 keytool -importcert -file /certs/intermediate.crt -alias intermediate -keystore /certs/chain.jks -storepass password -noprompt
 keytool -importcert -file /certs/regular.crt -alias regular -keystore /certs/chain.jks -storepass password -noprompt
 
-popd
-
 # Create broken truststore file
-echo "broken" > ./tests/certs/truststore/broken.jks
+echo "broken" > broken.jks
 
 # Create file with invalid extension
-echo "invalid" > ./tests/certs/truststore/cert.invalid
+echo "invalid" > cert.invalid
 
-# Create file with no extension
-echo "no extension" > ./tests/certs/truststore/no_extension
+popd

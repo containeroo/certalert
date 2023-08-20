@@ -24,8 +24,8 @@ func TestExtractP12CertificatesInfo(t *testing.T) {
 			ExpectedResults: []CertificateInfo{
 				{
 					Name:    "TestCert",
-					Type:    "p12",
-					Epoch:   1723973737,
+					Type:    "pkcs12",
+					Epoch:   1724097113,
 					Subject: "pkcs12",
 				},
 			},

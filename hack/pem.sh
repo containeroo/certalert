@@ -37,9 +37,6 @@ echo "broken" > broken.pem
 # create file with invalid extension
 echo "invalid" > cert.invalid
 
-# create file with no extension
-echo "no extension" > no_extension
-
 # create pem file with a certificate chain
 cat final.crt intermediate.crt root.crt > chain.crt
 # create pem file with a certificate chain and private key

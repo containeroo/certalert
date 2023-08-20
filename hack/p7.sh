@@ -35,7 +35,4 @@ echo "broken" > broken.p7b
 # create file with invalid extension
 echo "invalid" > cert.invalid
 
-# create file with no extension
-echo "no extension" > no_extension
-
 popd

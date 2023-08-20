@@ -39,7 +39,7 @@ echo "broken" > broken.p12
 echo "invalid" > cert.invalid
 
 # create file with no extension
-echo "no extension" > no_extension
+echo no_extension > no_extension
 
 # create p12 file with a certificate chain
 cat final.crt intermediate.crt root.crt > chain.crt

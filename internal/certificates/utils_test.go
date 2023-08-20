@@ -50,8 +50,8 @@ func TestProcess(t *testing.T) {
 				{Name: "ValidCert2", Path: "../../tests/certs/p12/with_password.p12", Password: "password", Type: "p12", Enabled: utils.BoolPtr(true), Valid: utils.BoolPtr(true)},
 			},
 			ExpectedInfo: []CertificateInfo{
-				{Name: "ValidCert1", Epoch: 1723974180, Type: "jks", Subject: "regular"},
-				{Name: "ValidCert2", Epoch: 1722925469, Type: "p12", Subject: "with_password"},
+				{Name: "ValidCert1", Epoch: 1724096931, Type: "jks", Subject: "regular"},
+				{Name: "ValidCert2", Epoch: 1724097374, Type: "p12", Subject: "with_password"},
 			},
 		},
 		{
@@ -88,7 +88,21 @@ func TestProcess(t *testing.T) {
 				assert.Equal(t, tc.ExpectedError, err.Error())
 			} else {
 				assert.Nil(t, err)
-				assert.Equal(t, tc.ExpectedInfo, result)
+
+				// Check if each certificate in the expected slice exists in the result slice
+				for _, expectedCert := range tc.ExpectedInfo {
+					if !certExistsInSlice(expectedCert, result) {
+						t.Errorf("Expected cert %v not found", expectedCert)
+					}
+				}
+
+				// Also check the opposite: each certificate in the result slice should exist in the expected slice
+				for _, resultCert := range result {
+					if !certExistsInSlice(resultCert, tc.ExpectedInfo) {
+						t.Errorf("Unexpected cert found: %v", resultCert)
+					}
+				}
+
 			}
 		})
 	}
