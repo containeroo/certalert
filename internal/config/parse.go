@@ -110,7 +110,7 @@ func ParseConfig(config *Config, failOnError bool) (err error) {
 		if err := utils.CheckFileAccessibility(cert.Path); err != nil {
 			if err := handleCertError(cert, idx, fmt.Sprintf("Certificate '%s' is not accessible: %v", cert.Name, err)); err != nil {
 				return err
-			}o 
+			}
 		}
 
 		if cert.Name == "" {
