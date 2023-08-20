@@ -46,37 +46,37 @@ func TestProcess(t *testing.T) {
 			Name:        "handles valid certificates",
 			FailOnError: true,
 			Certificates: []Certificate{
-				{Name: "ValidCert1", Path: "tests/certs/jks/regular.jks", Type: "testType", Enabled: utils.BoolPtr(true), Valid: utils.BoolPtr(true)},
-				{Name: "ValidCert2", Path: "valid2.jks", Type: "testType", Enabled: utils.BoolPtr(true), Valid: utils.BoolPtr(true)},
+				{Name: "ValidCert1", Path: "../../tests/certs/jks/regular.jks", Password: "password", Type: "jks", Enabled: utils.BoolPtr(true), Valid: utils.BoolPtr(true)},
+				{Name: "ValidCert2", Path: "../../tests/certs/p12/with_password.p12", Password: "password", Type: "p12", Enabled: utils.BoolPtr(true), Valid: utils.BoolPtr(true)},
 			},
 			ExpectedInfo: []CertificateInfo{
-				{Name: "ValidCert1", Type: "testType", Epoch: 123, Subject: "Test Subject"},
-				{Name: "ValidCert2", Type: "testType", Epoch: 123, Subject: "Test Subject"},
+				{Name: "ValidCert1", Epoch: 1723974180, Type: "jks", Subject: "regular"},
+				{Name: "ValidCert2", Epoch: 1722925469, Type: "p12", Subject: "with_password"},
 			},
 		},
 		{
-			Name:        "skips disabled certificates",
+			Name:        "skips disabled certificate",
 			FailOnError: true,
 			Certificates: []Certificate{
-				{Name: "DisabledCert", Path: "disabled.jks", Type: "testType", Enabled: utils.BoolPtr(false), Valid: utils.BoolPtr(true)},
+				{Name: "DisabledCert", Path: "disabled.jks", Type: "jks", Enabled: utils.BoolPtr(false), Valid: utils.BoolPtr(true)},
 			},
-			ExpectedInfo: []CertificateInfo{},
+			ExpectedInfo: []CertificateInfo(nil),
 		},
 		{
-			Name:        "skips invalid certificates",
+			Name:        "skips invalid certificate",
 			FailOnError: true,
 			Certificates: []Certificate{
-				{Name: "InvalidCert", Path: "/certs/jks/broken.jks", Type: "testType", Enabled: utils.BoolPtr(true), Valid: utils.BoolPtr(false)},
+				{Name: "InvalidCert", Path: "../tests/certs/jks/broken.jks", Type: "jks", Enabled: utils.BoolPtr(true), Valid: utils.BoolPtr(false)},
 			},
-			ExpectedInfo: []CertificateInfo{},
+			ExpectedInfo: []CertificateInfo(nil),
 		},
 		{
 			Name:        "fails on extraction error",
 			FailOnError: true,
 			Certificates: []Certificate{
-				{Name: "FailCert", Path: "fail", Type: "testType", Enabled: utils.BoolPtr(true), Valid: utils.BoolPtr(true)},
+				{Name: "FailCert", Path: "fail", Type: "jks", Enabled: utils.BoolPtr(true), Valid: utils.BoolPtr(true)},
 			},
-			ExpectedError: "Error extracting certificate information: Extraction failed",
+			ExpectedError: "Failed to read certificate file 'fail': open fail: no such file or directory",
 		},
 	}
 
