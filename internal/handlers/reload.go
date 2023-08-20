@@ -7,8 +7,8 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// ReloadHandler is a handler function that reloads the application configuration
-func ReloadHandler(w http.ResponseWriter, r *http.Request) {
+// Reload is a handler function that reloads the application configuration
+func Reload(w http.ResponseWriter, r *http.Request) {
 	log.Debugf("Force reloading configuration")
 
 	if err := config.ParseConfig(&config.App, config.FailOnError); err != nil {

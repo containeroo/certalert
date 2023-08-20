@@ -8,8 +8,8 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// ConfigHandler returns the config as yaml
-func ConfigHandler(w http.ResponseWriter, r *http.Request) {
+// Config returns the config as yaml
+func Config(w http.ResponseWriter, r *http.Request) {
 	var b bytes.Buffer
 	yamlEncoder := yaml.NewEncoder(&b)
 	defer yamlEncoder.Close()

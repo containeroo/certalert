@@ -173,11 +173,12 @@ certalert provides the following web-accessible endpoints:
 
 | Endpoint    | Purpose                                                                             |
 | :---------- | :---------------------------------------------------------------------------------- |
-| `/`         | Fetches and displays all the certificates in a tabular format                       |
+| `/`         | Shows the endpoints                                                                 |
+| `/config`   | Fetches and displays all the certificates in a tabular format                       |
 | `/-/reload` | Reloads the configuration                                                           |
-| `/config`   | Provides the currently active configuration file. Plaintext passwords are redacted. |
+| `/config`   | Provides the currently active configuration file. Plaintext passwords are redacted  |
 | `/metrics`  | Delivers metrics for Prometheus to scrape                                           |
-| `/healthz`  | Get health status                                                                   |
+| `/healthz`  | Returns the health of the application                                               |
 
 ## Supported Certificate Formats
 

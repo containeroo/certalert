@@ -25,11 +25,12 @@ func NewRouter() *mux.Router {
 	metrics.PromMetrics = *metrics.NewMetrics()
 
 	//register handlers
-	router.HandleFunc("/", handlers.HomeHandler).Methods("GET", "POST")
-	router.HandleFunc("/-/reload", handlers.ReloadHandler).Methods("GET", "POST")
-	router.HandleFunc("/config", handlers.ConfigHandler).Methods("GET", "POST")
-	router.HandleFunc("/healthz", handlers.HealthzHandler).Methods("GET", "POST")
-	router.Handle("/metrics", http.HandlerFunc(handlers.MetricsHandler)).Methods("GET", "POST")
+	router.HandleFunc("/", handlers.Home).Methods("GET", "POST")
+	router.HandleFunc("/-/reload", handlers.Reload).Methods("GET", "POST")
+	router.HandleFunc("/config", handlers.Config).Methods("GET", "POST")
+	router.HandleFunc("/certificates", handlers.Certificates).Methods("GET", "POST")
+	router.HandleFunc("/healthz", handlers.Healthz).Methods("GET", "POST")
+	router.Handle("/metrics", http.HandlerFunc(handlers.Metrics)).Methods("GET", "POST")
 
 	return router
 }
