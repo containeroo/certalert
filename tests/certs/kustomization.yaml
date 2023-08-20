@@ -9,7 +9,7 @@ configMapGenerator:
   - name: p7
     files:
       - p7/cert1.p7b
-      - p7/mydomain.p7b
+      - p7/cert2.p7b
   - name: p12
     files:
       - p12/with_password.p12

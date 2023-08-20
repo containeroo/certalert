@@ -16,7 +16,7 @@ data:
       - name: P7 regular
         path: /certs/p7/cert1.p7b
       - name: P7 my domain
-        path: /certs/p7/mydomain.p7b
+        path: /certs/p7/cert2.p7b
       - name: P12 with password
         path: /certs/p12/with_password.p12
         password: env:P12_PASSWORD
