@@ -34,11 +34,14 @@ func Process(certificates []Certificate, failOnError bool) (certificatesInfo []C
 		var certificateInfo []CertificateInfo
 		certData, err := os.ReadFile(cert.Path)
 		if err != nil {
+			// Accessibiliy of the file is checked in the config validation, if reached
+			// here, the file exists but can't be read for some reason.
 			return nil, fmt.Errorf("Failed to read certificate file '%s': %w", cert.Path, err)
 		}
 
 		extractFunc, found := TypeToExtractionFunction[cert.Type]
 		if !found {
+			// This should never happen as the config validation ensures that the type is valid
 			return nil, fmt.Errorf("Unknown certificate type '%s'", cert.Type)
 		}
 
