@@ -153,6 +153,20 @@ func TestParseConfig(t *testing.T) {
 			expectedError: "Certificate 'test_cert' has no 'path' defined",
 		},
 		{
+			name: "cert path not accessible",
+			config: &Config{
+				Certs: []certificates.Certificate{
+					{
+
+						Name:    "test_cert",
+						Enabled: utils.BoolPtr(true),
+						Path:    "/invalid/path",
+					},
+				},
+			},
+			expectedError: "Certificate 'test_cert' is not accessible: File does not exist: /invalid/path",
+		},
+		{
 			name: "cert type not defined",
 			config: &Config{
 				Certs: []certificates.Certificate{
