@@ -39,7 +39,7 @@ func ParseConfig(config *Config, failOnError bool) (err error) {
 		log.Warn(errMsg)
 		return nil
 	}
-	handerPushgatewayError := func(errMsg string) error {
+	handlePushgatewayError := func(errMsg string) error {
 		if failOnError {
 			return fmt.Errorf(errMsg)
 		}
@@ -49,33 +49,33 @@ func ParseConfig(config *Config, failOnError bool) (err error) {
 
 	resolvedAddress, err := utils.ResolveVariable(config.Pushgateway.Address)
 	if err != nil {
-		if err := handerPushgatewayError(fmt.Sprintf("Failed to resolve address for pushgateway: %v", err)); err != nil {
+		if err := handlePushgatewayError(fmt.Sprintf("Failed to resolve address for pushgateway: %v", err)); err != nil {
 			return err
 		}
 	}
 	if _, err := url.Parse(resolvedAddress); err != nil {
-		if err := handerPushgatewayError(fmt.Sprintf("Invalid pushgateway address '%s': %v", resolvedAddress, err)); err != nil {
+		if err := handlePushgatewayError(fmt.Sprintf("Invalid pushgateway address '%s': %v", resolvedAddress, err)); err != nil {
 			return err
 		}
 	}
 	config.Pushgateway.Address = resolvedAddress
 
 	if err := validateAuthConfig(config.Pushgateway.Auth); err != nil {
-		if err := handerPushgatewayError(err.Error()); err != nil {
+		if err := handlePushgatewayError(err.Error()); err != nil {
 			return err
 		}
 	}
 
 	config.Pushgateway.Auth.Basic.Password, err = utils.ResolveVariable(config.Pushgateway.Auth.Basic.Password)
 	if err != nil {
-		if err := handerPushgatewayError(fmt.Sprintf("Failed to resolve password for pushgateway: %v", err)); err != nil {
+		if err := handlePushgatewayError(fmt.Sprintf("Failed to resolve password for pushgateway: %v", err)); err != nil {
 			return err
 		}
 	}
 
 	config.Pushgateway.Auth.Bearer.Token, err = utils.ResolveVariable(config.Pushgateway.Auth.Bearer.Token)
 	if err != nil {
-		if err := handerPushgatewayError(fmt.Sprintf("Failed to resolve token for pushgateway: %v", err)); err != nil {
+		if err := handlePushgatewayError(fmt.Sprintf("Failed to resolve token for pushgateway: %v", err)); err != nil {
 			return err
 		}
 	}
@@ -85,7 +85,7 @@ func ParseConfig(config *Config, failOnError bool) (err error) {
 	} else {
 		config.Pushgateway.Job, err = utils.ResolveVariable(config.Pushgateway.Job)
 		if err != nil {
-			if err := handerPushgatewayError(fmt.Sprintf("Failed to resolve job for pushgateway: %v", err)); err != nil {
+			if err := handlePushgatewayError(fmt.Sprintf("Failed to resolve job for pushgateway: %v", err)); err != nil {
 				return err
 			}
 		}
@@ -110,7 +110,7 @@ func ParseConfig(config *Config, failOnError bool) (err error) {
 		if err := utils.CheckFileAccessibility(cert.Path); err != nil {
 			if err := handleCertError(cert, idx, fmt.Sprintf("Certificate '%s' is not accessible: %v", cert.Name, err)); err != nil {
 				return err
-			}
+			}o 
 		}
 
 		if cert.Name == "" {
