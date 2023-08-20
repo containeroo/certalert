@@ -77,7 +77,8 @@ const tpl = `
 `
 
 func formatTime(t time.Time, format string) string {
-	if t.IsZero() {
+	// check if the time is zero or time is not set
+	if t.IsZero() || t.Unix() == 0 {
 		return "-"
 	}
 	return t.Format(format)
