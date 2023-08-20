@@ -15,26 +15,27 @@ const tpl = `
 <html>
 <head>
 	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<style>
-		#myTable {
+		.table {
 			border-collapse: collapse;
 			width: 60%;
 			margin: 0 auto;
 			border: 1px solid #ddd;
 			font-size: 16px;
 		}
-		#myTable th,
-		#myTable td {
+		.table th,
+		.table td {
 			text-align: left;
 			padding: 12px;
 		}
-		#myTable tr:not(.header) {
+		.table tr:not(.table-header) {
 			border-bottom: 1px solid #ddd;
 		}
-		#myTable tr:not(.header):hover {
+		.table tr:not(.table-header):hover {
 			background-color: #f1f1f1;
 		}
-		#myTable tr.header {
+		.table-header {
 			background-color: #BDB76B;
 		}
 
@@ -45,35 +46,33 @@ const tpl = `
 			background: #BDB76B;
 		}
 
-		/* Add hover effect for error symbol */
 		.error-symbol:hover {
-				opacity: 0.7;
+			opacity: 0.7;
 		}
 
-
-		.yellow-row {
-			background-color: yellow;
+		.row-yellow {
+			background-color: #FFD700;
 		}
 
-		.orange-row {
-				background-color: orange;
+		.row-orange {
+			background-color: #FFA500;
 		}
 
-		.red-row {
-				background-color: red;
+		.row-red {
+			background-color: #FF4500;
 		}
 	</style>
 </head>
 <body>
-	<table id="myTable">
+	<table class="table">
         <thead>
-            <tr class="header">
-								<th></th>
-                <th>Name</th>
-                <th>Subject</th>
-                <th>Type</th>
-                <th>Expiry Date</th>
-                <th>Expiration</th>
+            <tr class="table-header">
+								<th scope="col"></th>
+                <th scope="col">Name</th>
+                <th scope="col">Subject</th>
+                <th scope="col">Type</th>
+                <th scope="col">Expiry Date</th>
+                <th scope="col">Expiration</th>
             </tr>
         </thead>
         <tbody>
