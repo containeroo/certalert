@@ -4,7 +4,7 @@ This program serves as a dynamic tool for the purpose of handling and monitoring
 
 On invocation of the `/metrics` endpoint by Prometheus, the tool performs a real-time check on the expiration dates of the certificates.
 
-Additionally, `certalert` also supports forwarding the expiration date epoch directly to a Pushgateway server, offering flexibility and control over monitoring workflows.
+Additionally, `certalert` also supports forwarding the expiration date epoch directly to a Pushgateway server, offering flexibility and control over monitoring workflows or simply output them as `json`, `yaml` or a `text` table.
 
 ## Usage
 
@@ -78,7 +78,7 @@ The primary function is to utilize the `serve` command to initiate a web server 
 
 ## Certificate Management
 
-Certificates can be defined with properties such as their `name`, `path`, `type`, and an optional `password`. You have the flexibility to enable or disable specific certificate checks. Additionally, the `type` of certificate can either be manually defined or determined by the system based on the file extension.
+Certificates can be defined with properties such as their `name`, `path`, `type`, and an optional `password`. You have the flexibility to enable or disable specific certificate checks with the field `enabled`. Additionally, the `type` of certificate can either be manually defined or determined by the system based on the file extension.
 
 Credentials, such as `passwords`, can be specified in multiple ways: `plain text`, an `environment variable`, or a `file` containing the credentials. For files with multiple key-value pairs, a specific key can be chosen by appending `:{KEY}` at the end of the file path. See `Providing Credentials` for more details.
 
@@ -169,7 +169,7 @@ certs:
 
 ## Available Endpoints
 
-certalert provides the following web-accessible endpoints:
+`certalert` provides the following web-accessible endpoints:
 
 | Endpoint    | Purpose                                                                             |
 | :---------- | :---------------------------------------------------------------------------------- |
