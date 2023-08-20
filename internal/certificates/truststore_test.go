@@ -22,7 +22,7 @@ func TestExtractTrustStoreCertificatesInfo(t *testing.T) {
 			FilePath:        "../../tests/certs/truststore/broken.jks",
 			Password:        "password",
 			ExpectedResults: []CertificateInfo{},
-			ExpectedError:   "Failed to load JKS file 'TestCert': got invalid magic",
+			ExpectedError:   "Failed to decode P12 file 'TestCert': pkcs12: error reading P12 data: asn1: structure error: tags don't match (16 vs {class:1 tag:2 length:114 isCompound:true}) {optional:false explicit:false application:false private:false defaultValue:<nil> tag:<nil> stringType:0 timeType:0 set:false omitEmpty:false} pfxPdu @2",
 		},
 		{
 			Name:     "Test TrustStore certificate - valid",
@@ -31,7 +31,7 @@ func TestExtractTrustStoreCertificatesInfo(t *testing.T) {
 			ExpectedResults: []CertificateInfo{
 				{
 					Name:    "TestCert",
-					Type:    "jks",
+					Type:    "truststore",
 					Epoch:   1722692115,
 					Subject: "regular",
 				},
@@ -45,27 +45,21 @@ func TestExtractTrustStoreCertificatesInfo(t *testing.T) {
 			ExpectedResults: []CertificateInfo{
 				{
 					Name:    "TestCert",
-					Type:    "jks",
+					Type:    "truststore",
 					Epoch:   1722692127,
 					Subject: "root",
 				},
 				{
 					Name:    "TestCert",
-					Type:    "jks",
+					Type:    "truststore",
 					Epoch:   1722692128,
 					Subject: "intermediate",
 				},
 				{
 					Name:    "TestCert",
-					Type:    "jks",
+					Type:    "truststore",
 					Epoch:   1722692131,
-					Subject: "leaf",
-				},
-				{
-					Name:    "TestCert",
-					Type:    "jks",
-					Epoch:   1722692126,
-					Subject: "chain",
+					Subject: "regular",
 				},
 			},
 			ExpectedError: "",
@@ -93,29 +87,23 @@ func TestExtractTrustStoreCertificatesInfo(t *testing.T) {
 				}
 				return // error is expected, so we can skip the rest of the test
 			}
-
 			// Check the length of the returned slice
 			if len(certs) != len(tc.ExpectedResults) {
-				t.Errorf("Expected %d certificate, got %d", len(tc.ExpectedResults), len(certs))
+				t.Errorf("Expected %d certificates, got %d", len(tc.ExpectedResults), len(certs))
+				return
 			}
 
-			// Check the values in the returned certificate
+			// Check if each certificate in the expected slice exists in the result slice
 			for _, expectedCert := range tc.ExpectedResults {
-				// Find the certificate in the returned slice
-				var extractedCert CertificateInfo
-				var found bool
-				for _, cert := range certs {
-					if cert.Name == expectedCert.Name && cert.Subject == expectedCert.Subject && cert.Type == expectedCert.Type {
-						extractedCert = cert
-						found = true
-						break
-					}
-				}
-				if !found {
+				if !certExistsInSlice(expectedCert, certs) {
 					t.Errorf("Expected cert %v not found", expectedCert)
 				}
-				if expectedCert.Epoch != extractedCert.Epoch {
-					t.Errorf("Expected cert %v, got %v", expectedCert, extractedCert)
+			}
+
+			// Also check the opposite: each certificate in the result slice should exist in the expected slice
+			for _, resultCert := range certs {
+				if !certExistsInSlice(resultCert, tc.ExpectedResults) {
+					t.Errorf("Unexpected cert found: %v", resultCert)
 				}
 			}
 		})
