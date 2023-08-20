@@ -1,7 +1,0 @@
-apiVersion: v1
-data:
-  broken_certificate.pem: |
-    broken
-kind: ConfigMap
-metadata:
-  name: pem-broken-certificate

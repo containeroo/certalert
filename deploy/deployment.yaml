@@ -33,39 +33,21 @@ spec:
             - name: certalert-password-file
               mountPath: /certs/certalert.passwords
               subPath: certalert.passwords
-            - name: jks-broken-certificate
-              mountPath: /certs/jks/broken.jks
-              subPath: broken.jks
-            - name: jks-regular-certificate
-              mountPath: /certs/jks/regular.jks
-              subPath: regular.jks
-            - name: jks-chain-certificate
-              mountPath: /certs/jks/chain.jks
-              subPath: chain.jks
-            - name: p12-with-password-certificate
-              mountPath: /certs/p12/with_password.p12
-              subPath: with_password.p12
-            - name: p12-without-password-certificate
-              mountPath: /certs/p12/without_password.p12
-              subPath: without_password.p12
-            - name: p12-chain-certificate
-              mountPath: /certs/p12/chain.p12
-              subPath: chain.p12
-            - name: pem-broken-certificate
-              mountPath: /certs/pem/broken.pem
-              subPath: broken.pem
-            - name: pem-with-password-certificate
-              mountPath: /certs/pem/with_password.pem
-              subPath: with_password.pem
-            - name: pem-without-password-certificate
-              mountPath: /certs/pem/without_password.pem
-              subPath: without_password.pem
-            - name: pem-chain-certificate
-              mountPath: /certs/pem/chain.pem
-              subPath: chain.pem
             - name: pem-chain-certificate-password
-              mountPath: /certs/pem/chain.password
+              mountPath: /certs/chain.password
               subPath: chain.password
+            - name: jks-certs
+              mountPath: /certs/jks
+            - name: p7-certs
+              mountPath: /certs/p7
+            - name: p12-certs
+              mountPath: /certs/p12
+            - name: pem-certs
+              mountPath: /certs/pem
+            - name: truststore-certs
+              mountPath: /certs/truststore
+            - name: additional-jks-certs
+              mountPath: /certs/additional-jks-certs
           resources: {}
       volumes:
         - name: config
@@ -76,36 +58,24 @@ spec:
         - name: certalert-password-file
           secret:
             secretName: certalert-password-file
-        - name: jks-broken-certificate
-          configMap:
-            name: jks-broken-certificate
-        - name: jks-regular-certificate
-          configMap:
-            name: jks-regular-certificate
-        - name: jks-chain-certificate
-          configMap:
-            name: jks-chain-certificate
-        - name: p12-with-password-certificate
-          configMap:
-            name: p12-with-password-certificate
-        - name: p12-without-password-certificate
-          configMap:
-            name: p12-without-password-certificate
-        - name: p12-chain-certificate
-          configMap:
-            name: p12-chain-certificate
-        - name: pem-broken-certificate
-          configMap:
-            name: pem-broken-certificate
-        - name: pem-with-password-certificate
-          configMap:
-            name: pem-with-password-certificate
-        - name: pem-without-password-certificate
-          configMap:
-            name: pem-without-password-certificate
-        - name: pem-chain-certificate
-          configMap:
-            name: pem-chain-certificate
         - name: pem-chain-certificate-password
           secret:
             secretName: pem-chain-certificate-password
+        - name: jks-certs
+          configMap:
+            name: jks
+        - name: p7-certs
+          configMap:
+            name: p7
+        - name: p12-certs
+          configMap:
+            name: p12
+        - name: pem-certs
+          configMap:
+            name: pem
+        - name: truststore-certs
+          configMap:
+            name: truststore
+        - name: additional-jks-certs
+          configMap:
+            name: additional-jks-certs

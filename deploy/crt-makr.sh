@@ -46,4 +46,8 @@ for jks_file in $(find ${SOURCE} -maxdepth 1 -name "*.jks");do
                 -nokeys \
                 -out ${DEST}/${base_name}.crt \
                 -passin pass:${!password}
+
+    echo "set permissions to ${DEST}/${base_name}.crt (644)"
+    chmod 644 ${DEST}/${base_name}.crt
+
 done

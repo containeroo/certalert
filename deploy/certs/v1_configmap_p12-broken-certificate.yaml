@@ -1,7 +1,0 @@
-apiVersion: v1
-data:
-  broken_certificate.p12: |
-    broken
-kind: ConfigMap
-metadata:
-  name: p12-broken-certificate

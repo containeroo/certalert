@@ -32,3 +32,4 @@ spec:
         - name: certs
           configMap:
             name: additional-jks-certs
+            defaultMode: 0644
