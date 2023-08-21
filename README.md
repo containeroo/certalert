@@ -45,6 +45,7 @@ The primary function is to utilize the `serve` command to initiate a web server 
     Flags:
     - `-A, --all`: Prints all certificates.
     - `-o, --output`: Specify the output format. Supported formats: `text`, `json`, `yaml`.
+    - `--auto-reload-config`: Detects config changes and reloads the configuration file.
 
     Examples:
 
@@ -90,7 +91,8 @@ Just like the certificate password, these credentials can also be provided as `p
 
 ## Configuration
 
-The certificates must be configured in a file. The config file can be `yaml`, `json` or `toml`. The config file should be loaded automatically if changed. Please check the log output to control if the automatic config reload works in your environment. The endpont `/-/reload` also reloads the configuration.
+The certificates must be configured in a file. The config file can be `yaml`, `json` or `toml`. The config file should be loaded automatically if changed. Please check the log output to control if the automatic config reload works in your environment. You can disable the automatic reload by adding the flag `--auto-reload-config=false`.
+The endpont `/-/reload` also reloads the configuration.
 
 ### Pushgateway
 

@@ -71,7 +71,13 @@ Endpoints:
 			}
 
 		})
-		viper.WatchConfig()
+
+		if config.App.AutoReloadConfig {
+			log.Debug("Auto reloading configuration is enabled")
+			viper.WatchConfig()
+		}
+
+		config.App.Version = version
 
 		// this is only necessary if starting the web server
 		config.AppCopy = config.App.DeepCopy()
@@ -92,4 +98,5 @@ func init() {
 	rootCmd.AddCommand(serveCmd)
 
 	serveCmd.Flags().StringVar(&listenAddress, "listen-address", ":8080", "The address to listen on for HTTP requests.")
+	serveCmd.Flags().BoolVar(&config.App.AutoReloadConfig, "auto-reload-config", true, "Detects config changes and reloads the configuration file.")
 }

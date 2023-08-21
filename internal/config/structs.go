@@ -12,9 +12,11 @@ var FailOnError bool
 
 // Config represents the config file
 type Config struct {
-	Server      Server                     `json:"server"`
-	Pushgateway Pushgateway                `json:"pushgateway"`
-	Certs       []certificates.Certificate `json:"certs"`
+	AutoReloadConfig bool                       `json:"autoReloadConfig"`
+	Version          string                     `json:"version"`
+	Server           Server                     `json:"server"`
+	Pushgateway      Pushgateway                `json:"pushgateway"`
+	Certs            []certificates.Certificate `json:"certs"`
 }
 
 // Server represents the server config
