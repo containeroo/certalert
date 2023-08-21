@@ -68,26 +68,23 @@ func TestExtractP7CertificatesInfo(t *testing.T) {
 				return
 			}
 
+			// Check the length of the returned slice
 			if len(certs) != len(tc.ExpectedResults) {
-				t.Errorf("Expected %d certificate, got %d", len(tc.ExpectedResults), len(certs))
+				t.Errorf("Expected %d certificates, got %d", len(tc.ExpectedResults), len(certs))
+				return
 			}
 
+			// Check if each certificate in the expected slice exists in the result slice
 			for _, expectedCert := range tc.ExpectedResults {
-				var extractedCert CertificateInfo
-				for _, cert := range certs {
-					if cert.Name == expectedCert.Name &&
-						cert.Subject == expectedCert.Subject &&
-						cert.Type == expectedCert.Type {
-						extractedCert = cert
-						break
-					}
-				}
-				if extractedCert == (CertificateInfo{}) {
+				if !certExistsInSlice(expectedCert, certs) {
 					t.Errorf("Expected cert %v not found", expectedCert)
 				}
+			}
 
-				if extractedCert != expectedCert {
-					t.Errorf("Expected cert %v, got %v", expectedCert, extractedCert)
+			// Also check the opposite: each certificate in the result slice should exist in the expected slice
+			for _, resultCert := range certs {
+				if !certExistsInSlice(resultCert, tc.ExpectedResults) {
+					t.Errorf("Unexpected cert found: %v", resultCert)
 				}
 			}
 		})
