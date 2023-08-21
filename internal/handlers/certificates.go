@@ -6,15 +6,8 @@ import (
 	"net/http"
 )
 
-func renderCertificates(certInfo []certificates.CertificateInfo) string {
-	data := TemplateData{
-		CertInfos: certInfo,
-		CSS:       CSS,
-		JS:        JS,
-	}
-	return renderTemplate(tplBase, tplCertificates, data)
-}
-
+// Certificates is the handler for the /certificates route
+// It fetches all the certificates and displays them in a tabular format
 func Certificates(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
 
@@ -24,5 +17,16 @@ func Certificates(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Write([]byte(renderCertificates(certificatesInfo)))
+	tplData := TemplateData{
+		CertInfos: certificatesInfo,
+		CSS:       CSS,
+		JS:        JS,
+	}
+	tpl, err := renderTemplate(tplBase, tplCertificates, tplData)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Write([]byte(tpl))
 }

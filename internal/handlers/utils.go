@@ -96,7 +96,8 @@ func formatTime(t time.Time, format string) string {
 	return t.Format(format)
 }
 
-func renderTemplate(baseTplStr string, tplStr string, data interface{}) string {
+// renderTemplate renders the given template with the given data
+func renderTemplate(baseTplStr string, tplStr string, data interface{}) (string, error) {
 	funcMap := template.FuncMap{
 		"formatTime":    formatTime,
 		"humanReadable": epochToHumanReadable,
@@ -107,13 +108,13 @@ func renderTemplate(baseTplStr string, tplStr string, data interface{}) string {
 	t := template.New("base").Funcs(funcMap)
 	t, err := t.Parse(baseTplStr)
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
 
 	// Create a new template that is associated with the previous one, and parse the specific template into it.
 	t, err = t.New("content").Parse(tplStr)
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
 
 	var buf bytes.Buffer
@@ -121,9 +122,10 @@ func renderTemplate(baseTplStr string, tplStr string, data interface{}) string {
 		log.Fatal(err)
 	}
 
-	return buf.String()
+	return buf.String(), nil
 }
 
+// TemplateData is the data that is passed to the template
 type TemplateData struct {
 	CSS       string
 	JS        string
@@ -131,6 +133,7 @@ type TemplateData struct {
 	CertInfos []certificates.CertificateInfo
 }
 
+// CSS is the CSS that is used in the template
 const CSS = `
 .table {
 	border-collapse: collapse;
@@ -191,6 +194,7 @@ thead th {
 }
 `
 
+// JS is the JS that is used in the template
 const JS = `
 let currentColumn = -1;
 let sortAscending = true;
@@ -225,6 +229,8 @@ function sortTable(columnIndex) {
 }
 `
 
+// tplBase is the base template
+// Add "content" to this base template
 const tplBase = `
 <!DOCTYPE html>
 <html>
@@ -246,6 +252,7 @@ const tplBase = `
 </html>
 `
 
+// tplCertificates is the template for the /certificates route
 const tplCertificates = `
 {{ define "content" }}
 	<table class="table">
@@ -281,6 +288,7 @@ const tplCertificates = `
 {{ end }}
 `
 
+// tplEndpoints is the template for the / route
 const tplEndpoints = `
 {{ define "content" }}
 	<table class="table">

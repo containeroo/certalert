@@ -8,7 +8,8 @@ import (
 	"github.com/spf13/viper"
 )
 
-// Reload is a handler function that reloads the application configuration
+// Reload is the handler for the /reload route
+// It reloads the configuration file
 func Reload(w http.ResponseWriter, r *http.Request) {
 	log.Debugf("Force reloading configuration")
 

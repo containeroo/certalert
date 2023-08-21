@@ -8,7 +8,8 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// Config returns the config as yaml
+// Config is the handler for the /config route
+// It returns the currently active configuration file
 func Config(w http.ResponseWriter, r *http.Request) {
 	var b bytes.Buffer
 	yamlEncoder := yaml.NewEncoder(&b)

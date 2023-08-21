@@ -10,6 +10,8 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
+// Metrics is the handler for the /metrics route
+// It returns the metrics for Prometheus to scrape
 func Metrics(w http.ResponseWriter, r *http.Request) {
 	certificateInfos, err := certificates.Process(config.App.Certs, config.FailOnError)
 	if err != nil {

@@ -4,12 +4,14 @@ import (
 	"net/http"
 )
 
+// Endpoint is a struct that represents an endpoint
 type Endpoint struct {
 	Path        string   `json:"path"`
 	Methods     []string `json:"method"`
 	Description string   `json:"description"`
 }
 
+// Endpoints is a list of all the endpoints
 var Endpoints = []Endpoint{
 	{
 		Path:        "/",
@@ -43,16 +45,20 @@ var Endpoints = []Endpoint{
 	},
 }
 
-func renderEndpoints(endpoints []Endpoint) string {
-	data := TemplateData{
-		Endpoints: endpoints,
-		CSS:       CSS,
-	}
-	return renderTemplate(tplBase, tplEndpoints, data)
-}
-
+// Home is the handler for the / route
+// It displays all the endpoints
 func Home(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
 
-	w.Write([]byte(renderEndpoints(Endpoints)))
+	tplData := TemplateData{
+		Endpoints: Endpoints,
+		CSS:       CSS,
+	}
+	tpl, err := renderTemplate(tplBase, tplEndpoints, tplData)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Write([]byte(tpl))
 }
