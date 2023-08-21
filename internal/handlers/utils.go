@@ -126,6 +126,7 @@ func renderTemplate(baseTplStr string, tplStr string, data interface{}) string {
 
 type TemplateData struct {
 	CSS       string
+	JS        string
 	Endpoints []Endpoint
 	CertInfos []certificates.CertificateInfo
 }
@@ -175,6 +176,53 @@ thead th {
 .row-red {
 	background-color: #FF4500;
 }
+
+.sortable:hover {
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.sort-asc:after {
+  content: " ↑";
+}
+
+.sort-desc:after {
+  content: " ↓";
+}
+`
+
+const JS = `
+let currentColumn = -1;
+let sortAscending = true;
+
+function sortTable(columnIndex) {
+	const table = document.querySelector('.table');
+	const headers = Array.from(table.querySelectorAll('thead th'));
+	const rows = Array.from(table.querySelectorAll('tbody tr'));
+
+	// Remove previous sort direction classes
+	headers.forEach(header => {
+		header.classList.remove('sort-asc', 'sort-desc');
+	});
+
+	if (columnIndex === currentColumn) {
+		sortAscending = !sortAscending;
+	} else {
+		currentColumn = columnIndex;
+		sortAscending = true;
+	}
+
+	headers[columnIndex].classList.add(sortAscending ? 'sort-asc' : 'sort-desc');
+
+	rows.sort((a, b) => {
+		const cellA = a.cells[columnIndex].textContent;
+		const cellB = b.cells[columnIndex].textContent;
+		return sortAscending ? cellA.localeCompare(cellB) : cellB.localeCompare(cellA);
+	});
+
+	const tbody = table.querySelector('tbody');
+	rows.forEach(row => tbody.appendChild(row));
+}
 `
 
 const tplBase = `
@@ -192,6 +240,9 @@ const tplBase = `
 		{{ template "content" . }}
 	</div>
 </body>
+<script>
+	{{ .JS }}
+</script>
 </html>
 `
 
@@ -201,11 +252,11 @@ const tplCertificates = `
 			<thead>
 					<tr class="table-header">
 							<th scope="col"></th>
-							<th scope="col">Name</th>
-							<th scope="col">Subject</th>
-							<th scope="col">Type</th>
-							<th scope="col">Expiry Date</th>
-							<th scope="col">Expiration</th>
+							<th class="sortable" onclick="sortTable(1)">Name</th>
+							<th class="sortable" onclick="sortTable(2)">Subject</th>
+							<th class="sortable" onclick="sortTable(3)">Type</th>
+							<th class="sortable" onclick="sortTable(4)">Expiry Date</th>
+							<th class="sortable" onclick="sortTable(5)">Expiration</th>
 					</tr>
 			</thead>
 			<tbody>

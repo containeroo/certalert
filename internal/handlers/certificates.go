@@ -10,6 +10,7 @@ func renderCertificates(certInfo []certificates.CertificateInfo) string {
 	data := TemplateData{
 		CertInfos: certInfo,
 		CSS:       CSS,
+		JS:        JS,
 	}
 	return renderTemplate(tplBase, tplCertificates, data)
 }
