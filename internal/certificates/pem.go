@@ -4,29 +4,13 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
-
-	log "github.com/sirupsen/logrus"
 )
 
 // ExtractPEMCertificatesInfo extracts certificate information from the given PEM data
 func ExtractPEMCertificatesInfo(name string, certData []byte, password string, failOnError bool) ([]CertificateInfo, error) {
 	var certInfoList []CertificateInfo
-
-	// handleError is a helper function to handle failOnError
-	handleError := func(errMsg string) error {
-		if failOnError {
-			return fmt.Errorf(errMsg)
-		}
-		log.Warningf("Failed to extract certificate information: %v", errMsg)
-		certInfoList = append(certInfoList, CertificateInfo{
-			Name:  name,
-			Type:  "pem",
-			Error: errMsg,
-		})
-		return nil
-	}
-
 	var counter int
+
 	// Decode PEM and extract certificates
 	for {
 		block, rest := pem.Decode(certData)
@@ -43,7 +27,7 @@ func ExtractPEMCertificatesInfo(name string, certData []byte, password string, f
 				_, err = x509.ParsePKCS8PrivateKey(block.Bytes)
 			}
 			if err != nil {
-				if handleError(fmt.Sprintf("Failed to parse/decrypt private key '%s': %v", name, err)) != nil {
+				if err := handleError(&certInfoList, name, "pem", fmt.Sprintf("Failed to parse/decrypt private key '%s': %v", name, err), failOnError); err != nil {
 					return certInfoList, err
 				}
 				certData = rest
@@ -61,7 +45,7 @@ func ExtractPEMCertificatesInfo(name string, certData []byte, password string, f
 
 		cert, err := x509.ParseCertificate(block.Bytes)
 		if err != nil {
-			if handleError(fmt.Sprintf("Failed to parse certificate '%s': %v", name, err)) != nil {
+			if err := handleError(&certInfoList, name, "pem", fmt.Sprintf("Failed to parse certificate '%s': %v", name, err), failOnError); err != nil {
 				return certInfoList, err
 			}
 			certData = rest
@@ -85,9 +69,7 @@ func ExtractPEMCertificatesInfo(name string, certData []byte, password string, f
 		certData = rest // Move to the next PEM block
 	}
 	if len(certInfoList) == 0 {
-		if err := handleError(fmt.Sprintf("Failed to decode any certificate in '%s'", name)); err != nil {
-			return certInfoList, err
-		}
+		return certInfoList, handleError(&certInfoList, name, "pem", fmt.Sprintf("Failed to decode any certificate in '%s'", name), failOnError)
 	}
 
 	return certInfoList, nil

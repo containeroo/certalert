@@ -113,3 +113,32 @@ func TestProcess(t *testing.T) {
 		})
 	}
 }
+
+func TestHandleError(t *testing.T) {
+	var certInfoList []CertificateInfo
+
+	t.Run("failOnError is true", func(t *testing.T) {
+		err := handleError(&certInfoList, "certName", "certType", "An error occurred", true)
+		if err == nil {
+			t.Fatalf("Expected an error, got nil")
+		} else if err.Error() != "An error occurred" {
+			t.Fatalf("Unexpected error message: %v", err)
+		}
+	})
+
+	t.Run("failOnError is false", func(t *testing.T) {
+		err := handleError(&certInfoList, "certName", "certType", "Another error occurred", false)
+		if err != nil {
+			t.Fatalf("Did not expect an error, got: %v", err)
+		}
+
+		if len(certInfoList) != 1 {
+			t.Fatalf("Expected certInfoList to have 1 entry, got: %d", len(certInfoList))
+		}
+
+		certInfo := certInfoList[0]
+		if certInfo.Name != "certName" || certInfo.Type != "certType" || certInfo.Error != "Another error occurred" {
+			t.Fatalf("Unexpected entry in certInfoList: %+v", certInfo)
+		}
+	})
+}

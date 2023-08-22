@@ -83,3 +83,17 @@ func certExistsInSlice(cert CertificateInfo, slice []CertificateInfo) bool {
 	}
 	return false
 }
+
+// handleError is a helper function to handle failOnError
+func handleError(certInfoList *[]CertificateInfo, name, certType, errMsg string, failOnError bool) error {
+	if failOnError {
+		return fmt.Errorf(errMsg)
+	}
+	log.Warningf("Failed to extract certificate information: %v", errMsg)
+	*certInfoList = append(*certInfoList, CertificateInfo{
+		Name:  name,
+		Type:  certType,
+		Error: errMsg,
+	})
+	return nil
+}

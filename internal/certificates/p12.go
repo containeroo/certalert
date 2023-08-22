@@ -11,24 +11,10 @@ import (
 func ExtractP12CertificatesInfo(name string, certData []byte, password string, failOnError bool) ([]CertificateInfo, error) {
 	var certInfoList []CertificateInfo
 
-	// handleError is a helper function to handle failOnError
-	handleError := func(errMsg string) error {
-		if failOnError {
-			return fmt.Errorf(errMsg)
-		}
-		log.Warningf("Failed to extract certificate information: %v", errMsg)
-		certInfoList = append(certInfoList, CertificateInfo{
-			Name:  name,
-			Type:  "p12",
-			Error: errMsg,
-		})
-		return nil
-	}
-
 	// Decode the P12 data
 	_, certificate, caCerts, err := pkcs12.DecodeChain(certData, password)
 	if err != nil {
-		return certInfoList, handleError(fmt.Sprintf("Failed to decode P12 file '%s': %v", name, err))
+		return certInfoList, handleError(&certInfoList, name, "p12", fmt.Sprintf("Failed to decode P12 file '%s': %v", name, err), failOnError)
 	}
 
 	// Prepare for extraction
