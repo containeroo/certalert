@@ -12,11 +12,17 @@ import (
 func ExtractP7CertificatesInfo(name string, certData []byte, password string, failOnError bool) ([]CertificateInfo, error) {
 	var certInfoList []CertificateInfo
 
+	// handleError is a helper function to handle failOnError
 	handleError := func(errMsg string) error {
 		if failOnError {
 			return fmt.Errorf(errMsg)
 		}
 		log.Warningf("Failed to extract certificate information: %v", errMsg)
+		certInfoList = append(certInfoList, CertificateInfo{
+			Name:  name,
+			Type:  "p7",
+			Error: errMsg,
+		})
 		return nil
 	}
 

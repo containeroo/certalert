@@ -11,7 +11,6 @@ import (
 // ExtractPEMCertificatesInfo extracts certificate information from the given PEM data
 func ExtractPEMCertificatesInfo(name string, certData []byte, password string, failOnError bool) ([]CertificateInfo, error) {
 	var certInfoList []CertificateInfo
-	var counter int
 
 	// handleError is a helper function to handle failOnError
 	handleError := func(errMsg string) error {
@@ -27,6 +26,7 @@ func ExtractPEMCertificatesInfo(name string, certData []byte, password string, f
 		return nil
 	}
 
+	var counter int
 	// Decode PEM and extract certificates
 	for {
 		block, rest := pem.Decode(certData)
