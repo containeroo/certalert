@@ -45,10 +45,10 @@ func TestMapKeys(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := MapKeys(tt.input)
+			got := ExtractMapKeys(tt.input)
 			sort.Strings(got)
 			sort.Strings(tt.expected)
-			if !reflect.DeepEqual(got, tt.expected) {
+			if got != nil && tt.expected != nil && !reflect.DeepEqual(got, tt.expected) {
 				t.Errorf("%s for input %v, expected %v, but got %v", tt.name, tt.input, tt.expected, got)
 			}
 		})

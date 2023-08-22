@@ -45,7 +45,7 @@ func TestParseConfig(t *testing.T) {
 		"BEARER_TOKEN":        "token",
 	}
 	passwordFileName := createTempFile("password", t)
-	sortedFileExtensions := utils.MapKeys(certificates.FileExtensionsToType)
+	sortedFileExtensions := utils.ExtractMapKeys(certificates.FileExtensionsToType)
 	sort.Strings(sortedFileExtensions)
 
 	testCases := []struct {

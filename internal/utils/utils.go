@@ -22,13 +22,17 @@ func IsInList(value string, list []string) bool {
 	return false
 }
 
-// MapKeys returns the keys of a map as a slice
-func MapKeys(m map[string]string) []string {
-	var keys []string
-	for k := range m {
-		keys = append(keys, k)
+func ExtractMapKeys(m interface{}) []string {
+	v := reflect.ValueOf(m)
+	if v.Kind() != reflect.Map {
+		return nil
 	}
-	return keys
+	keys := v.MapKeys()
+	strkeys := make([]string, len(keys))
+	for i := 0; i < len(keys); i++ {
+		strkeys[i] = keys[i].Interface().(string)
+	}
+	return strkeys
 }
 
 // CheckFileAccessibility checks if a file exists and is accessible

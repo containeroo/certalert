@@ -2,6 +2,7 @@ package print
 
 import (
 	"certalert/internal/certificates"
+	"certalert/internal/utils"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -17,7 +18,7 @@ func TestConvertCertificatesToFormat(t *testing.T) {
 	}
 
 	// Test valid formats
-	for _, format := range []string{YAMLFormat, JSONFormat, TextFormat} {
+	for _, format := range utils.ExtractMapKeys(FormatHandlers) {
 		_, err := ConvertCertificatesToFormat(format, certs, true)
 		assert.Nil(t, err)
 	}

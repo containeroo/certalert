@@ -36,7 +36,7 @@ const (
 var cfgFile string
 var verbose, silent, printVersion bool
 
-var fileExtensionsTypes = utils.MapKeys(certificates.FileExtensionsToType)
+var fileExtensionsTypes = utils.ExtractMapKeys(certificates.FileExtensionsToType)
 var lenFileExtensionsTypes = len(fileExtensionsTypes)
 
 // rootCmd represents the base command when called without any subcommands
