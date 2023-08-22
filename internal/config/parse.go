@@ -30,6 +30,7 @@ func validateAuthConfig(authConfig Auth) error {
 
 // ParseConfig parse the config file and resolves variables
 func ParseConfig(config *Config, failOnError bool) (err error) {
+	// handleCertError is a helper function to handle errors during certificate validation
 	handleCertError := func(cert certificates.Certificate, idx int, errMsg string) error {
 		if failOnError {
 			config.Certs[idx] = cert
@@ -38,6 +39,8 @@ func ParseConfig(config *Config, failOnError bool) (err error) {
 		log.Warn(errMsg)
 		return nil
 	}
+
+	// handlePushgatewayError is a helper function to handle errors during pushgateway validation
 	handlePushgatewayError := func(errMsg string) error {
 		if failOnError {
 			return fmt.Errorf(errMsg)
@@ -95,7 +98,6 @@ func ParseConfig(config *Config, failOnError bool) (err error) {
 
 	for idx, cert := range config.Certs {
 		if cert.Enabled != nil && !*cert.Enabled {
-			config.Certs[idx] = cert // update the certificate in the slice (maybe has changed from enabled to disabled)
 			log.Debugf("Skip certificate '%s' because is disabled", cert.Name)
 			continue
 		}
@@ -114,10 +116,13 @@ func ParseConfig(config *Config, failOnError bool) (err error) {
 
 		if cert.Name == "" {
 			file := filepath.Base(cert.Path)
-			name := strings.ReplaceAll(file, ".", "-")
-			name = strings.ReplaceAll(file, " ", "-")
-			name = strings.ReplaceAll(file, "_", "-")
-			cert.Name = name
+			// replace dots, spaces and underscores with dashes
+			cert.Name = strings.Map(func(r rune) rune {
+				if r == '.' || r == ' ' || r == '_' {
+					return '-'
+				}
+				return r
+			}, file)
 		}
 
 		if cert.Type == "" {
