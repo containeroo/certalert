@@ -21,20 +21,6 @@ func GetCertificateByName(name string, certificates []Certificate) (*Certificate
 func Process(certificates []Certificate, failOnError bool) (certificatesInfo []CertificateInfo, err error) {
 	var certInfoList []CertificateInfo
 
-	// handleError is a helper function to handle failOnError
-	handleError := func(certName, certType, errMsg string) error {
-		if failOnError {
-			return fmt.Errorf(errMsg)
-		}
-		log.Warningf("Failed to extract certificate information: %v", errMsg)
-		certInfoList = append(certInfoList, CertificateInfo{
-			Name:  certName,
-			Type:  certType,
-			Error: errMsg,
-		})
-		return nil
-	}
-
 	for _, cert := range certificates {
 		if cert.Enabled != nil && !*cert.Enabled {
 			log.Debugf("Skip certificate '%s' as it is disabled", cert.Name)
@@ -47,7 +33,7 @@ func Process(certificates []Certificate, failOnError bool) (certificatesInfo []C
 		if err != nil {
 			// Accessibiliy of the file is checked in the config validation, if reached
 			// here, the file exists but can't be read for some reason.
-			if err := handleError(cert.Name, cert.Type, fmt.Sprintf("Failed to read certificate file '%s': %v", cert.Path, err)); err != nil {
+			if err := handleError(&certInfoList, cert.Name, cert.Type, fmt.Sprintf("Failed to read certificate file '%s': %v", cert.Path, err), failOnError); err != nil {
 				return nil, err
 			}
 			continue
@@ -56,7 +42,7 @@ func Process(certificates []Certificate, failOnError bool) (certificatesInfo []C
 		extractFunc, found := TypeToExtractionFunction[cert.Type]
 		if !found {
 			// This should never happen as the config validation ensures that the type is valid
-			if err := handleError(cert.Name, cert.Type, fmt.Sprintf("Unknown certificate type '%s'", cert.Type)); err != nil {
+			if err := handleError(&certInfoList, cert.Name, cert.Type, fmt.Sprintf("Unknown certificate type '%s'", cert.Type), failOnError); err != nil {
 				return nil, err
 			}
 			continue
@@ -85,13 +71,13 @@ func certExistsInSlice(cert CertificateInfo, slice []CertificateInfo) bool {
 }
 
 // handleError is a helper function to handle failOnError
-func handleError(certInfoList *[]CertificateInfo, name, certType, errMsg string, failOnError bool) error {
+func handleError(certInfoList *[]CertificateInfo, certName, certType, errMsg string, failOnError bool) error {
 	if failOnError {
 		return fmt.Errorf(errMsg)
 	}
 	log.Warningf("Failed to extract certificate information: %v", errMsg)
 	*certInfoList = append(*certInfoList, CertificateInfo{
-		Name:  name,
+		Name:  certName,
 		Type:  certType,
 		Error: errMsg,
 	})
