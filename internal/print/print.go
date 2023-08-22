@@ -5,11 +5,11 @@ import (
 	"fmt"
 )
 
-const (
-	YAMLFormat = "yaml"
-	JSONFormat = "json"
-	TextFormat = "text"
-)
+var FormatHandlers = map[string]func(interface{}) (string, error){
+	"yaml": convertToYaml,
+	"json": convertToJson,
+	"text": convertToTable,
+}
 
 // ConvertCertificatesToFormat converts the provided certificates to the specified output format
 func ConvertCertificatesToFormat(outputFormat string, certs []certificates.Certificate, failOnError bool) (string, error) {
@@ -18,13 +18,7 @@ func ConvertCertificatesToFormat(outputFormat string, certs []certificates.Certi
 		return "", err
 	}
 
-	formatHandlers := map[string]func(interface{}) (string, error){
-		YAMLFormat: convertToYaml,
-		JSONFormat: convertToJson,
-		TextFormat: convertToTable,
-	}
-
-	if handler, exists := formatHandlers[outputFormat]; exists {
+	if handler, exists := FormatHandlers[outputFormat]; exists {
 		return handler(certificatesInfo)
 	}
 	return "", fmt.Errorf("Unsupported output format: %s", outputFormat)
