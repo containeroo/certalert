@@ -56,10 +56,6 @@ func TestParseConfig(t *testing.T) {
 		{
 			name: "success",
 			config: &Config{
-				Pushgateway: Pushgateway{
-					Address: "env:PUSHGATEWAY_ADDRESS",
-					Job:     "env:PUSHGATEWAY_JOB",
-				},
 				Certs: []certificates.Certificate{
 					{
 						Name:     "test_cert",
@@ -109,7 +105,7 @@ func TestParseConfig(t *testing.T) {
 					Address: "env:INVALID_ENV",
 				},
 			},
-			expectedError: "Failed to resolve address for pushgateway: Environment variable 'INVALID_ENV' not found",
+			expectedError: "Failed to resolve address for pushgateway: Environment variable 'INVALID_ENV' not found.",
 		},
 		{
 			name: "missing_file_var",
@@ -143,7 +139,6 @@ func TestParseConfig(t *testing.T) {
 			config: &Config{
 				Certs: []certificates.Certificate{
 					{
-
 						Name:    "test_cert",
 						Enabled: utils.BoolPtr(true),
 						Type:    "pem",
@@ -157,7 +152,6 @@ func TestParseConfig(t *testing.T) {
 			config: &Config{
 				Certs: []certificates.Certificate{
 					{
-
 						Name:    "test_cert",
 						Enabled: utils.BoolPtr(true),
 						Path:    "/invalid/path",

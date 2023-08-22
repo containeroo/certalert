@@ -1,4 +1,4 @@
-package utils
+package resolve
 
 import (
 	"bufio"
@@ -9,11 +9,9 @@ import (
 )
 
 const (
-	envPrefix     = "env:"  // Prefix to identify environment variable references
-	filePrefix    = "file:" // Prefix to identify file references
-	keyDelim      = ":"     // Delimiter to identify a key in a file
-	keyStartDelim = "{"     // Starting delimiter for a key in a file reference
-	keyEndDelim   = "}"     // Ending delimiter for a key in a file reference
+	envPrefix  = "env:"  // Prefix to identify environment variable references
+	filePrefix = "file:" // Prefix to identify file references
+	keyDelim   = "//"    // Delimiter to identify a key in a file
 )
 
 // ResolveVariable takes a string and resolves its value based on its prefix.
@@ -38,28 +36,24 @@ func ResolveVariable(value string) (string, error) {
 func resolveEnvVariable(envVar string) (string, error) {
 	resolvedVariable, found := os.LookupEnv(envVar)
 	if !found {
-		return "", fmt.Errorf("Environment variable '%s' not found", envVar)
+		return "", fmt.Errorf("Environment variable '%s' not found.", envVar)
 	}
 	return resolvedVariable, nil
 }
 
 // resolveFileVariable resolves a string as a path to a file with an optional key.
-// The key, if present, specifies which line to retrieve from the file.
 func resolveFileVariable(filePathWithKey string) (string, error) {
 	lastSeparatorIndex := strings.LastIndex(filePathWithKey, keyDelim)
 	filePath := filePathWithKey // default filePath (whole value)
 	key := ""                   // default key (no key)
 
-	// Check if there's a key specification in the filePathWithKey
-	if lastSeparatorIndex != -1 && lastSeparatorIndex+1 < len(filePathWithKey) &&
-		strings.HasPrefix(filePathWithKey[lastSeparatorIndex+1:], keyStartDelim) {
+	// Check for key specification
+	if lastSeparatorIndex != -1 {
 		filePath = filePathWithKey[:lastSeparatorIndex]
-		key = strings.Trim(filePathWithKey[lastSeparatorIndex+2:], keyEndDelim)
-		if key == "" {
-			return "", fmt.Errorf("Empty key")
-		}
+		key = filePathWithKey[lastSeparatorIndex+len(keyDelim):]
 	}
 
+	filePath = os.ExpandEnv(filePath)
 	file, err := os.Open(filePath)
 	if err != nil {
 		return "", fmt.Errorf("Failed to open file '%s': %v", filePath, err)
@@ -70,7 +64,7 @@ func resolveFileVariable(filePathWithKey string) (string, error) {
 		return searchKeyInFile(file, key)
 	}
 
-	// No key specified, return the whole file content
+	// No key specified, read the whole file
 	data, err := io.ReadAll(file)
 	if err != nil {
 		return "", fmt.Errorf("Failed to read file '%s': %v", filePath, err)
@@ -79,7 +73,6 @@ func resolveFileVariable(filePathWithKey string) (string, error) {
 }
 
 // searchKeyInFile searches for a specified key in a file and returns its associated value.
-// The file is expected to contain lines in the format "key=value".
 func searchKeyInFile(file *os.File, key string) (string, error) {
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {

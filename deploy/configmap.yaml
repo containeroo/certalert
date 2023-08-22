@@ -9,10 +9,10 @@ data:
     certs:
       - name: JKS chain
         path: /certs/jks/chain.jks
-        password: file:/certs/certalert.passwords:{jks_password}
+        password: file:/certs/certalert.passwords//jks_password
       - name: JKS regular
         path: /certs/jks/regular.jks
-        password: file:/certs/certalert.passwords:{jks_password}
+        password: file:/certs/certalert.passwords//jks_password
       - name: P7 regular
         path: /certs/p7/cert1.p7b
       - name: P7 my domain
@@ -24,10 +24,10 @@ data:
         path: /certs/p12/without_password.p12
       - name: P12 chain
         path: /certs/p12/chain.p12
-        password: file:/certs/certalert.passwords:{p12_password}
+        password: file:/certs/certalert.passwords//p12_password
       - name: PEM with password
         path: /certs/pem/with_password.pem
-        password: file:/certs/certalert.passwords:{PEM_PASSWORD}
+        password: file:/certs/certalert.passwords//PEM_PASSWORD
       - name: PEM without password
         path: /certs/pem/without_password.pem
       - name: PEM chain

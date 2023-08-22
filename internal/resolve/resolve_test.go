@@ -1,4 +1,4 @@
-package utils
+package resolve
 
 import (
 	"fmt"
@@ -56,7 +56,7 @@ func TestResolveVariable(t *testing.T) {
 		tmpfile := createTempFile("key1 = value 1\nkey2=value 2\nkey3 =   value 3")
 		defer os.Remove(tmpfile.Name()) // clean up after test
 
-		result, err := resolveFileVariable(tmpfile.Name() + ":{key2}")
+		result, err := resolveFileVariable(tmpfile.Name() + "//key2")
 		if err != nil {
 			t.Fatalf("Failed to resolve variable: %v", err)
 		}
@@ -66,44 +66,6 @@ func TestResolveVariable(t *testing.T) {
 		}
 
 	})
-}
-
-func TestResolveEnvVariable(t *testing.T) {
-	// Set up test cases
-	tests := []struct {
-		envVar         string
-		expectedValue  string
-		expectedErrMsg string
-	}{
-		{
-			envVar:         "TEST_ENV_VAR_1",
-			expectedValue:  "value1",
-			expectedErrMsg: "",
-		},
-		{
-			envVar:         "TEST_ENV_VAR_2",
-			expectedValue:  "",
-			expectedErrMsg: "Environment variable 'TEST_ENV_VAR_2' not found",
-		},
-	}
-
-	// Set up environment variables for testing
-	os.Setenv("TEST_ENV_VAR_1", "value1")
-
-	for _, test := range tests {
-		t.Run(fmt.Sprintf("Testing resolveEnvVariable for %s", test.envVar), func(t *testing.T) {
-			value, err := resolveEnvVariable(test.envVar)
-
-			// Check if there was an error and if it's the expected one
-			if err != nil {
-				if err.Error() != test.expectedErrMsg {
-					t.Errorf("Expected error message '%s', got '%s'", test.expectedErrMsg, err.Error())
-				}
-			} else if value != test.expectedValue {
-				t.Errorf("Expected value '%s', got '%s'", test.expectedValue, value)
-			}
-		})
-	}
 }
 
 func TestResolveFileVariable(t *testing.T) {
@@ -142,7 +104,7 @@ func TestResolveFileVariable(t *testing.T) {
 		tmpfile := createTempFile("key1 = value 1\nkey2=value 2\nkey3 =   value 3")
 		defer os.Remove(tmpfile.Name()) // clean up after test
 
-		result, err := resolveFileVariable(tmpfile.Name() + ":{key2}")
+		result, err := resolveFileVariable(tmpfile.Name() + "//key2")
 		if err != nil {
 			t.Fatalf("Failed to resolve variable: %v", err)
 		}
@@ -156,7 +118,7 @@ func TestResolveFileVariable(t *testing.T) {
 		tmpfile := createTempFile("key1 =	  value 1\nkey2=value 2\nkey3 =   value 3")
 		defer os.Remove(tmpfile.Name()) // clean up after test
 
-		result, err := resolveFileVariable(tmpfile.Name() + ":{key1}")
+		result, err := resolveFileVariable(tmpfile.Name() + "//key1")
 		if err != nil {
 			t.Fatalf("Failed to resolve variable: %v", err)
 		}
@@ -174,7 +136,7 @@ func TestResolveFileVariable(t *testing.T) {
 	})
 
 	t.Run("with empty key", func(t *testing.T) {
-		_, err := resolveFileVariable("non-existent-file:{}")
+		_, err := resolveFileVariable("non-existent-file//")
 		if err == nil {
 			t.Fatalf("Expected an error, got nil")
 		}
@@ -188,7 +150,7 @@ func TestResolveFileVariable(t *testing.T) {
 	})
 
 	t.Run("with empty key and empty file", func(t *testing.T) {
-		_, err := resolveFileVariable(":{}")
+		_, err := resolveFileVariable("//")
 		if err == nil {
 			t.Fatalf("Expected an error, got nil")
 		}
@@ -202,14 +164,14 @@ func TestResolveFileVariable(t *testing.T) {
 	})
 
 	t.Run("with colon in key", func(t *testing.T) {
-		_, err := resolveFileVariable("file:/path/to/file:{key:with:colon}")
+		_, err := resolveFileVariable("file:/path/to/file//key:with:colon")
 		if err == nil {
 			t.Fatalf("Expected an error, got nil")
 		}
 	})
 
 	t.Run("with colon in file path and key", func(t *testing.T) {
-		_, err := resolveFileVariable("file:/path/to/file:with:colon:{key:with:colon}")
+		_, err := resolveFileVariable("file:/path/to/file:with:colon//key:with:colon")
 		if err == nil {
 			t.Fatalf("Expected an error, got nil")
 		}

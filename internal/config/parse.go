@@ -2,6 +2,7 @@ package config
 
 import (
 	"certalert/internal/certificates"
+	"certalert/internal/resolve"
 	"certalert/internal/utils"
 	"fmt"
 	"net/url"
@@ -49,7 +50,7 @@ func ParseConfig(config *Config, failOnError bool) (err error) {
 		return nil
 	}
 
-	resolvedAddress, err := utils.ResolveVariable(config.Pushgateway.Address)
+	resolvedAddress, err := resolve.ResolveVariable(config.Pushgateway.Address)
 	if err != nil {
 		if err := handlePushgatewayError(fmt.Sprintf("Failed to resolve address for pushgateway: %v", err)); err != nil {
 			return err
@@ -68,14 +69,14 @@ func ParseConfig(config *Config, failOnError bool) (err error) {
 		}
 	}
 
-	config.Pushgateway.Auth.Basic.Password, err = utils.ResolveVariable(config.Pushgateway.Auth.Basic.Password)
+	config.Pushgateway.Auth.Basic.Password, err = resolve.ResolveVariable(config.Pushgateway.Auth.Basic.Password)
 	if err != nil {
 		if err := handlePushgatewayError(fmt.Sprintf("Failed to resolve password for pushgateway: %v", err)); err != nil {
 			return err
 		}
 	}
 
-	config.Pushgateway.Auth.Bearer.Token, err = utils.ResolveVariable(config.Pushgateway.Auth.Bearer.Token)
+	config.Pushgateway.Auth.Bearer.Token, err = resolve.ResolveVariable(config.Pushgateway.Auth.Bearer.Token)
 	if err != nil {
 		if err := handlePushgatewayError(fmt.Sprintf("Failed to resolve token for pushgateway: %v", err)); err != nil {
 			return err
@@ -85,7 +86,7 @@ func ParseConfig(config *Config, failOnError bool) (err error) {
 	if config.Pushgateway.Job == "" {
 		config.Pushgateway.Job = "certalert"
 	} else {
-		config.Pushgateway.Job, err = utils.ResolveVariable(config.Pushgateway.Job)
+		config.Pushgateway.Job, err = resolve.ResolveVariable(config.Pushgateway.Job)
 		if err != nil {
 			if err := handlePushgatewayError(fmt.Sprintf("Failed to resolve job for pushgateway: %v", err)); err != nil {
 				return err
@@ -145,7 +146,7 @@ func ParseConfig(config *Config, failOnError bool) (err error) {
 			return handleCertError(cert, idx, fmt.Sprintf("Certificate '%s' has an invalid 'type'. Must be one of: %s", cert.Name, strings.Join(validFileExtensionTypes, ", ")))
 		}
 
-		pw, err := utils.ResolveVariable(cert.Password)
+		pw, err := resolve.ResolveVariable(cert.Password)
 		if err != nil {
 			if err := handleCertError(cert, idx, fmt.Sprintf("Certifacate '%s' has a non resolvable 'password'. %v", cert.Name, err)); err != nil {
 				return err

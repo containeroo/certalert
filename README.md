@@ -81,7 +81,7 @@ The primary function is to utilize the `serve` command to initiate a web server 
 
 Certificates can be defined with properties such as their `name`, `path`, `type`, and an optional `password`. You have the flexibility to enable or disable specific certificate checks with the field `enabled`. Additionally, the `type` of certificate can either be manually defined or determined by the system based on the file extension.
 
-Credentials, such as `passwords`, can be specified in multiple ways: `plain text`, an `environment variable`, or a `file` containing the credentials. For files with multiple key-value pairs, a specific key can be chosen by appending `:{KEY}` at the end of the file path. See `Providing Credentials` for more details.
+Credentials, such as `passwords`, can be specified in multiple ways: `plain text`, an `environment variable`, or a `file` containing the credentials. For files with multiple key-value pairs, a specific key can be chosen by appending `://KEY` at the end of the file path. See `Providing Credentials` for more details.
 
 ## Pushgateway Interaction
 
@@ -131,7 +131,7 @@ Credentials such as passwords or tokens can be provided in one of the following 
 - **Environment Variable**: Use the `env:` prefix, followed by the name of the environment variable that stores the credentials.
 - **File**: Use the `file:` prefix, followed by the path of the file that contains the credentials. The file should contain only the credentials.
 
-    In case the file contains multiple key-value pairs, the specific key for the credentials can be selected by appending `:{KEY}` to the end of the path. Each key-value pair in the file must follow the `key = value` format. The system will use the value corresponding to the specified `{KEY}`.
+    In case the file contains multiple key-value pairs, the specific key for the credentials can be selected by appending `//KEY` to the end of the path. Each key-value pair in the file must follow the `key = value` format. The system will use the value corresponding to the specified `//KEY`.
 
 Make sure each credential property is correctly configured to prevent any unexpected behaviors.
 
@@ -158,7 +158,7 @@ certs:
   - name: P12 - chain
     enabled: true
     path: /certs/p12/chain_certificate.p12
-    password: file:/certs/certalert.passwords:{p12_password}
+    password: file:/certs/certalert.passwords//p12_password
   - name: jks - regular
     enabled: true
     path: /certs/jks/regular.jks
@@ -166,7 +166,7 @@ certs:
   - name: jks - chain
     enabled: true
     path: /certs/jks/chain.jks
-    password: file:/certs/certalert.passwords:{jks_password}
+    password: file:/certs/certalert.passwords//jks_password
 ```
 
 ## Available Endpoints
