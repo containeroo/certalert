@@ -31,7 +31,6 @@ func validateAuthConfig(authConfig Auth) error {
 // ParseConfig parse the config file and resolves variables
 func ParseConfig(config *Config, failOnError bool) (err error) {
 	handleCertError := func(cert certificates.Certificate, idx int, errMsg string) error {
-		cert.Valid = utils.BoolPtr(false)
 		if failOnError {
 			config.Certs[idx] = cert
 			return fmt.Errorf(errMsg)
@@ -91,7 +90,7 @@ func ParseConfig(config *Config, failOnError bool) (err error) {
 		}
 	}
 
-	validFileExtensionTypes := utils.MapKeys(certificates.FileExtensionsToType)
+	validFileExtensionTypes := utils.ExtractMapKeys(certificates.FileExtensionsToType)
 	sort.Strings(validFileExtensionTypes) // sort the list to have a deterministic order
 
 	for idx, cert := range config.Certs {

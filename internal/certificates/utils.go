@@ -40,12 +40,6 @@ func Process(certificates []Certificate, failOnError bool) (certificatesInfo []C
 			log.Debugf("Skip certificate '%s' as it is disabled", cert.Name)
 			continue
 		}
-		if cert.Valid != nil && !*cert.Valid {
-			if err := handleError(cert.Name, cert.Type, fmt.Sprintf("Skip certificate '%s' as it is not valid", cert.Name)); err != nil {
-				return nil, err
-			}
-			continue
-		}
 
 		log.Debugf("Processing certificate '%s'", cert.Name)
 
@@ -68,13 +62,13 @@ func Process(certificates []Certificate, failOnError bool) (certificatesInfo []C
 			continue
 		}
 
-		certInfoList, err = extractFunc(cert.Name, certData, cert.Password, failOnError)
+		certs, err := extractFunc(cert.Name, certData, cert.Password, failOnError)
 		if err != nil {
 			// err is only returned if failOnError is true
 			return nil, fmt.Errorf("Error extracting certificate information: %v", err)
 		}
 
-		certInfoList = append(certInfoList, certInfoList...)
+		certInfoList = append(certInfoList, certs...)
 	}
 
 	return certInfoList, nil

@@ -46,8 +46,8 @@ func TestProcess(t *testing.T) {
 			Name:        "handles valid certificates",
 			FailOnError: true,
 			Certificates: []Certificate{
-				{Name: "ValidCert1", Path: "../../tests/certs/jks/regular.jks", Password: "password", Type: "jks", Enabled: utils.BoolPtr(true), Valid: utils.BoolPtr(true)},
-				{Name: "ValidCert2", Path: "../../tests/certs/p12/with_password.p12", Password: "password", Type: "p12", Enabled: utils.BoolPtr(true), Valid: utils.BoolPtr(true)},
+				{Name: "ValidCert1", Path: "../../tests/certs/jks/regular.jks", Password: "password", Type: "jks", Enabled: utils.BoolPtr(true)},
+				{Name: "ValidCert2", Path: "../../tests/certs/p12/with_password.p12", Password: "password", Type: "p12", Enabled: utils.BoolPtr(true)},
 			},
 			ExpectedInfo: []CertificateInfo{
 				{Name: "ValidCert1", Epoch: 1724096931, Type: "jks", Subject: "regular"},
@@ -58,7 +58,7 @@ func TestProcess(t *testing.T) {
 			Name:        "skips disabled certificate",
 			FailOnError: true,
 			Certificates: []Certificate{
-				{Name: "DisabledCert", Path: "disabled.jks", Type: "jks", Enabled: utils.BoolPtr(false), Valid: utils.BoolPtr(true)},
+				{Name: "DisabledCert", Path: "disabled.jks", Type: "jks", Enabled: utils.BoolPtr(false)},
 			},
 			ExpectedInfo: []CertificateInfo(nil),
 		},
@@ -66,15 +66,16 @@ func TestProcess(t *testing.T) {
 			Name:        "skips invalid certificate",
 			FailOnError: true,
 			Certificates: []Certificate{
-				{Name: "InvalidCert", Path: "../tests/certs/jks/broken.jks", Type: "jks", Enabled: utils.BoolPtr(true), Valid: utils.BoolPtr(false)},
+				{Name: "InvalidCert", Path: "../tests/certs/jks/broken.jks", Type: "jks", Enabled: utils.BoolPtr(true)},
 			},
-			ExpectedInfo: []CertificateInfo(nil),
+			ExpectedInfo:  []CertificateInfo(nil),
+			ExpectedError: "Failed to read certificate file '../tests/certs/jks/broken.jks': open ../tests/certs/jks/broken.jks: no such file or directory",
 		},
 		{
 			Name:        "fails on extraction error",
 			FailOnError: true,
 			Certificates: []Certificate{
-				{Name: "FailCert", Path: "fail", Type: "jks", Enabled: utils.BoolPtr(true), Valid: utils.BoolPtr(true)},
+				{Name: "FailCert", Path: "fail", Type: "jks", Enabled: utils.BoolPtr(true)},
 			},
 			ExpectedError: "Failed to read certificate file 'fail': open fail: no such file or directory",
 		},
@@ -89,6 +90,12 @@ func TestProcess(t *testing.T) {
 			} else {
 				assert.Nil(t, err)
 
+				// Check the length of the returned slice
+				if len(result) != len(tc.ExpectedInfo) {
+					t.Errorf("Expected %d certificates, got %d", len(tc.ExpectedInfo), len(result))
+					return
+				}
+
 				// Check if each certificate in the expected slice exists in the result slice
 				for _, expectedCert := range tc.ExpectedInfo {
 					if !certExistsInSlice(expectedCert, result) {
@@ -102,7 +109,6 @@ func TestProcess(t *testing.T) {
 						t.Errorf("Unexpected cert found: %v", resultCert)
 					}
 				}
-
 			}
 		})
 	}

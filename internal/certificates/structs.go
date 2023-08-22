@@ -34,7 +34,6 @@ var FileExtensionsToType = map[string]string{
 type Certificate struct {
 	Name     string `json:"name"`
 	Enabled  *bool  `json:"enabled,omitempty" yaml:"enabled,omitempty"`
-	Valid    *bool  `json:"-" yaml:"-"`
 	Path     string `json:"path"`
 	Password string `json:"password"`
 	Type     string `json:"type"`
