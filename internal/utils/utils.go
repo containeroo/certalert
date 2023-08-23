@@ -22,6 +22,7 @@ func IsInList(value string, list []string) bool {
 	return false
 }
 
+// ExtractMapKeys extracts the keys of a map as a slice of strings
 func ExtractMapKeys(m interface{}) []string {
 	v := reflect.ValueOf(m)
 	if v.Kind() != reflect.Map {
