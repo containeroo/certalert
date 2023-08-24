@@ -1,6 +1,9 @@
 package config
 
-import "testing"
+import (
+	"certalert/internal/certificates"
+	"testing"
+)
 
 func TestRedactVariable(t *testing.T) {
 	tests := []struct {
@@ -22,5 +25,47 @@ func TestRedactVariable(t *testing.T) {
 				t.Errorf("expected %s, got %s", tt.expected, actual)
 			}
 		})
+	}
+}
+
+func TestRedactConfig(t *testing.T) {
+	// Create a mock Config object
+	config := &Config{}
+	config.Pushgateway.Address = "http://example.com"
+	config.Pushgateway.Auth.Basic.Username = "username"
+	config.Pushgateway.Auth.Basic.Password = "password"
+	config.Pushgateway.Auth.Bearer.Token = "token"
+	config.Certs = append(config.Certs, certificates.Certificate{
+		Name:     "TestCert",
+		Password: "password",
+	})
+
+	// Run RedactConfig
+	err := RedactConfig(config)
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
+	// Check if the sensitive fields are <REDACTED>
+	if config.Pushgateway.Address != "<REDACTED>" {
+		t.Errorf("Pushgateway Address not <REDACTED>")
+	}
+
+	if config.Pushgateway.Auth.Basic.Username != "<REDACTED>" {
+		t.Errorf("Basic Username not <REDACTED>")
+	}
+
+	if config.Pushgateway.Auth.Basic.Password != "<REDACTED>" {
+		t.Errorf("Basic Password not <REDACTED>")
+	}
+
+	if config.Pushgateway.Auth.Bearer.Token != "<REDACTED>" {
+		t.Errorf("Bearer Token not <REDACTED>")
+	}
+
+	for _, cert := range config.Certs {
+		if cert.Password != "<REDACTED>" {
+			t.Errorf("Cert Password not <REDACTED>")
+		}
 	}
 }

@@ -74,6 +74,20 @@ func TestExtractP12CertificatesInfo(t *testing.T) {
 			ExpectedError:   "Failed to decode P12 file 'TestCert': pkcs12: error reading P12 data: asn1: structure error: tags don't match (16 vs {class:1 tag:2 length:114 isCompound:true}) {optional:false explicit:false application:false private:false defaultValue:<nil> tag:<nil> stringType:0 timeType:0 set:false omitEmpty:false} pfxPdu @2",
 		},
 		{
+			Name:     "Test P12 certificate without subject",
+			FilePath: "../../tests/certs/p12/empty_subject.p12",
+			Password: "password",
+			ExpectedResults: []CertificateInfo{
+				{
+					Name:    "TestCert",
+					Subject: "1",
+					Epoch:   1722925468,
+					Type:    "p12",
+				},
+			},
+			ExpectedError: "",
+		},
+		{
 			Name:     "Test P12 certificate with chain",
 			FilePath: "../../tests/certs/p12/chain.p12",
 			Password: "password",

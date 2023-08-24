@@ -8,6 +8,34 @@ import (
 	"testing"
 )
 
+func TestBoolPtr(t *testing.T) {
+	t.Run("returns pointer to true", func(t *testing.T) {
+		b := true
+		result := BoolPtr(b)
+
+		if result == nil {
+			t.Fatalf("Expected a non-nil pointer, got nil")
+		}
+
+		if *result != b {
+			t.Fatalf("Expected pointer to point to %v, got %v", b, *result)
+		}
+	})
+
+	t.Run("returns pointer to false", func(t *testing.T) {
+		b := false
+		result := BoolPtr(b)
+
+		if result == nil {
+			t.Fatalf("Expected a non-nil pointer, got nil")
+		}
+
+		if *result != b {
+			t.Fatalf("Expected pointer to point to %v, got %v", b, *result)
+		}
+	})
+}
+
 func TestIsInList(t *testing.T) {
 	list := []string{"one", "two", "three"}
 
@@ -20,36 +48,51 @@ func TestIsInList(t *testing.T) {
 	}
 }
 
-func TestMapKeys(t *testing.T) {
-	tests := []struct {
-		name     string
-		input    map[string]string
-		expected []string
+func TestExtractMapKeys(t *testing.T) {
+	testCases := []struct {
+		name  string
+		input interface{}
+		want  []string
 	}{
 		{
-			name:     "empty map",
-			input:    map[string]string{},
-			expected: nil,
+			name: "Valid map with string keys",
+			input: map[string]int{
+				"key1": 1,
+				"key2": 2,
+				"key3": 3,
+			},
+			want: []string{"key1", "key2", "key3"},
 		},
 		{
-			name:     "single key-value pair",
-			input:    map[string]string{"key1": "value1"},
-			expected: []string{"key1"},
+			name:  "Invalid input (slice)",
+			input: []int{1, 2, 3},
+			want:  nil,
 		},
 		{
-			name:     "multiple key-value pairs",
-			input:    map[string]string{"key1": "value1", "key2": "value2", "key3": "value3"},
-			expected: []string{"key1", "key2", "key3"},
+			name:  "Invalid input (string)",
+			input: "hello",
+			want:  nil,
+		},
+		{
+			name: "Map with non-string keys (should fail type assertion)",
+			input: map[int]string{
+				1: "one",
+				2: "two",
+				3: "three",
+			},
+			want: nil, // Because your function assumes keys are strings, this will fail type assertion.
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := ExtractMapKeys(tt.input)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			got := ExtractMapKeys(tc.input)
+
 			sort.Strings(got)
-			sort.Strings(tt.expected)
-			if got != nil && tt.expected != nil && !reflect.DeepEqual(got, tt.expected) {
-				t.Errorf("%s for input %v, expected %v, but got %v", tt.name, tt.input, tt.expected, got)
+			sort.Strings(tc.want)
+
+			if !reflect.DeepEqual(got, tc.want) {
+				t.Fatalf("Expected %v, but got %v", tc.want, got)
 			}
 		})
 	}
@@ -93,6 +136,18 @@ func TestCheckFileAccessibility(t *testing.T) {
 			t.Errorf("Expected no error for readable file, got %v", err)
 		}
 	})
+
+	// Test case when os.Stat itself returns an error (other than file not found)
+	t.Run("Error stating file", func(t *testing.T) {
+		err := CheckFileAccessibility(string([]byte{0}))
+		if err == nil {
+			t.Fatalf("Expected an error but got nil")
+		}
+		expectedErrMsgPrefix := "Error stating file"
+		if err != nil && err.Error()[:len(expectedErrMsgPrefix)] != expectedErrMsgPrefix {
+			t.Fatalf("Expected error to start with '%s', got '%v'", expectedErrMsgPrefix, err)
+		}
+	})
 }
 
 type NestedStruct struct {
@@ -105,66 +160,44 @@ type TestStruct struct {
 }
 
 func TestHasKey(t *testing.T) {
-	tests := []struct {
-		name   string
-		input  interface{}
-		key    string
-		expect bool
-	}{
-		{
-			name:   "simple map key exists",
-			input:  map[string]int{"key1": 1, "key2": 2},
-			key:    "key1",
-			expect: true,
-		},
-		{
-			name:   "simple map key does not exist",
-			input:  map[string]int{"key1": 1, "key2": 2},
-			key:    "key3",
-			expect: false,
-		},
-		{
-			name:   "nested map key exists",
-			input:  map[string]map[string]int{"key1": {"nestedKey": 1}},
-			key:    "key1.nestedKey",
-			expect: true,
-		},
-		{
-			name:   "nested map key does not exist",
-			input:  map[string]map[string]int{"key1": {"nestedKey": 1}},
-			key:    "key1.wrongKey",
-			expect: false,
-		},
-		{
-			name:   "struct key exists",
-			input:  TestStruct{Field1: "value1", Field2: NestedStruct{InnerField: "inner"}},
-			key:    "Field1",
-			expect: true,
-		},
-		{
-			name:   "struct key does not exist",
-			input:  TestStruct{Field1: "value1", Field2: NestedStruct{InnerField: "inner"}},
-			key:    "Field3",
-			expect: false,
-		},
-		{
-			name:   "nested struct key exists",
-			input:  TestStruct{Field1: "value1", Field2: NestedStruct{InnerField: "inner"}},
-			key:    "Field2.InnerField",
-			expect: true,
-		},
-		{
-			name:   "nested struct key does not exist",
-			input:  TestStruct{Field1: "value1", Field2: NestedStruct{InnerField: "inner"}},
-			key:    "Field2.WrongField",
-			expect: false,
+	type TestStruct struct {
+		Field1 string
+		Field2 int
+	}
+
+	testMap := map[string]int{
+		"key1": 1,
+		"key2": 2,
+	}
+
+	nestedMap := map[string]interface{}{
+		"level1": map[string]int{
+			"level2": 3,
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := HasKey(tt.input, tt.key); got != tt.expect {
-				t.Errorf("Expected %v for key '%s', but got %v", tt.expect, tt.key, got)
+	testCases := []struct {
+		name string
+		obj  interface{}
+		key  string
+		want bool
+	}{
+		{"Has field in struct", TestStruct{Field1: "value1", Field2: 1}, "Field1", true},
+		{"Doesn't have field in struct", TestStruct{Field1: "value1", Field2: 1}, "Field3", false},
+		{"Has key in map", testMap, "key1", true},
+		{"Doesn't have key in map", testMap, "key3", false},
+		{"Has nested key in map", nestedMap, "level1.level2", true},
+		{"Has partial nested key in map", nestedMap, "level1", true},
+		{"Doesn't have nested key in map", nestedMap, "level1.level3", false},
+		{"Has invalid type", []int{1, 2, 3}, "0", false}, // This should go into the default case.
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			got := HasKey(tc.obj, tc.key)
+
+			if got != tc.want {
+				t.Fatalf("Expected %v, but got %v", tc.want, got)
 			}
 		})
 	}

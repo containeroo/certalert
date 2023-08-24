@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestReadConfigFile(t *testing.T) {
@@ -18,7 +18,7 @@ func TestReadConfigFile(t *testing.T) {
 
 	// Temporarily create a config file
 	tempFile, err := os.CreateTemp(os.TempDir(), "*.yaml")
-	require.NoError(t, err, "Failed to create temp file.")
+	assert.NoError(t, err, "Failed to create temp file.")
 
 	defer os.Remove(tempFile.Name()) // clean up
 
@@ -26,17 +26,25 @@ func TestReadConfigFile(t *testing.T) {
 
 	content := []byte("key: value\nnested:\n  key: nested value\n")
 	_, err = tempFile.Write(content)
-	require.NoError(t, err, "Failed to write to temp file.")
+	assert.NoError(t, err, "Failed to write to temp file.")
 	tempFile.Close()
 
 	var cfg Config
 
 	// Call the function under test
 	err = ReadConfigFile(tempFileName, &cfg)
-	require.NoError(t, err, "Failed to read config file.")
+	assert.NoError(t, err, "Failed to read config file.")
 
 	// Check the values in the returned config
-	require.Equal(t, "value", cfg.Key)
-	require.Equal(t, "nested value", cfg.Nested.Key)
+	assert.Equal(t, "value", cfg.Key)
+	assert.Equal(t, "nested value", cfg.Nested.Key)
+
+	// Test errors
+	err = ReadConfigFile("not existing", &cfg)
+	assert.Error(t, err, "Failed to read config file.")
+
+	// marshal error
+	err = ReadConfigFile(tempFileName, &cfg.Key)
+	assert.Error(t, err, "Failed to read config file.")
 
 }

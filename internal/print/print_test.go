@@ -28,4 +28,16 @@ func TestConvertCertificatesToFormat(t *testing.T) {
 	assert.NotNil(t, err)
 	assert.Equal(t, "Unsupported output format: unsupported", err.Error())
 
+	// Test invalid certificate
+	certs = []certificates.Certificate{
+		{
+			Name: "TestCert",
+			Path: "../../tests/certs/p12/without_password.p12",
+			Type: "invalid",
+		},
+	}
+	_, err = ConvertCertificatesToFormat("unsupported", certs, true)
+	assert.NotNil(t, err)
+	assert.Equal(t, "Unknown certificate type 'invalid'", err.Error())
+
 }

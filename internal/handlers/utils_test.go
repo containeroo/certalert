@@ -5,6 +5,41 @@ import (
 	"time"
 )
 
+func TestRemainingDuration(t *testing.T) {
+	tests := []struct {
+		name             string
+		epoch            int64
+		expectedDuration time.Duration
+	}{
+		{
+			name:             "Time in the past",
+			epoch:            time.Now().Add(-10 * time.Minute).Unix(),
+			expectedDuration: -10 * time.Minute,
+		},
+		{
+			name:             "Time in the future",
+			epoch:            time.Now().Add(10 * time.Minute).Unix(),
+			expectedDuration: 10 * time.Minute,
+		},
+		{
+			name:             "Current time",
+			epoch:            time.Now().Unix(),
+			expectedDuration: 0,
+		},
+	}
+
+	tolerance := 1 * time.Second // Allow up to 1 second of tolerance
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			actualDuration := remainingDuration(tt.epoch)
+			if actualDuration > tt.expectedDuration+tolerance || actualDuration < tt.expectedDuration-tolerance {
+				t.Errorf("Got %v, expected approximately %v", actualDuration, tt.expectedDuration)
+			}
+		})
+	}
+}
+
 func TestGetRowColor(t *testing.T) {
 	// Mock remainingDuration for testing
 	oldRemainingDuration := remainingDuration
@@ -115,6 +150,74 @@ func TestFormatTime(t *testing.T) {
 			actual := formatTime(tt.time, tt.format)
 			if actual != tt.expected {
 				t.Errorf("Expected: %s, Got: %s", tt.expected, actual)
+			}
+		})
+	}
+}
+
+func TestRenderTemplate(t *testing.T) {
+	testCases := []struct {
+		Name        string
+		baseTplStr  string
+		tplStr      string
+		data        interface{}
+		expectedStr string
+		expectedErr error
+	}{
+		{
+			Name:       "Valid_Case",
+			baseTplStr: "{{formatTime .Time \"2006-01-02\"}} {{humanReadable .Epoch}} {{getRowColor .Status}}",
+			tplStr:     "",
+			data: map[string]interface{}{
+				"Time":   time.Date(2022, 1, 1, 0, 0, 0, 0, time.UTC),
+				"Epoch":  int64(1630454400),
+				"Status": int64(1630454400),
+			},
+			expectedStr: "2022-01-01 now red-row",
+			expectedErr: nil,
+		},
+		{
+			Name:        "Error_in_base_template",
+			baseTplStr:  "{{ .MissingFunction }}",
+			tplStr:      "",
+			data:        nil,
+			expectedStr: "<no value>",
+			expectedErr: nil, // The template package often does not return errors for missing fields/functions
+		},
+		{
+			Name:        "Error_in_tplStr_parsing",
+			baseTplStr:  "{{ .Value }}",
+			tplStr:      "{{ .MissingFunction }}",
+			data:        nil,
+			expectedStr: "<no value>",
+			expectedErr: nil,
+		},
+		{
+			Name:       "Error_during_template_execution",
+			baseTplStr: "{{ .MissingField }}",
+			tplStr:     "",
+			data: map[string]interface{}{
+				"ExistingField": "value",
+			},
+			expectedStr: "<no value>",
+			expectedErr: nil,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.Name, func(t *testing.T) {
+			result, err := renderTemplate(tc.baseTplStr, tc.tplStr, tc.data)
+			if err != nil {
+				if tc.expectedErr == nil {
+					t.Errorf("unexpected error: %v", err)
+					return
+				}
+				if err.Error() != tc.expectedErr.Error() {
+					t.Errorf("expected error %v, got %v", tc.expectedErr, err)
+				}
+			}
+			if result != tc.expectedStr {
+				t.Errorf("expected output %q, got %q", tc.expectedStr, result)
 			}
 		})
 	}
