@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"certalert/internal/certificates"
 	"fmt"
-	"log"
 	"strings"
 	"text/template"
 	"time"
@@ -105,8 +104,7 @@ func renderTemplate(baseTplStr string, tplStr string, data interface{}) (string,
 	}
 
 	// Create a new template and parse the base template into it.
-	t := template.New("base").Funcs(funcMap)
-	t, err := t.Parse(baseTplStr)
+	t, err := template.New("base").Funcs(funcMap).Parse(baseTplStr)
 	if err != nil {
 		return "", err
 	}
@@ -119,7 +117,7 @@ func renderTemplate(baseTplStr string, tplStr string, data interface{}) (string,
 
 	var buf bytes.Buffer
 	if err := t.ExecuteTemplate(&buf, "base", data); err != nil {
-		log.Fatal(err)
+		return "", err
 	}
 
 	return buf.String(), nil
