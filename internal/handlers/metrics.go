@@ -20,6 +20,9 @@ func Metrics(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, ci := range certificateInfos {
+		if ci.Error != "" {
+			continue
+		}
 		metrics.CertificateEpoch.With(
 			prometheus.Labels{
 				"instance": ci.Name,
