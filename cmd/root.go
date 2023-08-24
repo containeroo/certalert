@@ -18,7 +18,6 @@ package cmd
 import (
 	"certalert/internal/certificates"
 	"certalert/internal/config"
-	"certalert/internal/utils"
 	"fmt"
 	"os"
 	"strings"
@@ -36,8 +35,7 @@ const (
 var cfgFile string
 var verbose, silent, printVersion bool
 
-var fileExtensionsTypes = utils.ExtractMapKeys(certificates.FileExtensionsToType)
-var lenFileExtensionsTypes = len(fileExtensionsTypes)
+var lenFileExtensionsTypes = len(certificates.FileExtensionsTypes)
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -50,7 +48,7 @@ var rootCmd = &cobra.Command{
 	2. Use the 'serve' command to start a server that provides a '/metrics' endpoint for Prometheus to scrape.
 
 	For a full list of commands and options, use 'certalert --help'.
-	`, strings.Join(fileExtensionsTypes[:lenFileExtensionsTypes-1], ", "), fileExtensionsTypes[lenFileExtensionsTypes-1]),
+	`, strings.Join(certificates.FileExtensionsTypes[:lenFileExtensionsTypes-1], ", "), certificates.FileExtensionsTypes[lenFileExtensionsTypes-1]),
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		// Enter here before any subcommand is executed
 
@@ -67,7 +65,7 @@ var rootCmd = &cobra.Command{
 			os.Exit(0)
 		}
 
-		if err := config.ParseConfig(&config.App, config.FailOnError); err != nil {
+		if err := config.App.Parse(); err != nil {
 			log.Fatalf("Error parsing config file: %v", err)
 		}
 	},
@@ -97,7 +95,7 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&silent, "silent", "s", false, "silent output")
 	rootCmd.MarkFlagsMutuallyExclusive("verbose", "silent")
 
-	rootCmd.PersistentFlags().BoolVarP(&config.FailOnError, "fail-on-error", "f", false, "fail on error")
+	rootCmd.PersistentFlags().BoolVarP(&config.App.FailOnError, "fail-on-error", "f", false, "fail on error")
 	rootCmd.PersistentFlags().BoolVarP(&printVersion, "version", "V", false, "print version and exit")
 
 }
@@ -120,8 +118,8 @@ func initConfig() {
 
 	viper.AutomaticEnv() // read in environment variables that match
 
-	err := config.ReadConfigFile(viper.GetViper().ConfigFileUsed(), &config.App)
-	if err != nil {
+	if err := config.App.Read(viper.ConfigFileUsed()); err != nil {
 		log.Fatalf("Error reading config file: %v", err)
 	}
+
 }

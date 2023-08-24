@@ -1,15 +1,41 @@
 package utils
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"reflect"
+	"sort"
 	"strings"
 )
 
 // BoolPtr returns a pointer to a bool
 func BoolPtr(b bool) *bool {
 	return &b
+}
+
+// DeepCopy deep copies the source to the destination.
+// The dest argument should be a pointer to the type you want to copy into.
+func DeepCopy(src interface{}, dest interface{}) error {
+	// Marshal the source object to a JSON byte array
+	bytes, err := json.Marshal(src)
+	if err != nil {
+		return fmt.Errorf("error while marshaling: %v", err)
+	}
+
+	// Make sure dest is a pointer
+	destVal := reflect.ValueOf(dest)
+	if destVal.Kind() != reflect.Ptr {
+		return fmt.Errorf("destination is not a pointer")
+	}
+
+	// Unmarshal the JSON byte array to the destination object
+	err = json.Unmarshal(bytes, dest)
+	if err != nil {
+		return fmt.Errorf("error while unmarshaling: %v", err)
+	}
+
+	return nil
 }
 
 // IsInList checks if a value is in a list
@@ -25,7 +51,7 @@ func IsInList(value string, list []string) bool {
 // ExtractMapKeys is a utility function that takes an interface{} argument,
 // checks if it's a map, and then returns the keys of that map as a slice of strings.
 // If the argument is not a map or the map's keys are not strings, it returns nil.
-func ExtractMapKeys(m interface{}) []string {
+func ExtractMapKeys(m interface{}, sorted bool) []string {
 	v := reflect.ValueOf(m) // Get the value of m
 
 	// Check if the value is of type 'Map'
@@ -45,6 +71,9 @@ func ExtractMapKeys(m interface{}) []string {
 		strkeys = append(strkeys, keyStr)
 	}
 
+	if sorted {
+		sort.Strings(strkeys) // sort list
+	}
 	return strkeys
 }
 

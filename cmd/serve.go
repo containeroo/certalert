@@ -18,6 +18,7 @@ package cmd
 import (
 	"certalert/internal/config"
 	"certalert/internal/server"
+	"certalert/internal/utils"
 
 	"github.com/fsnotify/fsnotify"
 	log "github.com/sirupsen/logrus"
@@ -57,15 +58,18 @@ Endpoints:
 		viper.OnConfigChange(func(e fsnotify.Event) {
 			log.Infof("Config file changed: %s", e.Name)
 
-			if err := config.ReadConfigFile(viper.ConfigFileUsed(), &config.App); err != nil {
-				log.Fatalf("Unable to read config: %s", err)
+			if err := config.App.Read(viper.ConfigFileUsed()); err != nil {
+				log.Fatalf("Error reading config file: %v", err)
 			}
 
-			if err := config.ParseConfig(&config.App, config.FailOnError); err != nil {
+			if err := config.App.Parse(); err != nil {
 				log.Fatalf("Unable to parse config: %s", err)
 			}
 
-			config.AppCopy = config.App.DeepCopy()
+			if err := utils.DeepCopy(config.App, &config.AppCopy); err != nil {
+				log.Fatalf("Unable to copy config: %s", err)
+			}
+
 			if err := config.RedactConfig(&config.AppCopy); err != nil {
 				log.Fatalf("Unable to redact config: %s", err)
 			}
@@ -80,7 +84,9 @@ Endpoints:
 		config.App.Version = version
 
 		// this is only necessary if starting the web server
-		config.AppCopy = config.App.DeepCopy()
+		if err := utils.DeepCopy(config.App, &config.AppCopy); err != nil {
+			log.Fatalf("Unable to copy config: %s", err)
+		}
 		if err := config.RedactConfig(&config.AppCopy); err != nil {
 			log.Fatalf("Unable to redact config: %s", err)
 		}

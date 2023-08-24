@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"os"
 	"reflect"
 	"sort"
@@ -86,9 +87,8 @@ func TestExtractMapKeys(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			got := ExtractMapKeys(tc.input)
+			got := ExtractMapKeys(tc.input, true)
 
-			sort.Strings(got)
 			sort.Strings(tc.want)
 
 			if !reflect.DeepEqual(got, tc.want) {
@@ -150,15 +150,6 @@ func TestCheckFileAccessibility(t *testing.T) {
 	})
 }
 
-type NestedStruct struct {
-	InnerField string
-}
-
-type TestStruct struct {
-	Field1 string
-	Field2 NestedStruct
-}
-
 func TestHasKey(t *testing.T) {
 	type TestStruct struct {
 		Field1 string
@@ -201,4 +192,53 @@ func TestHasKey(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestDeepCopy(t *testing.T) {
+	type Person struct {
+		Name string
+		Age  int
+	}
+
+	t.Run("Test struct copy", func(t *testing.T) {
+		person1 := &Person{Name: "John", Age: 30}
+		person2 := &Person{}
+		if err := DeepCopy(person1, person2); err != nil {
+			t.Errorf("Unexpected error: %v", err)
+		}
+
+		if !reflect.DeepEqual(person1, person2) {
+			t.Errorf("Structs are not deeply equal: %v, %v", person1, person2)
+		}
+	})
+
+	t.Run("Test non-pointer destination", func(t *testing.T) {
+		person1 := &Person{Name: "John", Age: 30}
+		var x int
+		err := DeepCopy(person1, x)
+		if err == nil || err.Error() != "destination is not a pointer" {
+			t.Errorf("Expected pointer error, got: %v", err)
+		}
+	})
+
+	t.Run("Test actual deep copy", func(t *testing.T) {
+		person1 := &Person{Name: "John", Age: 30}
+		person2 := &Person{}
+		person2.Age = 40
+		if reflect.DeepEqual(person1, person2) {
+			t.Errorf("Structs are sharing memory: %v, %v", person1, person2)
+		}
+	})
+
+	t.Run("Test unmarshallable type", func(t *testing.T) {
+		type UnmarshalableType struct {
+			F func()
+		}
+		unmarshalable := &UnmarshalableType{}
+		err := DeepCopy(unmarshalable, &UnmarshalableType{})
+		errMsg := fmt.Sprintf("error while marshaling: json: unsupported type: func()")
+		if err == nil || err.Error() != errMsg {
+			t.Errorf("Expected '%s', got: '%v'", errMsg, err)
+		}
+	})
 }

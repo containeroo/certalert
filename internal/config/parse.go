@@ -7,110 +7,50 @@ import (
 	"fmt"
 	"net/url"
 	"path/filepath"
-	"reflect"
-	"sort"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
 )
 
-// validateAuthConfig validates the auth config
-func validateAuthConfig(authConfig Auth) error {
-	basicValue := reflect.ValueOf(authConfig.Basic)
-	bearerValue := reflect.ValueOf(authConfig.Bearer)
+// Parse parse the config file and resolves variables
+func (c *Config) Parse() (err error) {
+	if err := c.parsePushgatewayConfig(); err != nil {
+		return err
+	}
 
-	basicZero := reflect.Zero(basicValue.Type())
-	bearerZero := reflect.Zero(bearerValue.Type())
-
-	if basicValue.Interface() != basicZero.Interface() && bearerValue.Interface() != bearerZero.Interface() {
-		return fmt.Errorf("Both 'auth.basic' and 'auth.bearer' are defined")
+	if err := c.parseCertificatesConfig(); err != nil {
+		return err
 	}
 
 	return nil
 }
 
-// ParseConfig parse the config file and resolves variables
-func ParseConfig(config *Config, failOnError bool) (err error) {
-	// handleCertError is a helper function to handle errors during certificate validation
-	handleCertError := func(cert certificates.Certificate, idx int, errMsg string) error {
-		if failOnError {
-			config.Certs[idx] = cert
+// parseCertificatesConfig validates the certificates config
+func (c *Config) parseCertificatesConfig() (err error) {
+	// handleError is a helper function to handle errors during certificate validation
+	handleError := func(cert certificates.Certificate, idx int, errMsg string) error {
+		if c.FailOnError {
+			c.Certs[idx] = cert
 			return fmt.Errorf(errMsg)
 		}
 		log.Warn(errMsg)
 		return nil
 	}
 
-	// handlePushgatewayError is a helper function to handle errors during pushgateway validation
-	handlePushgatewayError := func(errMsg string) error {
-		if failOnError {
-			return fmt.Errorf(errMsg)
-		}
-		log.Warn(errMsg)
-		return nil
-	}
-
-	resolvedAddress, err := resolve.ResolveVariable(config.Pushgateway.Address)
-	if err != nil {
-		if err := handlePushgatewayError(fmt.Sprintf("Failed to resolve address for pushgateway: %v", err)); err != nil {
-			return err
-		}
-	}
-	if _, err := url.Parse(resolvedAddress); err != nil {
-		if err := handlePushgatewayError(fmt.Sprintf("Invalid pushgateway address '%s': %v", resolvedAddress, err)); err != nil {
-			return err
-		}
-	}
-	config.Pushgateway.Address = resolvedAddress
-
-	if err := validateAuthConfig(config.Pushgateway.Auth); err != nil {
-		if err := handlePushgatewayError(err.Error()); err != nil {
-			return err
-		}
-	}
-
-	config.Pushgateway.Auth.Basic.Password, err = resolve.ResolveVariable(config.Pushgateway.Auth.Basic.Password)
-	if err != nil {
-		if err := handlePushgatewayError(fmt.Sprintf("Failed to resolve password for pushgateway: %v", err)); err != nil {
-			return err
-		}
-	}
-
-	config.Pushgateway.Auth.Bearer.Token, err = resolve.ResolveVariable(config.Pushgateway.Auth.Bearer.Token)
-	if err != nil {
-		if err := handlePushgatewayError(fmt.Sprintf("Failed to resolve token for pushgateway: %v", err)); err != nil {
-			return err
-		}
-	}
-
-	if config.Pushgateway.Job == "" {
-		config.Pushgateway.Job = "certalert"
-	} else {
-		config.Pushgateway.Job, err = resolve.ResolveVariable(config.Pushgateway.Job)
-		if err != nil {
-			if err := handlePushgatewayError(fmt.Sprintf("Failed to resolve job for pushgateway: %v", err)); err != nil {
-				return err
-			}
-		}
-	}
-
-	validFileExtensionTypes := utils.ExtractMapKeys(certificates.FileExtensionsToType)
-	sort.Strings(validFileExtensionTypes) // sort the list to have a deterministic order
-
-	for idx, cert := range config.Certs {
+	for idx, cert := range c.Certs {
 		if cert.Enabled != nil && !*cert.Enabled {
 			log.Debugf("Skip certificate '%s' because is disabled", cert.Name)
 			continue
 		}
 
 		if cert.Path == "" {
-			if err := handleCertError(cert, idx, fmt.Sprintf("Certificate '%s' has no 'path' defined", cert.Name)); err != nil {
+			if err := handleError(cert, idx, fmt.Sprintf("Certificate '%s' has no 'path' defined", cert.Name)); err != nil {
 				return err
 			}
 		}
 
 		if err := utils.CheckFileAccessibility(cert.Path); err != nil {
-			if err := handleCertError(cert, idx, fmt.Sprintf("Certificate '%s' is not accessible: %v", cert.Name, err)); err != nil {
+			if err := handleError(cert, idx, fmt.Sprintf("Certificate '%s' is not accessible: %v", cert.Name, err)); err != nil {
 				return err
 			}
 		}
@@ -138,24 +78,82 @@ func ParseConfig(config *Config, failOnError bool) (err error) {
 					reason = fmt.Sprintf("unclear file extension (.%s).", ext)
 				}
 				errMsg := fmt.Sprintf("Certificate '%s' has no 'type' defined. Type can't be inferred due to the %s", cert.Name, reason)
-				return handleCertError(cert, idx, errMsg)
+				return handleError(cert, idx, errMsg)
 			}
 		}
 
-		if !utils.IsInList(cert.Type, validFileExtensionTypes) {
-			return handleCertError(cert, idx, fmt.Sprintf("Certificate '%s' has an invalid 'type'. Must be one of: %s", cert.Name, strings.Join(validFileExtensionTypes, ", ")))
+		if !utils.IsInList(cert.Type, certificates.FileExtensionsTypes) {
+			return handleError(cert, idx, fmt.Sprintf("Certificate '%s' has an invalid 'type'. Must be one of: %s", cert.Name, strings.Join(certificates.FileExtensionsTypes, ", ")))
 		}
 
 		pw, err := resolve.ResolveVariable(cert.Password)
 		if err != nil {
-			if err := handleCertError(cert, idx, fmt.Sprintf("Certifacate '%s' has a non resolvable 'password'. %v", cert.Name, err)); err != nil {
+			if err := handleError(cert, idx, fmt.Sprintf("Certifacate '%s' has a non resolvable 'password'. %v", cert.Name, err)); err != nil {
 				return err
 			}
 		}
 		cert.Password = pw
 
-		config.Certs[idx] = cert
+		c.Certs[idx] = cert
 
 	}
+	return nil
+
+}
+
+// parsePushgatewayConfig validates the pushgateway config
+func (c *Config) parsePushgatewayConfig() (err error) {
+	// handlePushgatewayError is a helper function to handle errors during pushgateway validation
+	handlePushgatewayError := func(errMsg string) error {
+		if c.FailOnError {
+			return fmt.Errorf(errMsg)
+		}
+		log.Warn(errMsg)
+		return nil
+	}
+	resolvedAddress, err := resolve.ResolveVariable(c.Pushgateway.Address)
+	if err != nil {
+		if err := handlePushgatewayError(fmt.Sprintf("Failed to resolve address for pushgateway: %v", err)); err != nil {
+			return err
+		}
+	}
+	if _, err := url.Parse(resolvedAddress); err != nil {
+		if err := handlePushgatewayError(fmt.Sprintf("Invalid pushgateway address '%s': %v", resolvedAddress, err)); err != nil {
+			return err
+		}
+	}
+	c.Pushgateway.Address = resolvedAddress
+
+	if err := validateAuthConfig(c.Pushgateway.Auth); err != nil {
+		if err := handlePushgatewayError(err.Error()); err != nil {
+			return err
+		}
+	}
+
+	c.Pushgateway.Auth.Basic.Password, err = resolve.ResolveVariable(c.Pushgateway.Auth.Basic.Password)
+	if err != nil {
+		if err := handlePushgatewayError(fmt.Sprintf("Failed to resolve password for pushgateway: %v", err)); err != nil {
+			return err
+		}
+	}
+
+	c.Pushgateway.Auth.Bearer.Token, err = resolve.ResolveVariable(c.Pushgateway.Auth.Bearer.Token)
+	if err != nil {
+		if err := handlePushgatewayError(fmt.Sprintf("Failed to resolve token for pushgateway: %v", err)); err != nil {
+			return err
+		}
+	}
+
+	if c.Pushgateway.Job == "" {
+		c.Pushgateway.Job = "certalert"
+	} else {
+		c.Pushgateway.Job, err = resolve.ResolveVariable(c.Pushgateway.Job)
+		if err != nil {
+			if err := handlePushgatewayError(fmt.Sprintf("Failed to resolve job for pushgateway: %v", err)); err != nil {
+				return err
+			}
+		}
+	}
+
 	return nil
 }

@@ -13,7 +13,7 @@ import (
 // Metrics is the handler for the /metrics route
 // It returns the metrics for Prometheus to scrape
 func Metrics(w http.ResponseWriter, r *http.Request) {
-	certificateInfos, err := certificates.Process(config.App.Certs, config.FailOnError)
+	certificateInfos, err := certificates.Process(config.App.Certs, config.App.FailOnError)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

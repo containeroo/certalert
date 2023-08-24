@@ -10,18 +10,21 @@ import (
 	"testing"
 )
 
+// setEnvVars sets all environment variables defined in the given map.
 func setEnvVars(envs map[string]string) {
 	for key, value := range envs {
 		os.Setenv(key, value)
 	}
 }
 
+// unsetEnvVars unsets all environment variables defined in the given map.
 func unsetEnvVars(envs map[string]string) {
 	for key := range envs {
 		os.Unsetenv(key)
 	}
 }
 
+// createTempFile creates a temporary file with the given content and returns the file name.
 func createTempFile(content string, t *testing.T) string {
 	tempFile, err := os.CreateTemp("", "certalert")
 	if err != nil {
@@ -39,13 +42,11 @@ func createTempFile(content string, t *testing.T) string {
 
 func TestParseConfig(t *testing.T) {
 	envs := map[string]string{
-		"PUSHGATEWAY_ADDRESS": "http://localhost:9091",
-		"PUSHGATEWAY_JOB":     "certalert",
-		"BASIC_PASSWORD":      "password",
-		"BEARER_TOKEN":        "token",
+		"BASIC_PASSWORD": "password",
+		"BEARER_TOKEN":   "token",
 	}
 	passwordFileName := createTempFile("password", t)
-	sortedFileExtensions := utils.ExtractMapKeys(certificates.FileExtensionsToType)
+	sortedFileExtensions := utils.ExtractMapKeys(certificates.FileExtensionsToType, true)
 	sort.Strings(sortedFileExtensions)
 
 	testCases := []struct {
@@ -65,47 +66,25 @@ func TestParseConfig(t *testing.T) {
 						Enabled:  utils.BoolPtr(true),
 					},
 				},
+				FailOnError: true,
 			},
 			expectedError: "",
 		},
 		{
-			name: "missing_address",
+			name: "disable cert",
 			config: &Config{
-				Pushgateway: Pushgateway{},
-			},
-		},
-		{
-			name: "invalid_address",
-			config: &Config{
-				Pushgateway: Pushgateway{
-					Address: "invalid",
-				},
-			},
-		},
-		{
-			name: "Auth error",
-			config: &Config{
-				Pushgateway: Pushgateway{
-					Auth: Auth{
-						Basic: Basic{
-							Password: "env:BASIC_PASSWORD",
-						},
-						Bearer: Bearer{
-							Token: "env:BEARER_TOKEN",
-						},
+				Certs: []certificates.Certificate{
+					{
+						Name:     "test_cert",
+						Path:     "../../tests/certs/pem/chain.pem",
+						Enabled:  utils.BoolPtr(false),
+						Type:     "pem",
+						Password: fmt.Sprintf("file:%s", passwordFileName),
 					},
 				},
+				FailOnError: true,
 			},
-			expectedError: "Both 'auth.basic' and 'auth.bearer' are defined",
-		},
-		{
-			name: "missing_env_var",
-			config: &Config{
-				Pushgateway: Pushgateway{
-					Address: "env:INVALID_ENV",
-				},
-			},
-			expectedError: "Failed to resolve address for pushgateway: Environment variable 'INVALID_ENV' not found.",
+			expectedError: "",
 		},
 		{
 			name: "missing_file_var",
@@ -119,6 +98,7 @@ func TestParseConfig(t *testing.T) {
 						Password: "file:INVALID_FILE",
 					},
 				},
+				FailOnError: true,
 			},
 			expectedError: "Certifacate 'test_cert' has a non resolvable 'password'. Failed to open file 'INVALID_FILE': open INVALID_FILE: no such file or directory",
 		},
@@ -131,6 +111,7 @@ func TestParseConfig(t *testing.T) {
 						Path:    "../../tests/certs/pem/final.pem",
 					},
 				},
+				FailOnError: true,
 			},
 			expectedError: "",
 		},
@@ -144,6 +125,7 @@ func TestParseConfig(t *testing.T) {
 						Type:    "pem",
 					},
 				},
+				FailOnError: true,
 			},
 			expectedError: "Certificate 'test_cert' has no 'path' defined",
 		},
@@ -157,6 +139,7 @@ func TestParseConfig(t *testing.T) {
 						Path:    "/invalid/path",
 					},
 				},
+				FailOnError: true,
 			},
 			expectedError: "Certificate 'test_cert' is not accessible: File does not exist: /invalid/path",
 		},
@@ -170,6 +153,7 @@ func TestParseConfig(t *testing.T) {
 						Path:    "../../tests/certs/p12/no_extension",
 					},
 				},
+				FailOnError: true,
 			},
 			expectedError: "Certificate 'test_cert' has no 'type' defined. Type can't be inferred due to the missing file extension.",
 		},
@@ -184,6 +168,7 @@ func TestParseConfig(t *testing.T) {
 						Type:    "invalid",
 					},
 				},
+				FailOnError: true,
 			},
 			expectedError: fmt.Sprintf("Certificate 'test_cert' has an invalid 'type'. Must be one of: %s", strings.Join(sortedFileExtensions, ", ")),
 		},
@@ -197,6 +182,7 @@ func TestParseConfig(t *testing.T) {
 						Path:    "../../tests/certs/pem/cert.invalid",
 					},
 				},
+				FailOnError: true,
 			},
 			expectedError: "Certificate 'test_cert' has no 'type' defined. Type can't be inferred due to the unclear file extension (.invalid).",
 		},
@@ -210,6 +196,7 @@ func TestParseConfig(t *testing.T) {
 						Path:    "../../tests/certs/p12/chain.p12",
 					},
 				},
+				FailOnError: true,
 			},
 			expectedError: "",
 		},
@@ -219,7 +206,7 @@ func TestParseConfig(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			setEnvVars(envs)
 
-			err := ParseConfig(testCase.config, true)
+			err := testCase.config.parseCertificatesConfig()
 
 			unsetEnvVars(envs)
 
@@ -234,6 +221,151 @@ func TestParseConfig(t *testing.T) {
 				}
 			}
 			// if reached here, we have no error, so we can continue with the next test case
+		})
+	}
+}
+
+func TestParsePushgatewayConfig(t *testing.T) {
+	envs := map[string]string{
+		"PUSHGATEWAY_ADDRESS": "http://localhost:9091",
+		"PUSHGATEWAY_JOB":     "certalert",
+	}
+
+	testCases := []struct {
+		name          string
+		config        *Config
+		expectedError string
+	}{
+		{
+			name: "Auth error",
+			config: &Config{
+				Pushgateway: Pushgateway{
+					Auth: Auth{
+						Basic: Basic{
+							Password: "env:BASIC_PASSWORD",
+						},
+						Bearer: Bearer{
+							Token: "env:BEARER_TOKEN",
+						},
+					},
+				},
+				FailOnError: true,
+			},
+			expectedError: "Both 'auth.basic' and 'auth.bearer' are defined",
+		},
+		{
+			name: "missing_address",
+			config: &Config{
+				Pushgateway: Pushgateway{},
+				FailOnError: true,
+			},
+		},
+		{
+			name: "invalid_address",
+			config: &Config{
+				Pushgateway: Pushgateway{
+					Address: "invalid",
+				},
+				FailOnError: true,
+			},
+		},
+		{
+			name: "missing_env_var",
+			config: &Config{
+				Pushgateway: Pushgateway{
+					Address: "env:INVALID_ENV",
+				},
+				FailOnError: true,
+			},
+			expectedError: "Failed to resolve address for pushgateway: Environment variable 'INVALID_ENV' not found.",
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			setEnvVars(envs)
+
+			err := testCase.config.parsePushgatewayConfig()
+
+			unsetEnvVars(envs)
+
+			if testCase.expectedError == "" && err != nil {
+				t.Errorf("Test case '%s': unexpected error: %v", testCase.name, err)
+			}
+			if testCase.expectedError != "" {
+				if err == nil {
+					t.Errorf("Test case '%s': expected error, but got none", testCase.name)
+				} else if err.Error() != testCase.expectedError {
+					t.Errorf("Test case '%s': expected error '%s', but got '%s'", testCase.name, testCase.expectedError, err.Error())
+				}
+			}
+			// if reached here, we have no error, so we can continue with the next test case
+		})
+	}
+}
+
+func TestParse(t *testing.T) {
+	testCases := []struct {
+		name          string
+		config        *Config
+		expectedError error
+	}{
+		{
+			name: "Simple config (success)",
+			config: &Config{
+				Certs: []certificates.Certificate{
+					{
+						Name:    "test_cert",
+						Enabled: utils.BoolPtr(true),
+						Path:    "../../tests/certs/pem/chain.pem",
+						Type:    "pem",
+					},
+				},
+				Pushgateway: Pushgateway{
+					Address: "http://localhost:9091",
+					Job:     "certalert",
+				},
+				FailOnError: true,
+			},
+			expectedError: nil,
+		},
+		{
+			name: "Pushgateway error",
+			config: &Config{
+				Pushgateway: Pushgateway{
+					Address: "env:INVALID_ENV",
+				},
+				FailOnError: true,
+			},
+			expectedError: fmt.Errorf("Failed to resolve address for pushgateway: Environment variable 'INVALID_ENV' not found."),
+		},
+		{
+			name: "Certificate error",
+			config: &Config{
+				Certs: []certificates.Certificate{
+					{
+						Name: "test_cert",
+					},
+				},
+				Pushgateway: Pushgateway{},
+				FailOnError: true,
+			},
+			expectedError: fmt.Errorf("Certificate 'test_cert' has no 'path' defined"),
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			err := tc.config.Parse()
+			if err != nil {
+				if tc.expectedError == nil {
+					t.Errorf("Unexpected error: %v", err)
+				} else if err.Error() != tc.expectedError.Error() {
+					t.Errorf("Expected error: '%v', got: '%v'", tc.expectedError, err)
+				}
+			} else if tc.expectedError != nil {
+				t.Errorf("Expected error: %v, got nil", tc.expectedError)
+			}
 		})
 	}
 }

@@ -58,7 +58,7 @@ Examples:
 				config.App.Pushgateway.Auth,
 				config.App.Certs,
 				config.App.Pushgateway.InsecureSkipVerify,
-				config.FailOnError); err != nil {
+				config.App.FailOnError); err != nil {
 				log.Fatal(err)
 			}
 			return
@@ -82,7 +82,7 @@ Examples:
 				config.App.Pushgateway.Auth,
 				[]certificates.Certificate{*certificate},
 				config.App.Pushgateway.InsecureSkipVerify,
-				config.FailOnError); err != nil {
+				config.App.FailOnError); err != nil {
 				log.Panic(err)
 			}
 		}

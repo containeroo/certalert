@@ -197,7 +197,7 @@ func TestProcess(t *testing.T) {
 	})
 }
 
-func TestHandleError(t *testing.T) {
+func TesthandleError(t *testing.T) {
 	var certInfoList []CertificateInfo
 
 	t.Run("failOnError is true", func(t *testing.T) {
