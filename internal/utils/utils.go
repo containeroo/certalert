@@ -22,17 +22,29 @@ func IsInList(value string, list []string) bool {
 	return false
 }
 
-// ExtractMapKeys extracts the keys of a map as a slice of strings
+// ExtractMapKeys is a utility function that takes an interface{} argument,
+// checks if it's a map, and then returns the keys of that map as a slice of strings.
+// If the argument is not a map or the map's keys are not strings, it returns nil.
 func ExtractMapKeys(m interface{}) []string {
-	v := reflect.ValueOf(m)
+	v := reflect.ValueOf(m) // Get the value of m
+
+	// Check if the value is of type 'Map'
 	if v.Kind() != reflect.Map {
 		return nil
 	}
-	keys := v.MapKeys()
-	strkeys := make([]string, len(keys))
+	keys := v.MapKeys() // Retrieve the keys of the map
+
+	// Initialize a slice of strings to hold the keys
+	strkeys := make([]string, 0, len(keys))
 	for i := 0; i < len(keys); i++ {
-		strkeys[i] = keys[i].Interface().(string)
+		// Convert the key to a string using type assertion
+		keyStr, ok := keys[i].Interface().(string)
+		if !ok {
+			return nil
+		}
+		strkeys = append(strkeys, keyStr)
 	}
+
 	return strkeys
 }
 
