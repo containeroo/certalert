@@ -45,4 +45,10 @@ echo no_extension > no_extension
 cat final.crt intermediate.crt root.crt > chain.crt
 openssl pkcs12 -export -out chain.p12 -inkey final.key -in final.crt -certfile chain.crt -password pass:password
 
+# emtpy subject
+openssl genpkey -algorithm RSA -out empty_subject.key -pass pass:password
+openssl req -new -x509 -key empty_subject.key -out empty_subject.crt -days 365
+openssl pkcs12 -export -out empty_subject.p12 -inkey empty_subject.key -in empty_subject.crt -password pass:password
+
+
 popd
