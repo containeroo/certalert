@@ -12,40 +12,40 @@ var FailOnError bool
 
 // Config represents the config file
 type Config struct {
-	AutoReloadConfig bool                       `json:"autoReloadConfig"`
-	Version          string                     `json:"version"`
-	Server           Server                     `json:"server"`
-	Pushgateway      Pushgateway                `json:"pushgateway"`
-	Certs            []certificates.Certificate `json:"certs"`
+	AutoReloadConfig bool                       `mapstructure:"autoReloadConfig"`
+	Version          string                     `mapstructure:"version"`
+	Server           Server                     `mapstructure:"server"`
+	Pushgateway      Pushgateway                `mapstructure:"pushgateway"`
+	Certs            []certificates.Certificate `mapstructure:"certs"`
 }
 
 // Server represents the server config
 type Server struct {
-	Hostname string `json:"hostname"`
-	Port     int    `json:"port"`
+	Hostname string `mapstructure:"hostname"`
+	Port     int    `mapstructure:"port"`
 }
 
 // Pushgateway represents the pushgateway config
 type Pushgateway struct {
-	Address            string `json:"address"`
-	InsecureSkipVerify bool   `json:"insecureSkipVerify"`
-	Job                string `json:"job"`
-	Auth               Auth   `json:"auth,omitempty" yaml:"auth,omitempty"`
+	Address            string `mapstructure:"address"`
+	InsecureSkipVerify bool   `mapstructure:"insecureSkipVerify"`
+	Job                string `mapstructure:"job"`
+	Auth               Auth   `mapstructure:"auth,omitempty" yaml:"auth,omitempty"`
 }
 
 // Auth represents the pushgateway auth config
 type Auth struct {
-	Basic  Basic  `json:"basic,omitempty" yaml:"basic,omitempty"`
-	Bearer Bearer `json:"bearer,omitempty" yaml:"bearer,omitempty"`
+	Basic  Basic  `mapstructure:"basic,omitempty" yaml:"basic,omitempty"`
+	Bearer Bearer `mapstructure:"bearer,omitempty" yaml:"bearer,omitempty"`
 }
 
 // Basic represents the pushgateway basic auth config
 type Basic struct {
-	Password string `json:"password"`
-	Username string `json:"username"`
+	Password string `mapstructure:"password"`
+	Username string `mapstructure:"username"`
 }
 
 // Bearer represents the pushgateway bearer auth config
 type Bearer struct {
-	Token string `json:"token"`
+	Token string `mapstructure:"token"`
 }

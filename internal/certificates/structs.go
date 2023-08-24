@@ -32,20 +32,20 @@ var FileExtensionsToType = map[string]string{
 
 // Certificate represents a certificate configuration
 type Certificate struct {
-	Name     string `json:"name"`
-	Enabled  *bool  `json:"enabled,omitempty" yaml:"enabled,omitempty"`
-	Path     string `json:"path"`
-	Password string `json:"password"`
-	Type     string `json:"type"`
+	Name     string `mapstructure:"name"`
+	Enabled  *bool  `mapstructure:"enabled,omitempty" yaml:"enabled,omitempty"`
+	Path     string `mapstructure:"path"`
+	Password string `mapstructure:"password"`
+	Type     string `mapstructure:"type"`
 }
 
 // CertificateInfo represents the extracted certificate information
 type CertificateInfo struct {
-	Name    string `json:"name"`
-	Subject string `json:"subject"`
-	Epoch   int64  `json:"epoch"`
-	Type    string `json:"type"`
-	Error   string `json:"error"`
+	Name    string `mapstructure:"name"`
+	Subject string `mapstructure:"subject"`
+	Epoch   int64  `mapstructure:"epoch"`
+	Type    string `mapstructure:"type"`
+	Error   string `mapstructure:"error"`
 }
 
 // ExpiryAsTime returns the expiry date as a time.Time
