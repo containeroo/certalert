@@ -19,15 +19,15 @@ func RedactConfig(config *Config) error {
 		config.Pushgateway.Address = redactVariable(config.Pushgateway.Address)
 	}
 
-	if utils.HasKey(config.Pushgateway, "Basic.Username") {
+	if utils.HasKey(config.Pushgateway, "Auth.Basic.Username") {
 		config.Pushgateway.Auth.Basic.Username = redactVariable(config.Pushgateway.Auth.Basic.Username)
 	}
 
-	if utils.HasKey(config.Pushgateway, "Basic.Password") {
+	if utils.HasKey(config.Pushgateway, "Auth.Basic.Password") {
 		config.Pushgateway.Auth.Basic.Password = redactVariable(config.Pushgateway.Auth.Basic.Password)
 	}
 
-	if utils.HasKey(config.Pushgateway, "Bearer.Token") {
+	if utils.HasKey(config.Pushgateway, "Auth.Bearer.Token") {
 		config.Pushgateway.Auth.Bearer.Token = redactVariable(config.Pushgateway.Auth.Bearer.Token)
 	}
 
