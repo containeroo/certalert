@@ -82,5 +82,5 @@ func searchKeyInFile(file *os.File, key string) (string, error) {
 			return strings.TrimSpace(pair[1]), nil
 		}
 	}
-	return "", fmt.Errorf("Key '%s' not found in file", key)
+	return "", fmt.Errorf("Key '%s' not found in file '%s'.", key, file.Name())
 }
