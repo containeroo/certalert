@@ -5,7 +5,6 @@ import (
 	"certalert/internal/resolve"
 	"certalert/internal/utils"
 	"fmt"
-	"net/url"
 	"path/filepath"
 	"strings"
 
@@ -44,13 +43,13 @@ func (c *Config) parseCertificatesConfig() (err error) {
 		}
 
 		if cert.Path == "" {
-			if err := handleError(cert, idx, fmt.Sprintf("Certificate '%s' has no 'path' defined", cert.Name)); err != nil {
+			if err := handleError(cert, idx, fmt.Sprintf("Certificate '%s' has no 'path' defined.", cert.Name)); err != nil {
 				return err
 			}
 		}
 
 		if err := utils.CheckFileAccessibility(cert.Path); err != nil {
-			if err := handleError(cert, idx, fmt.Sprintf("Certificate '%s' is not accessible: %v", cert.Name, err)); err != nil {
+			if err := handleError(cert, idx, fmt.Sprintf("Certificate '%s' is not accessible. %v", cert.Name, err)); err != nil {
 				return err
 			}
 		}
@@ -83,7 +82,10 @@ func (c *Config) parseCertificatesConfig() (err error) {
 		}
 
 		if !utils.IsInList(cert.Type, certificates.FileExtensionsTypes) {
-			return handleError(cert, idx, fmt.Sprintf("Certificate '%s' has an invalid 'type'. Must be one of: %s", cert.Name, strings.Join(certificates.FileExtensionsTypes, ", ")))
+
+			if err := handleError(cert, idx, fmt.Sprintf("Certificate '%s' has an invalid type '%s'. Must be one of '%s' or '%s'.", cert.Name, cert.Type, strings.Join(certificates.FileExtensionsTypes[:certificates.LenFileExtensionsTypes-1], "', '"), certificates.FileExtensionsTypes[certificates.LenFileExtensionsTypes-1])); err != nil {
+				return err
+			}
 		}
 
 		pw, err := resolve.ResolveVariable(cert.Password)
@@ -113,12 +115,17 @@ func (c *Config) parsePushgatewayConfig() (err error) {
 	}
 	resolvedAddress, err := resolve.ResolveVariable(c.Pushgateway.Address)
 	if err != nil {
-		if err := handlePushgatewayError(fmt.Sprintf("Failed to resolve address for pushgateway: %v", err)); err != nil {
+		if err := handlePushgatewayError(fmt.Sprintf("Failed to resolve address for pushgateway. %v", err)); err != nil {
 			return err
 		}
 	}
-	if _, err := url.Parse(resolvedAddress); err != nil {
-		if err := handlePushgatewayError(fmt.Sprintf("Invalid pushgateway address '%s': %v", resolvedAddress, err)); err != nil {
+	if resolvedAddress == "" && c.Pushgateway.Address != "" {
+		if err := handlePushgatewayError("Pushgateway address was resolved to empty."); err != nil {
+			return err
+		}
+	}
+	if resolvedAddress != "" && !isValidURL(resolvedAddress) {
+		if err := handlePushgatewayError(fmt.Sprintf("Invalid pushgateway address '%s'.", resolvedAddress)); err != nil {
 			return err
 		}
 	}
@@ -132,14 +139,14 @@ func (c *Config) parsePushgatewayConfig() (err error) {
 
 	c.Pushgateway.Auth.Basic.Password, err = resolve.ResolveVariable(c.Pushgateway.Auth.Basic.Password)
 	if err != nil {
-		if err := handlePushgatewayError(fmt.Sprintf("Failed to resolve password for pushgateway: %v", err)); err != nil {
+		if err := handlePushgatewayError(fmt.Sprintf("Failed to resolve basic auth password for pushgateway. %v", err)); err != nil {
 			return err
 		}
 	}
 
 	c.Pushgateway.Auth.Bearer.Token, err = resolve.ResolveVariable(c.Pushgateway.Auth.Bearer.Token)
 	if err != nil {
-		if err := handlePushgatewayError(fmt.Sprintf("Failed to resolve token for pushgateway: %v", err)); err != nil {
+		if err := handlePushgatewayError(fmt.Sprintf("Failed to resolve bearer token for pushgateway. %v", err)); err != nil {
 			return err
 		}
 	}
@@ -149,7 +156,7 @@ func (c *Config) parsePushgatewayConfig() (err error) {
 	} else {
 		c.Pushgateway.Job, err = resolve.ResolveVariable(c.Pushgateway.Job)
 		if err != nil {
-			if err := handlePushgatewayError(fmt.Sprintf("Failed to resolve job for pushgateway: %v", err)); err != nil {
+			if err := handlePushgatewayError(fmt.Sprintf("Failed to resolve jobName for pushgateway. %v", err)); err != nil {
 				return err
 			}
 		}

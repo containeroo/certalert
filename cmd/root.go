@@ -35,20 +35,18 @@ const (
 var cfgFile string
 var verbose, silent, printVersion bool
 
-var lenFileExtensionsTypes = len(certificates.FileExtensionsTypes)
-
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "certalert",
 	Short: "CertAlert is a tool to monitor the expiration dates of digital certificates",
-	Long: fmt.Sprintf(`CertAlert can handle a variety of certificate types, including %s and %s files.
+	Long: fmt.Sprintf(`CertAlert can handle a variety of certificate types, including '%s' or '%s' files.
 
 	You can execute specific commands for different actions:
 	1. Use the 'push' command to manually push metrics to the Prometheus Pushgateway.
 	2. Use the 'serve' command to start a server that provides a '/metrics' endpoint for Prometheus to scrape.
 
 	For a full list of commands and options, use 'certalert --help'.
-	`, strings.Join(certificates.FileExtensionsTypes[:lenFileExtensionsTypes-1], ", "), certificates.FileExtensionsTypes[lenFileExtensionsTypes-1]),
+	`, strings.Join(certificates.FileExtensionsTypes[:certificates.LenFileExtensionsTypes-1], "', '"), certificates.FileExtensionsTypes[certificates.LenFileExtensionsTypes-1]),
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		// Enter here before any subcommand is executed
 

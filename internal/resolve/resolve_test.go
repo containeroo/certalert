@@ -51,7 +51,7 @@ func TestResolveVariable(t *testing.T) {
 		}
 
 		tmpfilePath := "/non/existing"
-		expectedErrMsg := fmt.Sprintf("Failed to open file '%s': open %s: no such file or directory", tmpfilePath, tmpfilePath)
+		expectedErrMsg := fmt.Sprintf("Failed to open file '%s'. open %s: no such file or directory", tmpfilePath, tmpfilePath)
 		if err != nil && err.Error() != expectedErrMsg {
 			t.Fatalf("Expected error '%s', got '%v'", expectedErrMsg, err)
 		}

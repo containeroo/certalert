@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"net"
+	"net/url"
 	"reflect"
 	"strconv"
 )
@@ -31,8 +32,14 @@ func validateAuthConfig(authConfig Auth) error {
 	bearerZero := reflect.Zero(bearerValue.Type())
 
 	if basicValue.Interface() != basicZero.Interface() && bearerValue.Interface() != bearerZero.Interface() {
-		return fmt.Errorf("Both 'auth.basic' and 'auth.bearer' are defined")
+		return fmt.Errorf("Both 'auth.basic' and 'auth.bearer' are defined.")
 	}
 
 	return nil
+}
+
+// isValidURL tests a string to determine if it is a well-structured URL.
+func isValidURL(str string) bool {
+	u, err := url.Parse(str)
+	return err == nil && u.Scheme != "" && u.Host != ""
 }

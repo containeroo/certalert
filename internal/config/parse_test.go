@@ -40,7 +40,7 @@ func createTempFile(content string, t *testing.T) string {
 	return tempFile.Name()
 }
 
-func TestParseConfig(t *testing.T) {
+func TestParseCertificatesConfig(t *testing.T) {
 	envs := map[string]string{
 		"BASIC_PASSWORD": "password",
 		"BEARER_TOKEN":   "token",
@@ -54,6 +54,49 @@ func TestParseConfig(t *testing.T) {
 		config        *Config
 		expectedError string
 	}{
+		{
+			name: "cert path not defined (FailOnError: false)",
+			config: &Config{
+				Certs: []certificates.Certificate{
+					{
+						Name:    "test_cert",
+						Enabled: utils.BoolPtr(true),
+						Type:    "pem",
+					},
+				},
+				FailOnError: false,
+			},
+			expectedError: "",
+		},
+		{
+			name: "cert path not defined",
+			config: &Config{
+				Certs: []certificates.Certificate{
+					{
+						Name:    "test_cert",
+						Enabled: utils.BoolPtr(true),
+						Type:    "pem",
+					},
+				},
+				FailOnError: true,
+			},
+			expectedError: "Certificate 'test_cert' has no 'path' defined.",
+		},
+		{
+			name: "cert type invalid",
+			config: &Config{
+				Certs: []certificates.Certificate{
+					{
+						Name:    "test_cert",
+						Enabled: utils.BoolPtr(true),
+						Path:    "../../tests/certs/pem/without_password.pem",
+						Type:    "invalid",
+					},
+				},
+				FailOnError: true,
+			},
+			expectedError: fmt.Sprintf("Certificate 'test_cert' has an invalid type 'invalid'. Must be one of '%s' or '%s'.", strings.Join(certificates.FileExtensionsTypes[:certificates.LenFileExtensionsTypes-1], "', '"), certificates.FileExtensionsTypes[certificates.LenFileExtensionsTypes-1]),
+		},
 		{
 			name: "success",
 			config: &Config{
@@ -100,7 +143,7 @@ func TestParseConfig(t *testing.T) {
 				},
 				FailOnError: true,
 			},
-			expectedError: "Certifacate 'test_cert' has a non resolvable 'password'. Failed to open file 'INVALID_FILE': open INVALID_FILE: no such file or directory",
+			expectedError: "Certifacate 'test_cert' has a non resolvable 'password'. Failed to open file 'INVALID_FILE'. open INVALID_FILE: no such file or directory",
 		},
 		{
 			name: "cert name not defined",
@@ -116,20 +159,6 @@ func TestParseConfig(t *testing.T) {
 			expectedError: "",
 		},
 		{
-			name: "cert path not defined",
-			config: &Config{
-				Certs: []certificates.Certificate{
-					{
-						Name:    "test_cert",
-						Enabled: utils.BoolPtr(true),
-						Type:    "pem",
-					},
-				},
-				FailOnError: true,
-			},
-			expectedError: "Certificate 'test_cert' has no 'path' defined",
-		},
-		{
 			name: "cert path not accessible",
 			config: &Config{
 				Certs: []certificates.Certificate{
@@ -141,7 +170,7 @@ func TestParseConfig(t *testing.T) {
 				},
 				FailOnError: true,
 			},
-			expectedError: "Certificate 'test_cert' is not accessible: File does not exist: /invalid/path",
+			expectedError: "Certificate 'test_cert' is not accessible. File does not exist: /invalid/path",
 		},
 		{
 			name: "cert type not defined",
@@ -156,21 +185,6 @@ func TestParseConfig(t *testing.T) {
 				FailOnError: true,
 			},
 			expectedError: "Certificate 'test_cert' has no 'type' defined. Type can't be inferred due to the missing file extension.",
-		},
-		{
-			name: "cert type invalid",
-			config: &Config{
-				Certs: []certificates.Certificate{
-					{
-						Name:    "test_cert",
-						Enabled: utils.BoolPtr(true),
-						Path:    "../../tests/certs/pem/without_password.pem",
-						Type:    "invalid",
-					},
-				},
-				FailOnError: true,
-			},
-			expectedError: fmt.Sprintf("Certificate 'test_cert' has an invalid 'type'. Must be one of: %s", strings.Join(sortedFileExtensions, ", ")),
 		},
 		{
 			name: "cert type guessed invalid",
@@ -229,6 +243,7 @@ func TestParsePushgatewayConfig(t *testing.T) {
 	envs := map[string]string{
 		"PUSHGATEWAY_ADDRESS": "http://localhost:9091",
 		"PUSHGATEWAY_JOB":     "certalert",
+		"EMPTY_VAR":           "",
 	}
 
 	testCases := []struct {
@@ -237,9 +252,50 @@ func TestParsePushgatewayConfig(t *testing.T) {
 		expectedError string
 	}{
 		{
+			name: "Parse pushgateway missing pushgatway address (FailOnError: false)",
+			config: &Config{
+				Pushgateway: Pushgateway{
+					Address: "env:EMPTY_VAR",
+				},
+				FailOnError: false,
+			},
+			expectedError: "",
+		},
+		{
+			name: "Pusghateway address VAR is emtpy",
+			config: &Config{
+				Pushgateway: Pushgateway{
+					Address: "env:EMPTY_VAR",
+				},
+				FailOnError: true,
+			},
+			expectedError: "Pushgateway address was resolved to empty.",
+		},
+		{
+			name: "Pushgateway address parsing error",
+			config: &Config{
+				Pushgateway: Pushgateway{
+					Address: "http:/localhost:9091",
+				},
+				FailOnError: true,
+			},
+			expectedError: "Invalid pushgateway address 'http:/localhost:9091'.",
+		},
+		{
+			name: "Pushgateway address no scheme error",
+			config: &Config{
+				Pushgateway: Pushgateway{
+					Address: "localhost:9091",
+				},
+				FailOnError: true,
+			},
+			expectedError: "Invalid pushgateway address 'localhost:9091'.",
+		},
+		{
 			name: "Auth error",
 			config: &Config{
 				Pushgateway: Pushgateway{
+					Address: "http://localhost:9091",
 					Auth: Auth{
 						Basic: Basic{
 							Password: "env:BASIC_PASSWORD",
@@ -251,23 +307,7 @@ func TestParsePushgatewayConfig(t *testing.T) {
 				},
 				FailOnError: true,
 			},
-			expectedError: "Both 'auth.basic' and 'auth.bearer' are defined",
-		},
-		{
-			name: "missing_address",
-			config: &Config{
-				Pushgateway: Pushgateway{},
-				FailOnError: true,
-			},
-		},
-		{
-			name: "invalid_address",
-			config: &Config{
-				Pushgateway: Pushgateway{
-					Address: "invalid",
-				},
-				FailOnError: true,
-			},
+			expectedError: "Both 'auth.basic' and 'auth.bearer' are defined.",
 		},
 		{
 			name: "missing_env_var",
@@ -277,7 +317,48 @@ func TestParsePushgatewayConfig(t *testing.T) {
 				},
 				FailOnError: true,
 			},
-			expectedError: "Failed to resolve address for pushgateway: Environment variable 'INVALID_ENV' not found.",
+			expectedError: "Failed to resolve address for pushgateway. Environment variable 'INVALID_ENV' not found.",
+		},
+		{
+			name: "Basic Auth: Fail to resolve password",
+			config: &Config{
+				Pushgateway: Pushgateway{
+					Address: "http://localhost:9091",
+					Auth: Auth{
+						Basic: Basic{
+							Password: "env:INVALID_ENV",
+						},
+					},
+				},
+				FailOnError: true,
+			},
+			expectedError: "Failed to resolve basic auth password for pushgateway. Environment variable 'INVALID_ENV' not found.",
+		},
+		{
+			name: "Bearer Auth: Fail to resolve token",
+			config: &Config{
+				Pushgateway: Pushgateway{
+					Address: "http://localhost:9091",
+					Auth: Auth{
+						Bearer: Bearer{
+							Token: "env:INVALID_ENV",
+						},
+					},
+				},
+				FailOnError: true,
+			},
+			expectedError: "Failed to resolve bearer token for pushgateway. Environment variable 'INVALID_ENV' not found.",
+		},
+		{
+			name: "JobName: Fail to resolve job name",
+			config: &Config{
+				Pushgateway: Pushgateway{
+					Address: "http://localhost:9091",
+					Job:     "env:INVALID_ENV",
+				},
+				FailOnError: true,
+			},
+			expectedError: "Failed to resolve jobName for pushgateway. Environment variable 'INVALID_ENV' not found.",
 		},
 	}
 
@@ -311,6 +392,19 @@ func TestParse(t *testing.T) {
 		expectedError error
 	}{
 		{
+			name: "Certificate error",
+			config: &Config{
+				Certs: []certificates.Certificate{
+					{
+						Name: "test_cert",
+					},
+				},
+				Pushgateway: Pushgateway{},
+				FailOnError: true,
+			},
+			expectedError: fmt.Errorf("Certificate 'test_cert' has no 'path' defined."),
+		},
+		{
 			name: "Simple config (success)",
 			config: &Config{
 				Certs: []certificates.Certificate{
@@ -337,20 +431,7 @@ func TestParse(t *testing.T) {
 				},
 				FailOnError: true,
 			},
-			expectedError: fmt.Errorf("Failed to resolve address for pushgateway: Environment variable 'INVALID_ENV' not found."),
-		},
-		{
-			name: "Certificate error",
-			config: &Config{
-				Certs: []certificates.Certificate{
-					{
-						Name: "test_cert",
-					},
-				},
-				Pushgateway: Pushgateway{},
-				FailOnError: true,
-			},
-			expectedError: fmt.Errorf("Certificate 'test_cert' has no 'path' defined"),
+			expectedError: fmt.Errorf("Failed to resolve address for pushgateway. Environment variable 'INVALID_ENV' not found."),
 		},
 	}
 

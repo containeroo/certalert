@@ -34,6 +34,9 @@ var FileExtensionsToType = map[string]string{
 // FileExtensionsTypes is a map of file extensions to certificate types
 var FileExtensionsTypes = utils.ExtractMapKeys(FileExtensionsToType, true)
 
+// LenFileExtensionsTypes is the length of FileExtensionsTypes
+var LenFileExtensionsTypes = len(FileExtensionsTypes)
+
 // Certificate represents a certificate configuration
 type Certificate struct {
 	Name     string `mapstructure:"name"`
