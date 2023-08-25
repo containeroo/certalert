@@ -12,7 +12,16 @@ var (
 			Name: "certalert_certificate_epoch_seconds",
 			Help: "The epoch of the certificate",
 		},
-		[]string{"instance", "subject", "type"},
+		[]string{"instance", "subject", "type", "reason"},
+	)
+
+	// New metric to track failed certificate extractions
+	CertificateExtractionStatus = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "certalert_certificate_extraction_status",
+			Help: "Status of certificate extraction (0=success, 1=failure)",
+		},
+		[]string{"instance", "subject", "type", "reason"},
 	)
 )
 
@@ -23,7 +32,8 @@ type Metrics struct {
 // NewMetrics registers all prometheus metrics
 func NewMetrics() *Metrics {
 	reg := prometheus.NewRegistry()
-	reg.Register(CertificateEpoch) // Register the global metric
+	reg.Register(CertificateEpoch)            // Register the global metric
+	reg.Register(CertificateExtractionStatus) // Register the new metric
 
 	return &Metrics{
 		Registry: reg,
