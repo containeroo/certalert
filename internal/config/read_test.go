@@ -51,4 +51,16 @@ func TestReadConfig(t *testing.T) {
 		err := config.Read("path/to/non_existent.yaml")
 		assert.Error(t, err)
 	})
+
+	t.Run("Invalid YAML", func(t *testing.T) {
+		filePath := createTempFile("FailOnError: not_an_integer")
+		defer os.Remove(filePath)
+
+		// Run the test
+		cfg := &Config{}
+		err := cfg.Read(filePath)
+		assert.Error(t, err) // We expect an error because the file has incorrect content
+		assert.Contains(t, err.Error(), "Failed to unmarshal config file: 1 error(s) decoding:\n\n* cannot parse 'failOnError' as bool: strconv.ParseBool: parsing \"not_an_integer\": invalid syntax")
+
+	})
 }

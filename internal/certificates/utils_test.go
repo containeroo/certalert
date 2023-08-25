@@ -43,6 +43,20 @@ func TestProcess(t *testing.T) {
 		ExpectedError string
 	}{
 		{
+			Name:        "skips invalid certificate",
+			FailOnError: true,
+			Certificates: []Certificate{
+				{
+					Name:    "InvalidCert",
+					Path:    "../tests/certs/jks/broken.jks",
+					Type:    "jks",
+					Enabled: utils.BoolPtr(true),
+				},
+			},
+			ExpectedInfo:  []CertificateInfo(nil),
+			ExpectedError: "Failed to read certificate file '../tests/certs/jks/broken.jks'. open ../tests/certs/jks/broken.jks: no such file or directory",
+		},
+		{
 			Name:        "handles valid certificates",
 			FailOnError: true,
 			Certificates: []Certificate{
@@ -89,20 +103,6 @@ func TestProcess(t *testing.T) {
 			ExpectedInfo: []CertificateInfo(nil),
 		},
 		{
-			Name:        "skips invalid certificate",
-			FailOnError: true,
-			Certificates: []Certificate{
-				{
-					Name:    "InvalidCert",
-					Path:    "../tests/certs/jks/broken.jks",
-					Type:    "jks",
-					Enabled: utils.BoolPtr(true),
-				},
-			},
-			ExpectedInfo:  []CertificateInfo(nil),
-			ExpectedError: "Failed to read certificate file '../tests/certs/jks/broken.jks': open ../tests/certs/jks/broken.jks: no such file or directory",
-		},
-		{
 			Name:        "fails on extraction error",
 			FailOnError: true,
 			Certificates: []Certificate{
@@ -113,7 +113,7 @@ func TestProcess(t *testing.T) {
 					Enabled: utils.BoolPtr(true),
 				},
 			},
-			ExpectedError: "Failed to read certificate file 'fail': open fail: no such file or directory",
+			ExpectedError: "Failed to read certificate file 'fail'. open fail: no such file or directory",
 		},
 		{
 			Name:        "fails on invalid type (failsOnError = true)",
@@ -195,9 +195,27 @@ func TestProcess(t *testing.T) {
 		assert.Equal(t, "invalid", result[0].Type)
 		assert.Equal(t, "Unknown certificate type 'invalid'", result[0].Error)
 	})
+
+	t.Run("fails on extracting invalid password (failsOnError = false)", func(t *testing.T) {
+		certs := []Certificate{
+			{
+				Name:    "FailCert",
+				Path:    "fail",
+				Type:    "jks",
+				Enabled: utils.BoolPtr(true),
+			},
+		}
+		result, err := Process(certs, false)
+		assert.Nil(t, err)
+		assert.Equal(t, 1, len(result))
+		assert.Equal(t, "FailCert", result[0].Name)
+		assert.Equal(t, "jks", result[0].Type)
+		assert.Equal(t, "Failed to read certificate file 'fail'. open fail: no such file or directory", result[0].Error)
+	})
+
 }
 
-func TesthandleError(t *testing.T) {
+func TestHandleError(t *testing.T) {
 	var certInfoList []CertificateInfo
 
 	t.Run("failOnError is true", func(t *testing.T) {

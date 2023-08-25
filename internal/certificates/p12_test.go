@@ -127,7 +127,7 @@ func TestExtractP12CertificatesInfo(t *testing.T) {
 			// Run the function under test
 			certData, err := os.ReadFile(tc.FilePath)
 			if err != nil {
-				t.Errorf("Failed to read certificate file '%s': %v", tc.Name, err)
+				t.Errorf("Failed to read certificate file '%s'. %v", tc.Name, err)
 			}
 			certs, err := ExtractP12CertificatesInfo("TestCert", certData, tc.Password, true)
 

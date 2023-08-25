@@ -110,7 +110,7 @@ func TestExtractP7CertificatesInfo(t *testing.T) {
 		t.Run(tc.Name, func(t *testing.T) {
 			certData, err := os.ReadFile(tc.FilePath)
 			if err != nil {
-				t.Fatalf("Failed to read certificate file '%s': %v", tc.Name, err)
+				t.Fatalf("Failed to read certificate file '%s'. %v", tc.Name, err)
 			}
 			certs, err := ExtractP7CertificatesInfo("TestCert", certData, "", true)
 
