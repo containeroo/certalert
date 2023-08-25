@@ -19,25 +19,22 @@ func ExtractP12CertificatesInfo(name string, certData []byte, password string, f
 
 	// Prepare for extraction
 	certs := append(caCerts, certificate)
-	var counter int
 
 	// Extract certificates
 	for _, cert := range certs {
-		counter++
 		subject := cert.Subject.CommonName
 		if subject == "" {
-			subject = fmt.Sprint(counter)
+			subject = fmt.Sprintf("%d", len(certInfoList)+1)
 		}
-
 		certInfo := CertificateInfo{
 			Name:    name,
 			Subject: subject,
 			Epoch:   cert.NotAfter.Unix(),
 			Type:    "p12",
 		}
-		log.Debugf("Certificate '%s' expires on %s", certInfo.Subject, certInfo.ExpiryAsTime())
-
 		certInfoList = append(certInfoList, certInfo)
+
+		log.Debugf("Certificate '%s' expires on %s", certInfo.Subject, certInfo.ExpiryAsTime())
 	}
 
 	return certInfoList, nil

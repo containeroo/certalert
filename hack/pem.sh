@@ -39,7 +39,15 @@ echo "invalid" > cert.invalid
 
 # create pem file with a certificate chain
 cat final.crt intermediate.crt root.crt > chain.crt
+echo "Created chain.crt"
+
 # create pem file with a certificate chain and private key
 cat final.key final.crt intermediate.crt root.crt > chain.pem
+echo "Created chain.pem"
+
+# No Subject
+openssl genpkey -algorithm RSA -out no_subject.key -pass pass:password
+openssl req -new -x509 -key no_subject.key -out no_subject.crt -days 365 -subj "/"
+echo "Created no_subject.p7b"
 
 popd

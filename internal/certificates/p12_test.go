@@ -67,7 +67,7 @@ func TestExtractP12CertificatesInfo(t *testing.T) {
 			ExpectedError:   "Failed to decode P12 file 'TestCert': pkcs12: decryption password incorrect",
 		},
 		{
-			Name:            "Test P12 certificate which is broken",
+			Name:            "Test P12 certificate with is broken",
 			FilePath:        "../../tests/certs/p12/broken.p12",
 			Password:        "",
 			ExpectedResults: []CertificateInfo{{}},

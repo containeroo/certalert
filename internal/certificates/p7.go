@@ -1,6 +1,7 @@
 package certificates
 
 import (
+	"crypto/x509"
 	"encoding/pem"
 	"fmt"
 
@@ -14,40 +15,68 @@ func ExtractP7CertificatesInfo(name string, certData []byte, password string, fa
 
 	// Parse all PEM blocks and filter by type
 	for {
-		block, remainingData := pem.Decode(certData)
+		block, rest := pem.Decode(certData)
 		if block == nil {
 			break
 		}
 
+		certData = block.Bytes
 		switch block.Type {
 		case "PKCS7":
-			certData = block.Bytes
-			// Parse the P7B data
 			p7, err := pkcs7.Parse(certData)
 			if err != nil {
-				return certInfoList, handleError(&certInfoList, name, "p7", fmt.Sprintf("Failed to parse P7B file '%s': %v", name, err), failOnError)
+				if err := handleError(&certInfoList, name, "p7", fmt.Sprintf("Failed to parse P7B file '%s': %v", name, err), failOnError); err != nil {
+					return certInfoList, err
+				}
 			}
 
-			// Extract certificates
 			for _, cert := range p7.Certificates {
 				subject := cert.Subject.CommonName
+				if subject == "" {
+					subject = fmt.Sprintf("%d", len(certInfoList)+1)
+				}
 				certInfo := CertificateInfo{
 					Name:    name,
 					Subject: subject,
 					Epoch:   cert.NotAfter.Unix(),
-					Type:    "p7b",
+					Type:    "p7",
 				}
-				log.Debugf("Certificate '%s' expires on %s", certInfo.Subject, certInfo.ExpiryAsTime())
 				certInfoList = append(certInfoList, certInfo)
+
+				log.Debugf("Certificate '%s' expires on %s", certInfo.Subject, certInfo.ExpiryAsTime())
 			}
+		case "CERTIFICATE":
+			cert, err := x509.ParseCertificate(block.Bytes)
+			if err != nil {
+				if err := handleError(&certInfoList, name, "p7", fmt.Sprintf("Failed to parse certificate '%s': %v", name, err), failOnError); err != nil {
+					return certInfoList, err
+				}
+			}
+
+			subject := cert.Subject.CommonName
+			if subject == "" {
+				subject = fmt.Sprintf("%d", len(certInfoList)+1)
+			}
+			certInfo := CertificateInfo{
+				Name:    name,
+				Subject: subject,
+				Epoch:   cert.NotAfter.Unix(),
+				Type:    "p7",
+			}
+			certInfoList = append(certInfoList, certInfo)
+
+			log.Debugf("Certificate '%s' expires on %s", certInfo.Subject, certInfo.ExpiryAsTime())
+
+			certData = rest // Move to the next PEM block
 		default:
-			log.Warningf("Unknown PEM block type '%s' in P7B file", block.Type)
+			log.Debug("Skip unknown PEM block")
 		}
-		certData = remainingData
+		certData = rest
+		continue
 	}
 
 	if len(certInfoList) == 0 {
-		return certInfoList, handleError(&certInfoList, name, "p7", fmt.Sprintf("Failed to decode any certificate in '%s'", name), failOnError)
+		return certInfoList, handleError(&certInfoList, name, "pem", fmt.Sprintf("Failed to decode any certificate in '%s'", name), failOnError)
 	}
 
 	return certInfoList, nil

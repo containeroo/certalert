@@ -13,16 +13,18 @@ func TestExtractTrustStoreCertificatesInfo(t *testing.T) {
 		Password        string
 		ExpectedResults []CertificateInfo
 		ExpectedError   string
+		FailOnError     bool
 	}
 
 	// Define test cases
 	testCases := []testCase{
 		{
-			Name:            "Test TrustStore certificate - broken",
+			Name:            "Test TrustStore certificate - broken (FailOnError=true)",
 			FilePath:        "../../tests/certs/truststore/broken.jks",
 			Password:        "password",
 			ExpectedResults: []CertificateInfo{},
 			ExpectedError:   "Failed to decode P12 file 'TestCert': pkcs12: error reading P12 data: asn1: structure error: tags don't match (16 vs {class:1 tag:2 length:114 isCompound:true}) {optional:false explicit:false application:false private:false defaultValue:<nil> tag:<nil> stringType:0 timeType:0 set:false omitEmpty:false} pfxPdu @2",
+			FailOnError:     true,
 		},
 		{
 			Name:     "Test TrustStore certificate - valid",
@@ -37,6 +39,7 @@ func TestExtractTrustStoreCertificatesInfo(t *testing.T) {
 				},
 			},
 			ExpectedError: "",
+			FailOnError:   true,
 		},
 		{
 			Name:     "Test TrustStore certificate - valid chain",
@@ -63,6 +66,7 @@ func TestExtractTrustStoreCertificatesInfo(t *testing.T) {
 				},
 			},
 			ExpectedError: "",
+			FailOnError:   true,
 		},
 	}
 
@@ -74,7 +78,7 @@ func TestExtractTrustStoreCertificatesInfo(t *testing.T) {
 			if err != nil {
 				t.Errorf("Failed to read certificate file '%s': %v", tc.Name, err)
 			}
-			certs, err := ExtractTrustStoreCertificatesInfo("TestCert", certData, tc.Password, true)
+			certs, err := ExtractTrustStoreCertificatesInfo("TestCert", certData, tc.Password, tc.FailOnError)
 
 			if tc.ExpectedError == "" && err != nil {
 				t.Errorf("Test case '%s': unexpected error: %v", tc.Name, err)
