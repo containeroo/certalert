@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"certalert/internal/config"
+	"certalert/internal/utils"
 	"net/http"
 
 	log "github.com/sirupsen/logrus"
@@ -13,19 +14,24 @@ import (
 func Reload(w http.ResponseWriter, r *http.Request) {
 	log.Debugf("Force reloading configuration")
 
-	if err := config.ReadConfigFile(viper.ConfigFileUsed(), &config.App); err != nil {
+	if err := config.App.Read(viper.ConfigFileUsed()); err != nil {
 		log.Fatalf("Unable to read config: %s", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	if err := config.ParseConfig(&config.App, config.FailOnError); err != nil {
+	if err := config.App.Parse(); err != nil {
 		log.Fatalf("Unable to parse config: %s", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	config.AppCopy = config.App.DeepCopy()
+	if err := utils.DeepCopy(config.App, &config.AppCopy); err != nil {
+		log.Fatalf("Unable to copy config: %s", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	if err := config.RedactConfig(&config.AppCopy); err != nil {
 		log.Fatalf("Unable to redact config: %s", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)

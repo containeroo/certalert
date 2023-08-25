@@ -1,6 +1,8 @@
 package config
 
-import "certalert/internal/certificates"
+import (
+	"certalert/internal/certificates"
+)
 
 // Config represents the config file
 var App Config
@@ -8,12 +10,11 @@ var App Config
 // ConfigCopy represents the config file with sensitive data redacted
 var AppCopy Config
 
-var FailOnError bool
-
 // Config represents the config file
 type Config struct {
-	AutoReloadConfig bool                       `mapstructure:"autoReloadConfig"`
 	Version          string                     `mapstructure:"version"`
+	AutoReloadConfig bool                       `mapstructure:"autoReloadConfig"`
+	FailOnError      bool                       `mapstructure:"failOnError"`
 	Server           Server                     `mapstructure:"server"`
 	Pushgateway      Pushgateway                `mapstructure:"pushgateway"`
 	Certs            []certificates.Certificate `mapstructure:"certs"`

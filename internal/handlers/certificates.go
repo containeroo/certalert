@@ -11,7 +11,7 @@ import (
 func Certificates(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
 
-	certificatesInfo, err := certificates.Process(config.App.Certs, config.FailOnError)
+	certificatesInfo, err := certificates.Process(config.App.Certs, config.App.FailOnError)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

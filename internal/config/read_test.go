@@ -1,50 +1,65 @@
 package config
 
 import (
+	"certalert/internal/test_helpers"
+	"fmt"
 	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func TestReadConfigFile(t *testing.T) {
-	// Define your config structure, for example:
-	type Config struct {
-		Key    string
-		Nested struct {
-			Key string
+func TestReadConfig(t *testing.T) {
+	t.Run("Valid full configuration", func(t *testing.T) {
+		filePath, err := test_helpers.CreateTempFile("autoReloadConfig: true\nversion: \"1.0\"")
+		if err != nil {
+			t.Fatalf("Failed to create temp file: %v", err)
 		}
-	}
+		defer os.Remove(filePath.Name())
 
-	// Temporarily create a config file
-	tempFile, err := os.CreateTemp(os.TempDir(), "*.yaml")
-	assert.NoError(t, err, "Failed to create temp file.")
+		fc, _ := os.ReadFile(filePath.Name())
+		fmt.Println(string(fc))
 
-	defer os.Remove(tempFile.Name()) // clean up
+		config := &Config{}
+		err = config.Read(filePath.Name())
+		assert.NoError(t, err)
+		assert.Equal(t, true, config.AutoReloadConfig)
+		assert.Equal(t, "1.0", config.Version)
+	})
 
-	tempFileName := tempFile.Name()
+	t.Run("Partial configuration", func(t *testing.T) {
+		filePath, err := test_helpers.CreateTempFile("version: \"1.1\"")
+		if err != nil {
+			t.Fatalf("Failed to create temp file: %v", err)
+		}
+		defer os.Remove(filePath.Name())
 
-	content := []byte("key: value\nnested:\n  key: nested value\n")
-	_, err = tempFile.Write(content)
-	assert.NoError(t, err, "Failed to write to temp file.")
-	tempFile.Close()
+		config := &Config{}
+		err = config.Read(filePath.Name())
+		assert.NoError(t, err)
+		assert.Equal(t, false, config.AutoReloadConfig)
+		assert.Equal(t, "1.1", config.Version)
+	})
 
-	var cfg Config
+	// Test reading a non-existent file
+	t.Run("Invalid file path", func(t *testing.T) {
+		config := &Config{}
+		err := config.Read("path/to/non_existent.yaml")
+		assert.Error(t, err)
+	})
 
-	// Call the function under test
-	err = ReadConfigFile(tempFileName, &cfg)
-	assert.NoError(t, err, "Failed to read config file.")
+	t.Run("Invalid YAML", func(t *testing.T) {
+		filePath, err := test_helpers.CreateTempFile("FailOnError: not_an_integer")
+		if err != nil {
+			t.Fatalf("Failed to create temp file: %v", err)
+		}
+		defer os.Remove(filePath.Name())
 
-	// Check the values in the returned config
-	assert.Equal(t, "value", cfg.Key)
-	assert.Equal(t, "nested value", cfg.Nested.Key)
+		// Run the test
+		cfg := &Config{}
+		err = cfg.Read(filePath.Name())
+		assert.Error(t, err) // We expect an error because the file has incorrect content
+		assert.Contains(t, err.Error(), "Failed to unmarshal config file: 1 error(s) decoding:\n\n* cannot parse 'failOnError' as bool: strconv.ParseBool: parsing \"not_an_integer\": invalid syntax")
 
-	// Test errors
-	err = ReadConfigFile("not existing", &cfg)
-	assert.Error(t, err, "Failed to read config file.")
-
-	// marshal error
-	err = ReadConfigFile(tempFileName, &cfg.Key)
-	assert.Error(t, err, "Failed to read config file.")
-
+	})
 }

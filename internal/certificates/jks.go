@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/pavlo-v-chernykh/keystore-go/v4"
+	log "github.com/sirupsen/logrus"
 )
 
 func ExtractJKSCertificatesInfo(name string, certData []byte, password string, failOnError bool) ([]CertificateInfo, error) {
@@ -57,13 +58,15 @@ func ExtractJKSCertificatesInfo(name string, certData []byte, password string, f
 			if subject == "" {
 				subject = fmt.Sprintf("%d", len(certInfoList)+1)
 			}
-
-			certInfoList = append(certInfoList, CertificateInfo{
+			certInfo := CertificateInfo{
 				Name:    name,
 				Subject: subject,
 				Epoch:   certificate.NotAfter.Unix(),
 				Type:    "jks",
-			})
+			}
+			certInfoList = append(certInfoList, certInfo)
+
+			log.Debugf("Certificate '%s' expires on %s", subject, certInfo.ExpiryAsTime())
 		}
 	}
 

@@ -31,9 +31,9 @@ func Process(certificates []Certificate, failOnError bool) (certificatesInfo []C
 
 		certData, err := os.ReadFile(cert.Path)
 		if err != nil {
-			// Accessibiliy of the file is checked in the config validation, if reached
+			// Accessibility of the file is checked in the config validation, if reached
 			// here, the file exists but can't be read for some reason.
-			if err := handleError(&certInfoList, cert.Name, cert.Type, fmt.Sprintf("Failed to read certificate file '%s': %v", cert.Path, err), failOnError); err != nil {
+			if err := handleError(&certInfoList, cert.Name, cert.Type, fmt.Sprintf("Failed to read certificate file '%s'. %v", cert.Path, err), failOnError); err != nil {
 				return nil, err
 			}
 			continue

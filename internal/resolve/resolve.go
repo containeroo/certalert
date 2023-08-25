@@ -56,7 +56,7 @@ func resolveFileVariable(filePathWithKey string) (string, error) {
 	filePath = os.ExpandEnv(filePath)
 	file, err := os.Open(filePath)
 	if err != nil {
-		return "", fmt.Errorf("Failed to open file '%s': %v", filePath, err)
+		return "", fmt.Errorf("Failed to open file '%s'. %v", filePath, err)
 	}
 	defer file.Close()
 
@@ -67,7 +67,7 @@ func resolveFileVariable(filePathWithKey string) (string, error) {
 	// No key specified, read the whole file
 	data, err := io.ReadAll(file)
 	if err != nil {
-		return "", fmt.Errorf("Failed to read file '%s': %v", filePath, err)
+		return "", fmt.Errorf("Failed to read file '%s'. %v", filePath, err)
 	}
 	return strings.TrimSpace(string(data)), nil
 }
