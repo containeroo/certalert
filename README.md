@@ -3,6 +3,10 @@
 This program serves as a dynamic tool for the purpose of handling and monitoring certificates, and presenting their expiration dates in an epoch format. This design allows Prometheus to poll these metrics.
 
 On invocation of the `/metrics` endpoint by Prometheus, the tool performs a real-time check on the expiration dates of the certificates.
+It exposes the metrics:
+
+- **certalert_certificate_epoch_seconds**: The expiration date of the certificate as a epoch
+- **certalert_certificate_extraction_status**: Status of certificate extraction (0=success, 1=failure)
 
 Additionally, `certalert` also supports forwarding the expiration date epoch directly to a Pushgateway server, offering flexibility and control over monitoring workflows or simply output them as `json`, `yaml` or a `text` table.
 

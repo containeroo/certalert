@@ -10,7 +10,7 @@ var (
 	CertificateEpoch = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name: "certalert_certificate_epoch_seconds",
-			Help: "The epoch of the certificate",
+			Help: "The expiration date of the certificate as a epoch",
 		},
 		[]string{"instance", "subject", "type", "reason"},
 	)
