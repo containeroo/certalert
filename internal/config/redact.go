@@ -15,10 +15,6 @@ func redactVariable(s string) string {
 
 // RedactConfig redacts sensitive data from a config
 func RedactConfig(config *Config) error {
-	if utils.HasKey(config.Pushgateway, "Address") {
-		config.Pushgateway.Address = redactVariable(config.Pushgateway.Address)
-	}
-
 	if utils.HasKey(config.Pushgateway, "Auth.Basic.Username") {
 		config.Pushgateway.Auth.Basic.Username = redactVariable(config.Pushgateway.Auth.Basic.Username)
 	}
