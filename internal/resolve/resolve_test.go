@@ -1,29 +1,14 @@
 package resolve
 
 import (
+	"certalert/internal/test_helpers" // Make sure this path is correct
+
 	"fmt"
 	"os"
 	"testing"
 )
 
 func TestResolveVariable(t *testing.T) {
-	createTempFile := func(content string) *os.File {
-		tmpfile, err := os.CreateTemp("", "example")
-		if err != nil {
-			t.Fatalf("Failed to create temp file: %v", err)
-		}
-
-		if _, err := tmpfile.Write([]byte(content)); err != nil {
-			t.Fatalf("Failed to write to temp file: %v", err)
-		}
-
-		if err := tmpfile.Close(); err != nil {
-			t.Fatalf("Failed to close temp file: %v", err)
-		}
-
-		return tmpfile
-	}
-
 	t.Run("with no variable", func(t *testing.T) {
 		result, err := ResolveVariable("no-variable")
 		if err != nil {
@@ -58,10 +43,13 @@ func TestResolveVariable(t *testing.T) {
 	})
 
 	t.Run("key not found in file", func(t *testing.T) {
-		tmpfile := createTempFile("key1 = value 1\nkey2=value 2\nkey3 =   value 3")
+		tmpfile, err := test_helpers.CreateTempFile("key1 = value 1\nkey2=value 2\nkey3 =   value 3")
+		if err != nil {
+			t.Fatalf("Failed to create temp file: %v", err)
+		}
 		defer os.Remove(tmpfile.Name())
 
-		_, err := ResolveVariable("file:" + tmpfile.Name() + "//key4")
+		_, err = ResolveVariable("file:" + tmpfile.Name() + "//key4")
 		if err == nil {
 			t.Fatalf("Expected an error, got nil")
 		}
@@ -88,8 +76,11 @@ func TestResolveVariable(t *testing.T) {
 	})
 
 	t.Run("with file variable", func(t *testing.T) {
-		tmpfile := createTempFile("value1")
-		defer os.Remove(tmpfile.Name()) // clean up after test
+		tmpfile, err := test_helpers.CreateTempFile("value1")
+		if err != nil {
+			t.Fatalf("Failed to create temp file: %v", err)
+		}
+		defer os.Remove(tmpfile.Name())
 
 		result, err := ResolveVariable(fmt.Sprintf("file:%s", tmpfile.Name()))
 		if err != nil {
@@ -102,8 +93,11 @@ func TestResolveVariable(t *testing.T) {
 	})
 
 	t.Run("with file variable and key", func(t *testing.T) {
-		tmpfile := createTempFile("key1 = value 1\nkey2=value 2\nkey3 =   value 3")
-		defer os.Remove(tmpfile.Name()) // clean up after test
+		tmpfile, err := test_helpers.CreateTempFile("key1 = value 1\nkey2=value 2\nkey3 =   value 3")
+		if err != nil {
+			t.Fatalf("Failed to create temp file: %v", err)
+		}
+		defer os.Remove(tmpfile.Name())
 
 		result, err := resolveFileVariable(tmpfile.Name() + "//key2")
 		if err != nil {
@@ -118,26 +112,12 @@ func TestResolveVariable(t *testing.T) {
 }
 
 func TestResolveFileVariable(t *testing.T) {
-	createTempFile := func(content string) *os.File {
-		tmp, err := os.CreateTemp("", "example")
+	t.Run("with file and no key", func(t *testing.T) {
+		tmpfile, err := test_helpers.CreateTempFile("content")
 		if err != nil {
 			t.Fatalf("Failed to create temp file: %v", err)
 		}
-
-		if _, err := tmp.Write([]byte(content)); err != nil {
-			t.Fatalf("Failed to write to temp file: %v", err)
-		}
-
-		if err := tmp.Close(); err != nil {
-			t.Fatalf("Failed to close temp file: %v", err)
-		}
-
-		return tmp
-	}
-
-	t.Run("with file and no key", func(t *testing.T) {
-		tmpfile := createTempFile("content")
-		defer os.Remove(tmpfile.Name()) // clean up after test
+		defer os.Remove(tmpfile.Name())
 
 		result, err := resolveFileVariable(tmpfile.Name())
 		if err != nil {
@@ -150,8 +130,11 @@ func TestResolveFileVariable(t *testing.T) {
 	})
 
 	t.Run("with file and key", func(t *testing.T) {
-		tmpfile := createTempFile("key1 = value 1\nkey2=value 2\nkey3 =   value 3")
-		defer os.Remove(tmpfile.Name()) // clean up after test
+		tmpfile, err := test_helpers.CreateTempFile("key1 = value 1\nkey2=value 2\nkey3 =   value 3")
+		if err != nil {
+			t.Fatalf("Failed to create temp file: %v", err)
+		}
+		defer os.Remove(tmpfile.Name())
 
 		result, err := resolveFileVariable(tmpfile.Name() + "//key2")
 		if err != nil {
@@ -164,8 +147,11 @@ func TestResolveFileVariable(t *testing.T) {
 	})
 
 	t.Run("with file and key with spaces and tabs", func(t *testing.T) {
-		tmpfile := createTempFile("key1 =	  value 1\nkey2=value 2\nkey3 =   value 3")
-		defer os.Remove(tmpfile.Name()) // clean up after test
+		tmpfile, err := test_helpers.CreateTempFile("key1 =	  value 1\nkey2=value 2\nkey3 =   value 3")
+		if err != nil {
+			t.Fatalf("Failed to create temp file: %v", err)
+		}
+		defer os.Remove(tmpfile.Name())
 
 		result, err := resolveFileVariable(tmpfile.Name() + "//key1")
 		if err != nil {
@@ -228,36 +214,15 @@ func TestResolveFileVariable(t *testing.T) {
 }
 
 func TestSearchKeyInFile(t *testing.T) {
-	createTempFile := func(content string) *os.File {
-		tmpfile, err := os.CreateTemp("", "example")
+
+	t.Run("with file and key", func(t *testing.T) {
+		tmpfile, err := test_helpers.CreateTempFile("key1 =	value 1\nkey2=value 2\nkey3 =   value 3")
 		if err != nil {
 			t.Fatalf("Failed to create temp file: %v", err)
 		}
+		defer os.Remove(tmpfile.Name())
 
-		if _, err := tmpfile.Write([]byte(content)); err != nil {
-			t.Fatalf("Failed to write to temp file: %v", err)
-		}
-
-		if err := tmpfile.Close(); err != nil {
-			t.Fatalf("Failed to close temp file: %v", err)
-		}
-
-		return tmpfile
-	}
-
-	readTempFile := func(filePath string) (*os.File, error) {
-		file, err := os.Open(filePath)
-		if err != nil {
-			return nil, fmt.Errorf("Failed to open file '%s': %v", filePath, err)
-		}
-		return file, nil
-	}
-
-	t.Run("with file and key", func(t *testing.T) {
-		tmpfile := createTempFile("key1 =	value 1\nkey2=value 2\nkey3 =   value 3")
-		defer os.Remove(tmpfile.Name()) // clean up after test
-
-		file, err := readTempFile(tmpfile.Name())
+		file, err := test_helpers.ReadFile(tmpfile.Name())
 		defer file.Close()
 
 		if err != nil {
@@ -275,10 +240,13 @@ func TestSearchKeyInFile(t *testing.T) {
 	})
 
 	t.Run("with file and key with spaces and tabs", func(t *testing.T) {
-		tmpfile := createTempFile("key1 =	value 1\nkey2	  =   	  value 2\nkey3 =   value 3")
-		defer os.Remove(tmpfile.Name()) // clean up after test
+		tmpfile, err := test_helpers.CreateTempFile("key1 =	value 1\nkey2	  =   	  value 2\nkey3 =   value 3")
+		if err != nil {
+			t.Fatalf("Failed to create temp file: %v", err)
+		}
+		defer os.Remove(tmpfile.Name())
 
-		file, err := readTempFile(tmpfile.Name())
+		file, err := test_helpers.ReadFile(tmpfile.Name())
 		defer file.Close()
 
 		if err != nil {

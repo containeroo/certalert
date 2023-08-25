@@ -230,13 +230,26 @@ func TestDeepCopy(t *testing.T) {
 		}
 	})
 
-	t.Run("Test unmarshallable type", func(t *testing.T) {
+	t.Run("Test unmarshallable SRC type", func(t *testing.T) {
 		type UnmarshalableType struct {
 			F func()
 		}
 		unmarshalable := &UnmarshalableType{}
 		err := DeepCopy(unmarshalable, &UnmarshalableType{})
 		errMsg := fmt.Sprintf("error while marshaling: json: unsupported type: func()")
+		if err == nil || err.Error() != errMsg {
+			t.Errorf("Expected '%s', got: '%v'", errMsg, err)
+		}
+	})
+
+	t.Run("Test unmarshallable DST type", func(t *testing.T) {
+		unmarshalable := struct {
+			Name string
+		}{
+			Name: "John",
+		}
+		err := DeepCopy(unmarshalable, BoolPtr(true))
+		errMsg := fmt.Sprintf("error while unmarshaling: json: cannot unmarshal object into Go value of type bool")
 		if err == nil || err.Error() != errMsg {
 			t.Errorf("Expected '%s', got: '%v'", errMsg, err)
 		}

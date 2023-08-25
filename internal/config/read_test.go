@@ -1,7 +1,8 @@
 package config
 
 import (
-	"io/ioutil"
+	"certalert/internal/test_helpers"
+	"fmt"
 	"os"
 	"testing"
 
@@ -9,37 +10,32 @@ import (
 )
 
 func TestReadConfig(t *testing.T) {
-	// Helper to create temporary files
-	createTempFile := func(content string) string {
-		tempFile, err := ioutil.TempFile(os.TempDir(), "*.yaml")
-		assert.NoError(t, err)
-		defer tempFile.Close()
-
-		_, err = tempFile.WriteString(content)
-		assert.NoError(t, err)
-
-		return tempFile.Name()
-	}
-
-	// Test reading a valid full configuration
 	t.Run("Valid full configuration", func(t *testing.T) {
-		filePath := createTempFile("autoReloadConfig: true\nversion: \"1.0\"")
-		defer os.Remove(filePath)
+		filePath, err := test_helpers.CreateTempFile("autoReloadConfig: true\nversion: \"1.0\"")
+		if err != nil {
+			t.Fatalf("Failed to create temp file: %v", err)
+		}
+		defer os.Remove(filePath.Name())
+
+		fc, _ := os.ReadFile(filePath.Name())
+		fmt.Println(string(fc))
 
 		config := &Config{}
-		err := config.Read(filePath)
+		err = config.Read(filePath.Name())
 		assert.NoError(t, err)
 		assert.Equal(t, true, config.AutoReloadConfig)
 		assert.Equal(t, "1.0", config.Version)
 	})
 
-	// Test reading a partial configuration
 	t.Run("Partial configuration", func(t *testing.T) {
-		filePath := createTempFile("version: \"1.1\"")
-		defer os.Remove(filePath)
+		filePath, err := test_helpers.CreateTempFile("version: \"1.1\"")
+		if err != nil {
+			t.Fatalf("Failed to create temp file: %v", err)
+		}
+		defer os.Remove(filePath.Name())
 
 		config := &Config{}
-		err := config.Read(filePath)
+		err = config.Read(filePath.Name())
 		assert.NoError(t, err)
 		assert.Equal(t, false, config.AutoReloadConfig)
 		assert.Equal(t, "1.1", config.Version)
@@ -53,12 +49,15 @@ func TestReadConfig(t *testing.T) {
 	})
 
 	t.Run("Invalid YAML", func(t *testing.T) {
-		filePath := createTempFile("FailOnError: not_an_integer")
-		defer os.Remove(filePath)
+		filePath, err := test_helpers.CreateTempFile("FailOnError: not_an_integer")
+		if err != nil {
+			t.Fatalf("Failed to create temp file: %v", err)
+		}
+		defer os.Remove(filePath.Name())
 
 		// Run the test
 		cfg := &Config{}
-		err := cfg.Read(filePath)
+		err = cfg.Read(filePath.Name())
 		assert.Error(t, err) // We expect an error because the file has incorrect content
 		assert.Contains(t, err.Error(), "Failed to unmarshal config file: 1 error(s) decoding:\n\n* cannot parse 'failOnError' as bool: strconv.ParseBool: parsing \"not_an_integer\": invalid syntax")
 
