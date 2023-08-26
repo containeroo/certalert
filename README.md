@@ -85,7 +85,7 @@ The primary function is to utilize the `serve` command to initiate a web server 
 
 Certificates can be defined with properties such as their `name`, `path`, `type`, and an optional `password`. You have the flexibility to enable or disable specific certificate checks with the field `enabled`. Additionally, the `type` of certificate can either be manually defined or determined by the system based on the file extension.
 
-Credentials, such as `passwords`, can be specified in multiple ways: `plain text`, an `environment variable`, or a `file` containing the credentials. For files with multiple key-value pairs, a specific key can be chosen by appending `://KEY` at the end of the file path. See `Providing Credentials` for more details.
+Credentials, such as `passwords`, can be specified in multiple ways: `plain text`, an `environment variable`, or a `file` containing the credentials. For files with multiple key-value pairs, a specific key can be chosen by appending `//KEY` at the end of the file path. See `Providing Credentials` for more details.
 
 ## Pushgateway Interaction
 
@@ -124,7 +124,7 @@ Here are the available properties for the certificate:
 - **name**: This refers to the unique identifier of the certificate. It's used for distinguishing between different certificates. If not provided, it defaults to the certificate's filename, replacing all spaces (` `), dots (`.`) and underlines (`_`) with a dash (`-`).
 - **enabled**: This toggle enables or disables this check. By default, it is set to `true`.
 - **path**: This specifies the location of the certificate file in your system.
-- **type**: This denotes the type of the certificate. If it's not explicitly specified, the system will attempt to determine the type based on the file extension. Allowed types are: p12, pkcs12, pfx, pem, crt and jks.
+- **type**: This denotes the type of the certificate. If it's not explicitly specified, the system will attempt to determine the type based on the file extension. Allowed types are: `p12`, `pkcs12`, `pfx`, `pem`, `crt`, `jks`, `p7`, `p7b`, `p7c`, `truststore` or `ts`.
 - **password**: This optional property allows you to set the password for the certificate.
 
 #### Providing Credentials
@@ -177,14 +177,14 @@ certs:
 
 `certalert` provides the following web-accessible endpoints:
 
-| Endpoint    | Purpose                                                                             |
-| :---------- | :---------------------------------------------------------------------------------- |
-| `/`         | Shows the endpoints                                                                 |
-| `/config`   | Fetches and displays all the certificates in a tabular format                       |
-| `/-/reload` | Reloads the configuration                                                           |
-| `/config`   | Provides the currently active configuration file. Plaintext passwords are redacted  |
-| `/metrics`  | Delivers metrics for Prometheus to scrape                                           |
-| `/healthz`  | Returns the health of the application                                               |
+| Endpoint        | Purpose                                                                            |
+| :-------------- | :--------------------------------------------------------------------------------- |
+| `/`             | Shows the endpoints                                                                |
+| `/certificates` | Fetches and displays all the certificates in a tabular format                      |
+| `/-/reload`     | Reloads the configuration                                                          |
+| `/config`       | Provides the currently active configuration file. Plaintext passwords are redacted |
+| `/metrics`      | Delivers metrics for Prometheus to scrape                                          |
+| `/healthz`      | Returns the health of the application                                              |
 
 ## Supported Certificate Formats
 
@@ -219,9 +219,7 @@ TrustStores are repositories that store trusted certificates, ensuring secure co
 
 ### P7B (PKCS#7)
 
-P7B, also identified as `PKCS#7`, is a widely-accepted format for storing certificate chains. In some cases, it might also encompass the associated private key. 
-
-With `certalert`, the focus is exclusively on extracting certificates. Should there be additional components, a warning is prompted.
+`P7B`, also identified as `PKCS#7`, is a widely-accepted format for storing certificate chains. In some cases, it might also encompass the associated private key. With `certalert`, the focus is exclusively on extracting certificates. Should there be additional components, they will be skipped.
 
 **Recognized file extensions**:
 
@@ -244,6 +242,7 @@ Using the specified password, `certalert` retrieves both private keys and certif
 ### PEM (Privacy Enhanced Mail)
 
 PEM, a predominant file format, is instrumental in storing and transmitting cryptographic keys and certificates. It's discernible by its unique delimiters, `-----BEGIN CERTIFICATE-----` and `-----END CERTIFICATE-----`.
+With `certalert`, the focus is exclusively on extracting certificates. Should there be additional components, they will be skipped.
 
 **Recognized file extensions**:
 
