@@ -1,25 +1,27 @@
-# certalert
+# CertAlert
 
-This program serves as a dynamic tool for the purpose of handling and monitoring certificates, and presenting their expiration dates in an epoch format. This design allows Prometheus to poll these metrics.
+`CertAlert` is a dynamic monitoring tool designed to extract the expiration dates of local SSL/TLS certificates stored in `PEM`, `PKCS12`, `P7`, `TrustStore` and `Java Keystore` formats. It then exposes these expiration dates as epoch-formatted metrics, enabling Prometheus to easily scrape and alert on certificate expiry.
 
-On invocation of the `/metrics` endpoint by Prometheus, the tool performs a real-time check on the expiration dates of the certificates.
-It exposes the metrics:
+## Features
 
-- **certalert_certificate_epoch_seconds**: The expiration date of the certificate as a epoch
-- **certalert_certificate_extraction_status**: Status of certificate extraction (0=success, 1=failure)
+**Real-time Monitoring**: Automatically scans the expiration dates of certificates upon each `/metrics` endpoint request by Prometheus.
+**Flexible Export**: Supports exporting metrics directly to a Pushgateway server or outputs them in `JSON`, `YAML`, or `text table` formats.
 
-Additionally, `certalert` also supports forwarding the expiration date epoch directly to a Pushgateway server, offering flexibility and control over monitoring workflows or simply output them as `json`, `yaml` or a `text` table.
+## Exposed Metrics
+
+**certalert_certificate_epoch_seconds**: This metric represents the expiration date of each SSL/TLS certificate, expressed in epoch format.
+**certalert_certificate_extraction_status**: This metric signifies the status of the certificate extraction process. A value of `0` indicates successful extraction, while a value of `1` signifies a failure. In the case of a failure, the reason label will provide additional details on the issue encountered.
 
 ## Usage
 
-The primary function is to utilize the `serve` command to initiate a web server that displays metrics for Prometheus to retrieve.
+The primary function is to utilize the `serve` command to initiate a web server that exposes metrics for Prometheus to retrieve.
 
 ## Global Flags
 
-- `-c, --config`: Specify the path to a config file (Default is `$HOME/.certalert.yaml`).
-- `-v, --verbose`: Enable verbose output.
-- `-s, --silent`: Enable silent mode, only showing errors.
-- `-f, --fail-on-error`: Fail on error.
+- `-c, --config`: Sets the path to the configuration file (Default: `$HOME/.certalert.yaml`).
+- `-v, --verbose`: Activates verbose output for detailed logging.
+- `-s, --silent`: Enables silent mode, displaying only errors.
+- `-f, --fail-on-error`: Exits `certalert` immediately upon encountering an error.
 - `-V, --version`: Print the current version and exit.
 
 ### Basic Commands
