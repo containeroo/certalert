@@ -21,5 +21,8 @@ configMapGenerator:
   - name: crt-makr
     files:
       - crt-makr.sh
+  - name: grafana-dashboard-certalert
+    files:
+      - grafana-dashboard-certalert.json
 generatorOptions:
   disableNameSuffixHash: true
