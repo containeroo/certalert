@@ -69,7 +69,7 @@ func ExtractP7CertificatesInfo(name string, certData []byte, password string, fa
 
 			certData = rest // Move to the next PEM block
 		default:
-			log.Debug("Skip unknown PEM block")
+			log.Debugf("Skip PEM block of type '%s'", block.Type)
 		}
 		certData = rest
 		continue

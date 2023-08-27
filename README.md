@@ -1,21 +1,27 @@
-# certalert
+# CertAlert
 
-This program serves as a dynamic tool for the purpose of handling and monitoring certificates, and presenting their expiration dates in an epoch format. This design allows Prometheus to poll these metrics.
+`CertAlert` is a dynamic monitoring tool designed to extract the expiration dates of local SSL/TLS certificates stored in `PEM`, `PKCS12`, `P7`, `TrustStore` and `Java Keystore` formats. It then exposes these expiration dates as epoch-formatted metrics, enabling Prometheus to easily scrape and alert on certificate expiry.
 
-On invocation of the `/metrics` endpoint by Prometheus, the tool performs a real-time check on the expiration dates of the certificates.
+## Features
 
-Additionally, `certalert` also supports forwarding the expiration date epoch directly to a Pushgateway server, offering flexibility and control over monitoring workflows or simply output them as `json`, `yaml` or a `text` table.
+**Real-time Monitoring**: Automatically scans the expiration dates of certificates upon each `/metrics` endpoint request by Prometheus.
+**Flexible Export**: Supports exporting metrics directly to a Pushgateway server or outputs them in `JSON`, `YAML`, or `text table` formats.
+
+## Exposed Metrics
+
+**certalert_certificate_epoch_seconds**: This metric represents the expiration date of each SSL/TLS certificate, expressed in epoch format.
+**certalert_certificate_extraction_status**: This metric signifies the status of the certificate extraction process. A value of `0` indicates successful extraction, while a value of `1` signifies a failure. In the case of a failure, the reason label will provide additional details on the issue encountered.
 
 ## Usage
 
-The primary function is to utilize the `serve` command to initiate a web server that displays metrics for Prometheus to retrieve.
+The primary function is to utilize the `serve` command to initiate a web server that exposes metrics for Prometheus to retrieve.
 
 ## Global Flags
 
-- `-c, --config`: Specify the path to a config file (Default is `$HOME/.certalert.yaml`).
-- `-v, --verbose`: Enable verbose output.
-- `-s, --silent`: Enable silent mode, only showing errors.
-- `-f, --fail-on-error`: Fail on error.
+- `-c, --config`: Sets the path to the configuration file (Default: `$HOME/.certalert.yaml`).
+- `-v, --verbose`: Activates verbose output for detailed logging.
+- `-s, --silent`: Enables silent mode, displaying only errors.
+- `-f, --fail-on-error`: Exits `certalert` immediately upon encountering an error.
 - `-V, --version`: Print the current version and exit.
 
 ### Basic Commands
@@ -81,7 +87,7 @@ The primary function is to utilize the `serve` command to initiate a web server 
 
 Certificates can be defined with properties such as their `name`, `path`, `type`, and an optional `password`. You have the flexibility to enable or disable specific certificate checks with the field `enabled`. Additionally, the `type` of certificate can either be manually defined or determined by the system based on the file extension.
 
-Credentials, such as `passwords`, can be specified in multiple ways: `plain text`, an `environment variable`, or a `file` containing the credentials. For files with multiple key-value pairs, a specific key can be chosen by appending `://KEY` at the end of the file path. See `Providing Credentials` for more details.
+Credentials, such as `password`, can be specified in multiple ways: `plain text`, an `environment variable`, or a `file` containing the credentials. For files with multiple key-value pairs, a specific key can be chosen by appending `//KEY` at the end of the file path. See `Providing Credentials` for more details.
 
 ## Pushgateway Interaction
 
@@ -120,7 +126,7 @@ Here are the available properties for the certificate:
 - **name**: This refers to the unique identifier of the certificate. It's used for distinguishing between different certificates. If not provided, it defaults to the certificate's filename, replacing all spaces (` `), dots (`.`) and underlines (`_`) with a dash (`-`).
 - **enabled**: This toggle enables or disables this check. By default, it is set to `true`.
 - **path**: This specifies the location of the certificate file in your system.
-- **type**: This denotes the type of the certificate. If it's not explicitly specified, the system will attempt to determine the type based on the file extension. Allowed types are: p12, pkcs12, pfx, pem, crt and jks.
+- **type**: This denotes the type of the certificate. If it's not explicitly specified, the system will attempt to determine the type based on the file extension. Allowed types are: `p12`, `pkcs12`, `pfx`, `pem`, `crt`, `jks`, `p7`, `p7b`, `p7c`, `truststore` or `ts`.
 - **password**: This optional property allows you to set the password for the certificate.
 
 #### Providing Credentials
@@ -173,26 +179,24 @@ certs:
 
 `certalert` provides the following web-accessible endpoints:
 
-| Endpoint    | Purpose                                                                             |
-| :---------- | :---------------------------------------------------------------------------------- |
-| `/`         | Shows the endpoints                                                                 |
-| `/config`   | Fetches and displays all the certificates in a tabular format                       |
-| `/-/reload` | Reloads the configuration                                                           |
-| `/config`   | Provides the currently active configuration file. Plaintext passwords are redacted  |
-| `/metrics`  | Delivers metrics for Prometheus to scrape                                           |
-| `/healthz`  | Returns the health of the application                                               |
+| Endpoint        | Purpose                                                                            |
+| :-------------- | :--------------------------------------------------------------------------------- |
+| `/`             | Shows the endpoints                                                                |
+| `/certificates` | Fetches and displays all the certificates in a tabular format                      |
+| `/-/reload`     | Reloads the configuration                                                          |
+| `/config`       | Provides the currently active configuration file. Plaintext passwords are redacted |
+| `/metrics`      | Delivers metrics for Prometheus to scrape                                          |
+| `/healthz`      | Returns the health of the application                                              |
 
 ## Supported Certificate Formats
 
 The certificate format is inferred from its file extension. However, you can override this automatic detection by specifying the `type` field.
 
+With `certalert`, the focus is exclusively on extracting certificates. Should there be additional components, they will be skipped.
+
 ### JKS (Java KeyStore)
 
-JKS or Java KeyStores provide a secure mechanism to store private keys and their corresponding certificates. These are predominantly used within Java applications for various security functionalities.
-
-In `certalert`, the primary task is to retrieve certificates and their respective chains from JKS files.
-
-**Recognized file extensions**:
+Recognized file extensions:
 
 - `.jks`
 
@@ -202,24 +206,18 @@ Check if the file is really a Java Keystore:
 keytool -list -v -keystore CERT.jks -storepass PASSWORD
 ```
 
-If the `Keystore type` is `PKCS12`, you have to set the `type` to `p12`
+If the `Keystore type` is `PKCS12`, you have to set the `type` to `p12`.
 
 ### TrustStore
 
-TrustStores are repositories that store trusted certificates, ensuring secure communications and verification of resources. They play an integral role in the realm of security, specifically in validating certificate chains.
-
-**Recognized file extensions**:
+Recognized file extensions:
 
 - `.ts`
 - `.truststore`
 
 ### P7B (PKCS#7)
 
-P7B, also identified as `PKCS#7`, is a widely-accepted format for storing certificate chains. In some cases, it might also encompass the associated private key. 
-
-With `certalert`, the focus is exclusively on extracting certificates. Should there be additional components, a warning is prompted.
-
-**Recognized file extensions**:
+Recognized file extensions:
 
 - `.p7`
 - `.p7b`
@@ -227,11 +225,9 @@ With `certalert`, the focus is exclusively on extracting certificates. Should th
 
 ### P12 (PKCS#12)
 
-The binary format PKCS#12, commonly referred to as P12, is designed to encapsulate the server certificate, intermediary certificates, and the private key into a single encryptable entity. This format simplifies the processes of certificate and private key export/import.
-
 Using the specified password, `certalert` retrieves both private keys and certificates from P12 files. Incorrect password inputs lead to failures.
 
-**Recognized file extensions**:
+Recognized file extensions:
 
 - `.p12`
 - `.pkcs12`
@@ -239,9 +235,7 @@ Using the specified password, `certalert` retrieves both private keys and certif
 
 ### PEM (Privacy Enhanced Mail)
 
-PEM, a predominant file format, is instrumental in storing and transmitting cryptographic keys and certificates. It's discernible by its unique delimiters, `-----BEGIN CERTIFICATE-----` and `-----END CERTIFICATE-----`.
-
-**Recognized file extensions**:
+Recognized file extensions:
 
 - `.pem`
 - `.crt`

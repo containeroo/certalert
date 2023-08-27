@@ -36,13 +36,22 @@ var supportedOutputFormats = []string{"text", "json", "yaml"}
 // printCmd represents the print command
 var printCmd = &cobra.Command{
 	Use:   "print",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Short: "Export certificates in different formats.",
+	Long: `Prints certificates in different formats.
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+You can print all certificates or only a subset of them. The output format can be specified with the -o, --output flag.
+The default output format is 'text'.
+
+Examples:
+	# Print all certificates in text format
+	certalert print --all
+
+	# Print all certificates in json format
+	certalert print --all --output json
+
+	# Print only the certificate with the name 'my-cert' in yaml format
+	certalert print my-cert --output yaml
+	`,
 	Run: func(cmd *cobra.Command, args []string) {
 
 		if !utils.IsInList(outputFormat, supportedOutputFormats) {

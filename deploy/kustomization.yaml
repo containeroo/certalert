@@ -3,7 +3,7 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 images:
   - name: ghcr.io/containeroo/certalert
-    newTag: v0.0.24
+    newTag: v0.0.25
 resources:
   - certs.yaml
   - configmap.yaml
@@ -21,5 +21,8 @@ configMapGenerator:
   - name: crt-makr
     files:
       - crt-makr.sh
+  - name: grafana-dashboard-certalert
+    files:
+      - grafana-dashboard-certalert.json
 generatorOptions:
   disableNameSuffixHash: true

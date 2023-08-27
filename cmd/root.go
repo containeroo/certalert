@@ -29,7 +29,7 @@ import (
 )
 
 const (
-	version = "v0.0.24"
+	version = "v0.0.25"
 )
 
 var cfgFile string
@@ -42,8 +42,9 @@ var rootCmd = &cobra.Command{
 	Long: fmt.Sprintf(`CertAlert can handle a variety of certificate types, including '%s' or '%s' files.
 
 	You can execute specific commands for different actions:
-	1. Use the 'push' command to manually push metrics to the Prometheus Pushgateway.
-	2. Use the 'serve' command to start a server that provides a '/metrics' endpoint for Prometheus to scrape.
+	1. Use the 'serve' command to start a server that provides a '/metrics' endpoint for Prometheus to scrape.
+	2. Use the 'push' command to manually push metrics to the Prometheus Pushgateway.
+	3. Use the 'print' command to print certificates in different formats.
 
 	For a full list of commands and options, use 'certalert --help'.
 	`, strings.Join(certificates.FileExtensionsTypes[:certificates.LenFileExtensionsTypes-1], "', '"), certificates.FileExtensionsTypes[certificates.LenFileExtensionsTypes-1]),
@@ -87,14 +88,14 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 
-	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "", "config file (default is $HOME/.certalert.yaml)")
+	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "", "Path to the configuration file (Default: $HOME/.certalert.yaml).")
 
-	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "verbose output")
-	rootCmd.PersistentFlags().BoolVarP(&silent, "silent", "s", false, "silent output")
+	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Activates verbose output for detailed logging.")
+	rootCmd.PersistentFlags().BoolVarP(&silent, "silent", "s", false, "Enables silent mode, displaying only errors.")
 	rootCmd.MarkFlagsMutuallyExclusive("verbose", "silent")
 
-	rootCmd.PersistentFlags().BoolVarP(&config.App.FailOnError, "fail-on-error", "f", false, "fail on error")
-	rootCmd.PersistentFlags().BoolVarP(&printVersion, "version", "V", false, "print version and exit")
+	rootCmd.PersistentFlags().BoolVarP(&config.App.FailOnError, "fail-on-error", "f", false, "Exit immediately upon encountering an error.")
+	rootCmd.PersistentFlags().BoolVarP(&printVersion, "version", "V", false, "print version and exit.")
 
 }
 
