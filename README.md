@@ -87,7 +87,7 @@ The primary function is to utilize the `serve` command to initiate a web server 
 
 Certificates can be defined with properties such as their `name`, `path`, `type`, and an optional `password`. You have the flexibility to enable or disable specific certificate checks with the field `enabled`. Additionally, the `type` of certificate can either be manually defined or determined by the system based on the file extension.
 
-Credentials, such as `passwords`, can be specified in multiple ways: `plain text`, an `environment variable`, or a `file` containing the credentials. For files with multiple key-value pairs, a specific key can be chosen by appending `//KEY` at the end of the file path. See `Providing Credentials` for more details.
+Credentials, such as `password`, can be specified in multiple ways: `plain text`, an `environment variable`, or a `file` containing the credentials. For files with multiple key-value pairs, a specific key can be chosen by appending `//KEY` at the end of the file path. See `Providing Credentials` for more details.
 
 ## Pushgateway Interaction
 
@@ -192,13 +192,11 @@ certs:
 
 The certificate format is inferred from its file extension. However, you can override this automatic detection by specifying the `type` field.
 
+With `certalert`, the focus is exclusively on extracting certificates. Should there be additional components, they will be skipped.
+
 ### JKS (Java KeyStore)
 
-JKS or Java KeyStores provide a secure mechanism to store private keys and their corresponding certificates. These are predominantly used within Java applications for various security functionalities.
-
-In `certalert`, the primary task is to retrieve certificates and their respective chains from JKS files.
-
-**Recognized file extensions**:
+Recognized file extensions:
 
 - `.jks`
 
@@ -208,22 +206,18 @@ Check if the file is really a Java Keystore:
 keytool -list -v -keystore CERT.jks -storepass PASSWORD
 ```
 
-If the `Keystore type` is `PKCS12`, you have to set the `type` to `p12`
+If the `Keystore type` is `PKCS12`, you have to set the `type` to `p12`.
 
 ### TrustStore
 
-TrustStores are repositories that store trusted certificates, ensuring secure communications and verification of resources. They play an integral role in the realm of security, specifically in validating certificate chains.
-
-**Recognized file extensions**:
+Recognized file extensions:
 
 - `.ts`
 - `.truststore`
 
 ### P7B (PKCS#7)
 
-`P7B`, also identified as `PKCS#7`, is a widely-accepted format for storing certificate chains. In some cases, it might also encompass the associated private key. With `certalert`, the focus is exclusively on extracting certificates. Should there be additional components, they will be skipped.
-
-**Recognized file extensions**:
+Recognized file extensions:
 
 - `.p7`
 - `.p7b`
@@ -231,11 +225,9 @@ TrustStores are repositories that store trusted certificates, ensuring secure co
 
 ### P12 (PKCS#12)
 
-The binary format PKCS#12, commonly referred to as P12, is designed to encapsulate the server certificate, intermediary certificates, and the private key into a single encryptable entity. This format simplifies the processes of certificate and private key export/import.
-
 Using the specified password, `certalert` retrieves both private keys and certificates from P12 files. Incorrect password inputs lead to failures.
 
-**Recognized file extensions**:
+Recognized file extensions:
 
 - `.p12`
 - `.pkcs12`
@@ -243,10 +235,7 @@ Using the specified password, `certalert` retrieves both private keys and certif
 
 ### PEM (Privacy Enhanced Mail)
 
-PEM, a predominant file format, is instrumental in storing and transmitting cryptographic keys and certificates. It's discernible by its unique delimiters, `-----BEGIN CERTIFICATE-----` and `-----END CERTIFICATE-----`.
-With `certalert`, the focus is exclusively on extracting certificates. Should there be additional components, they will be skipped.
-
-**Recognized file extensions**:
+Recognized file extensions:
 
 - `.pem`
 - `.crt`
