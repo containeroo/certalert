@@ -3,16 +3,17 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: certalert
-  namespace: certalert
+  namespace: monitoring
   labels:
     app: certalert
 spec:
-  endpoints:
-  - interval: 60m
-    port: http
+  jobLabel: certalert
   namespaceSelector:
     matchNames:
-    - certalert
+      - certalert
   selector:
     matchLabels:
       app: certalert
+  endpoints:
+    - interval: 60m
+      port: http
