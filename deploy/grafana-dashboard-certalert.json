@@ -216,7 +216,7 @@
             "inspect": true
           },
           "mappings": [],
-          "noValue": "-",
+          "noValue": "no errors",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -226,7 +226,7 @@
               },
               {
                 "color": "red",
-                "value": 80
+                "value": 1
               }
             ]
           }
@@ -572,13 +572,13 @@
     "list": []
   },
   "time": {
-    "from": "now-3h",
+    "from": "now-30m",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "",
   "title": "certalert",
   "uid": "fe334647-28a5-4e47-bdb9-c8185e0ff43d",
-  "version": 11,
+  "version": 12,
   "weekStart": ""
 }
