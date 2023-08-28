@@ -112,7 +112,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "count(certalert_certificate_extraction_status)",
+          "expr": "count(last_over_time(certalert_certificate_extraction_status[$__range]))",
           "format": "time_series",
           "hide": false,
           "instant": false,
@@ -184,8 +184,8 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "sum(certalert_certificate_extraction_status == 1)",
-          "format": "table",
+          "expr": "sum(last_over_time(certalert_certificate_extraction_status[$__range]) == 1)",
+          "format": "time_series",
           "instant": true,
           "interval": "",
           "legendFormat": "__auto",
@@ -216,6 +216,7 @@
             "inspect": true
           },
           "mappings": [],
+          "noValue": "-",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -230,7 +231,51 @@
             ]
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": ""
+            },
+            "properties": []
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Namespace"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 200
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Name"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 200
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Type"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 90
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 5,
@@ -250,7 +295,8 @@
           ],
           "show": false
         },
-        "showHeader": true
+        "showHeader": true,
+        "sortBy": []
       },
       "pluginVersion": "10.0.2",
       "targets": [
@@ -336,6 +382,7 @@
             "cellOptions": {
               "type": "auto"
             },
+            "filterable": true,
             "inspect": false
           },
           "decimals": 2,
@@ -374,11 +421,59 @@
                 "value": "dtdurations"
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Namespace"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 240
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Name"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 240
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Type"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 90
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Time Left"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 230
+              }
+            ]
           }
         ]
       },
       "gridPos": {
-        "h": 15,
+        "h": 18,
         "w": 24,
         "x": 0,
         "y": 5
@@ -477,13 +572,13 @@
     "list": []
   },
   "time": {
-    "from": "now-6h",
+    "from": "now-3h",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "",
   "title": "certalert",
   "uid": "fe334647-28a5-4e47-bdb9-c8185e0ff43d",
-  "version": 6,
+  "version": 11,
   "weekStart": ""
 }
