@@ -8,7 +8,7 @@ metadata:
     app: certalert
 spec:
   endpoints:
-  - interval: 60s
+  - interval: 60m
     port: http
   namespaceSelector:
     matchNames:
