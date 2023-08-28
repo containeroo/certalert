@@ -34,6 +34,7 @@ The primary function is to utilize the `serve` command to initiate a web server 
 
     Flags:
     - `--listen-address`: The address to listen on for HTTP requests. (Default: `:8080`).
+    - `--auto-reload-config`: Detects config changes and reloads the configuration file.
 
     Examples:
 
@@ -51,7 +52,6 @@ The primary function is to utilize the `serve` command to initiate a web server 
     Flags:
     - `-A, --all`: Prints all certificates.
     - `-o, --output`: Specify the output format. Supported formats: `text`, `json`, `yaml`.
-    - `--auto-reload-config`: Detects config changes and reloads the configuration file.
 
     Examples:
 
