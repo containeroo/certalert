@@ -1,4 +1,41 @@
 {
+  "__inputs": [
+    {
+      "name": "DS_PROMETHEUS",
+      "label": "Prometheus",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "prometheus",
+      "pluginName": "Prometheus"
+    }
+  ],
+  "__elements": {},
+  "__requires": [
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "10.0.2"
+    },
+    {
+      "type": "datasource",
+      "id": "prometheus",
+      "name": "Prometheus",
+      "version": "1.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "stat",
+      "name": "Stat",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "table",
+      "name": "Table",
+      "version": ""
+    }
+  ],
   "annotations": {
     "list": [
       {
@@ -18,14 +55,14 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 35,
+  "id": null,
   "links": [],
   "liveNow": false,
   "panels": [
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "${DS_PROMETHEUS}"
       },
       "fieldConfig": {
         "defaults": {
@@ -66,12 +103,12 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "10.0.3",
+      "pluginVersion": "10.0.2",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "exemplar": false,
@@ -89,7 +126,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "${DS_PROMETHEUS}"
       },
       "fieldConfig": {
         "defaults": {
@@ -138,12 +175,12 @@
         },
         "textMode": "value"
       },
-      "pluginVersion": "10.0.3",
+      "pluginVersion": "10.0.2",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "exemplar": false,
@@ -163,7 +200,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "${DS_PROMETHEUS}"
       },
       "fieldConfig": {
         "defaults": {
@@ -176,8 +213,7 @@
               "type": "auto"
             },
             "filterable": true,
-            "inspect": true,
-            "minWidth": 200
+            "inspect": true
           },
           "mappings": [],
           "thresholds": {
@@ -216,16 +252,16 @@
         },
         "showHeader": true
       },
-      "pluginVersion": "10.0.3",
+      "pluginVersion": "10.0.2",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "last_over_time(certalert_certificate_extraction_status[$__interval]) == 1",
+          "expr": "last_over_time(certalert_certificate_extraction_status[$__range]) == 1",
           "format": "table",
           "instant": true,
           "legendFormat": "__auto",
@@ -253,24 +289,31 @@
               "type": false
             },
             "indexByName": {
-              "Time": 0,
-              "Value": 14,
-              "__name__": 1,
-              "clustername": 3,
-              "container": 4,
-              "endpoint": 5,
-              "exported_instance": 6,
-              "instance": 8,
-              "job": 9,
-              "namespace": 2,
-              "pod": 10,
-              "prometheus": 11,
-              "reason": 12,
-              "service": 13,
-              "type": 7
+              "Time": 5,
+              "Value": 15,
+              "__name__": 6,
+              "clustername": 7,
+              "container": 8,
+              "endpoint": 9,
+              "exported_instance": 1,
+              "instance": 10,
+              "job": 11,
+              "namespace": 0,
+              "pod": 12,
+              "prometheus": 13,
+              "reason": 4,
+              "service": 14,
+              "subject": 2,
+              "type": 3
             },
             "renameByName": {
-              "exported_instance": "name"
+              "Value": "",
+              "exported_instance": "Name",
+              "namespace": "Namespace",
+              "reason": "Reason",
+              "service": "",
+              "subject": "Subject",
+              "type": "Type"
             }
           }
         }
@@ -278,7 +321,10 @@
       "type": "table"
     },
     {
-      "datasource": {},
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
       "description": "",
       "fieldConfig": {
         "defaults": {
@@ -356,12 +402,12 @@
           }
         ]
       },
-      "pluginVersion": "10.0.3",
+      "pluginVersion": "10.0.2",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "exemplar": false,
@@ -389,11 +435,33 @@
               "job": true,
               "pod": true,
               "prometheus": true,
+              "reason": true,
               "service": true
             },
-            "indexByName": {},
+            "indexByName": {
+              "Time": 5,
+              "Value": 4,
+              "clustername": 6,
+              "container": 7,
+              "endpoint": 8,
+              "exported_instance": 1,
+              "instance": 9,
+              "job": 10,
+              "namespace": 0,
+              "pod": 11,
+              "prometheus": 12,
+              "reason": 13,
+              "service": 14,
+              "subject": 2,
+              "type": 3
+            },
             "renameByName": {
-              "Value": "Time Left"
+              "Value": "Time Left",
+              "exported_instance": "Name",
+              "namespace": "Namespace",
+              "prometheus": "",
+              "subject": "Subject",
+              "type": "Type"
             }
           }
         }
@@ -416,6 +484,6 @@
   "timezone": "",
   "title": "certalert",
   "uid": "fe334647-28a5-4e47-bdb9-c8185e0ff43d",
-  "version": 10,
+  "version": 6,
   "weekStart": ""
 }
