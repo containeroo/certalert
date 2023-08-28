@@ -15,5 +15,5 @@ You need `openssl` and `docker` installed (`docker` is for `keytool`).
 A `ConfigMap` with all certificates can be created with kustomize:
 
 ```sh
-kustomize build tests/certs -o deploy/certs.yaml
+kustomize build tests/ -o deploy/certs.yaml
 ```
