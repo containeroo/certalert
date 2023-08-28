@@ -82,7 +82,6 @@ func (c *Config) parseCertificatesConfig() (err error) {
 		}
 
 		if !utils.IsInList(cert.Type, certificates.FileExtensionsTypes) {
-
 			if err := handleError(cert, idx, fmt.Sprintf("Certificate '%s' has an invalid type '%s'. Must be one of '%s' or '%s'.", cert.Name, cert.Type, strings.Join(certificates.FileExtensionsTypes[:certificates.LenFileExtensionsTypes-1], "', '"), certificates.FileExtensionsTypes[certificates.LenFileExtensionsTypes-1])); err != nil {
 				return err
 			}

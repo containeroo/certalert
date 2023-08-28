@@ -39,7 +39,17 @@ func Process(certificates []Certificate, failOnError bool) (certificatesInfo []C
 			continue
 		}
 
-		extractFunc, found := TypeToExtractionFunction[cert.Type]
+		// If user used FileExtensionsToType to specify the type, we need to convert it to the canonical type
+		inferredType, found := FileExtensionsToType[cert.Type]
+		if !found {
+			// This should never happen as the config validation ensures that the type is valid
+			if err := handleError(&certInfoList, cert.Name, cert.Type, fmt.Sprintf("Unknown certificate type '%s'", cert.Type), failOnError); err != nil {
+				return nil, err
+			}
+			continue
+		}
+
+		extractFunc, found := TypeToExtractionFunction[inferredType]
 		if !found {
 			// This should never happen as the config validation ensures that the type is valid
 			if err := handleError(&certInfoList, cert.Name, cert.Type, fmt.Sprintf("Unknown certificate type '%s'", cert.Type), failOnError); err != nil {
