@@ -1,27 +1,7 @@
 # Manifests
 
 use `kubectl -k deploy/ -n NAMESPACE` to deploy certalert.
-If you possess certificates with unique requirements that `certalert` cannot accommodate, you can incorporate an `initContainer` featuring a customized bash script to extract these certificates. For reference, you can explore the pach-deployment, which serves as an illustrative example.
-
-## Certificates
-
-To create new certificates you one of the following scripts:
-
-- `hack/jks.sh`
-- `hack/p7.sh`
-- `hack/p12.sh`
-- `hack/pem.sh`
-- `hack/truststore.sh`
-
-You need `openssl` and `docker` installed (`docker` is for `keytool`).
-
-## ConfigMaps
-
-`ConfigMaps` with certificates can be created with kustomize:
-
-```sh
-kustomize build tests/certs -o deploy/certs.yaml
-```
+If you have certificates with unique requirements that `certalert` cannot accommodate, you can incorporate an `initContainer` featuring a customized bash script to extract these certificates. For reference, you can explore the pach-deployment, which serves as an illustrative example.
 
 ## `crt-makr`: A Certificate Extraction Helper for `certalert`
 
