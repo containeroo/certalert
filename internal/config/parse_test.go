@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 	"sort"
-	"strings"
 	"testing"
 )
 
@@ -46,7 +45,7 @@ func TestParseCertificatesConfig(t *testing.T) {
 		"BEARER_TOKEN":   "token",
 	}
 	passwordFileName := createTempFile("password", t)
-	sortedFileExtensions := utils.ExtractMapKeys(certificates.FileExtensionsToType, true)
+	sortedFileExtensions := utils.ExtractMapKeys(certificates.FileExtensionsToType)
 	sort.Strings(sortedFileExtensions)
 
 	testCases := []struct {
@@ -95,7 +94,7 @@ func TestParseCertificatesConfig(t *testing.T) {
 				},
 				FailOnError: true,
 			},
-			expectedError: fmt.Sprintf("Certificate 'test_cert' has an invalid type 'invalid'. Must be one of '%s' or '%s'.", strings.Join(certificates.FileExtensionsTypes[:certificates.LenFileExtensionsTypes-1], "', '"), certificates.FileExtensionsTypes[certificates.LenFileExtensionsTypes-1]),
+			expectedError: fmt.Sprintf("Certificate 'test_cert' has an invalid type 'invalid'. Must be one of %s.", certificates.FileExtensionsTypesString),
 		},
 		{
 			name: "success",

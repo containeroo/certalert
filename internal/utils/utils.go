@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"reflect"
-	"sort"
 	"strings"
 )
 
@@ -51,7 +50,7 @@ func IsInList(value string, list []string) bool {
 // ExtractMapKeys is a utility function that takes an interface{} argument,
 // checks if it's a map, and then returns the keys of that map as a slice of strings.
 // If the argument is not a map or the map's keys are not strings, it returns nil.
-func ExtractMapKeys(m interface{}, sorted bool) []string {
+func ExtractMapKeys(m interface{}) []string {
 	v := reflect.ValueOf(m) // Get the value of m
 
 	// Check if the value is of type 'Map'
@@ -71,9 +70,6 @@ func ExtractMapKeys(m interface{}, sorted bool) []string {
 		strkeys = append(strkeys, keyStr)
 	}
 
-	if sorted {
-		sort.Strings(strkeys) // sort list
-	}
 	return strkeys
 }
 

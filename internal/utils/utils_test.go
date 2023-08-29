@@ -87,8 +87,9 @@ func TestExtractMapKeys(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			got := ExtractMapKeys(tc.input, true)
+			got := ExtractMapKeys(tc.input)
 
+			sort.Strings(got)
 			sort.Strings(tc.want)
 
 			if !reflect.DeepEqual(got, tc.want) {
