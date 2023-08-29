@@ -4,6 +4,10 @@ import (
 	"net/http"
 )
 
+func init() {
+	Register("/", Home, "GET", "POST")
+}
+
 // Endpoint is a struct that represents an endpoint
 type Endpoint struct {
 	Path        string   `json:"path"`

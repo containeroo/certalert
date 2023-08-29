@@ -8,6 +8,10 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+func init() {
+	Register("/config", Config, "GET", "POST")
+}
+
 // Config is the handler for the /config route
 // It returns the currently active configuration file
 func Config(w http.ResponseWriter, r *http.Request) {

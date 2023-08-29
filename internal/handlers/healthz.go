@@ -6,6 +6,10 @@ import (
 	"net/http"
 )
 
+func init() {
+	Register("/healthz", Healthz, "GET", "POST")
+}
+
 // Healthz returns the status of the application
 // It returns a 200 if the application is healthy
 func Healthz(w http.ResponseWriter, r *http.Request) {

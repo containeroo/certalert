@@ -10,6 +10,10 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
+func init() {
+	Register("/metrics", Metrics, "GET", "POST")
+}
+
 // SetMetricsForCertificateInfo sets metrics for a given certificate info.
 func setMetricsForCertificateInfo(ci certificates.CertificateInfo) {
 	labels := prometheus.Labels{

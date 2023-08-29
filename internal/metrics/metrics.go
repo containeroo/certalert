@@ -29,6 +29,10 @@ type Metrics struct {
 	Registry *prometheus.Registry
 }
 
+func init() {
+	PromMetrics = *NewMetrics()
+}
+
 // NewMetrics registers all prometheus metrics
 func NewMetrics() *Metrics {
 	reg := prometheus.NewRegistry()

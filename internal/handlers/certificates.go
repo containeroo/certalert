@@ -6,6 +6,10 @@ import (
 	"net/http"
 )
 
+func init() {
+	Register("/certificates", Certificates, "GET")
+}
+
 // Certificates is the handler for the /certificates route
 // It fetches all the certificates and displays them in a tabular format
 func Certificates(w http.ResponseWriter, r *http.Request) {

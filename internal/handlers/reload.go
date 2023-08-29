@@ -9,6 +9,10 @@ import (
 	"github.com/spf13/viper"
 )
 
+func init() {
+	Register("/-/reload", Reload, "GET", "POST")
+}
+
 // Reload is the handler for the /reload route
 // It reloads the configuration file
 func Reload(w http.ResponseWriter, r *http.Request) {
