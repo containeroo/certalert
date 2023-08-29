@@ -8,7 +8,6 @@ spec:
     spec:
       initContainers:
         - name: crt-makr
-          image: openjdk:11
           command: ["/bin/bash"]
           args:
             - -c
