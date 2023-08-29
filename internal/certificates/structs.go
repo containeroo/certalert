@@ -2,12 +2,38 @@ package certificates
 
 import (
 	"certalert/internal/utils"
+	"fmt"
+	"sort"
+	"strings"
 	"time"
 )
 
+// FileExtensionsTypes contains a sorted list of unique certificate types extracted from 'FileExtensionsToType'
+var FileExtensionsTypes = []string{}
+
+// LenFileExtensionsTypes holds the length of 'FileExtensionsTypes'
+var LenFileExtensionsTypes = len(FileExtensionsTypes)
+
+// FileExtensionsTypesString is a formatted string containing the sorted certificate types for user-friendly display
+var FileExtensionsTypesString string
+
+// init initializes 'FileExtensionsTypes', 'LenFileExtensionsTypes', and 'FileExtensionsTypesString'
+func init() {
+	FileExtensionsTypes = utils.ExtractMapKeys(FileExtensionsToType)
+	// Sort the list of certificate types
+	sort.Strings(FileExtensionsTypes)
+
+	LenFileExtensionsTypes = len(FileExtensionsTypes)
+
+	FileExtensionsTypesString = fmt.Sprintf("'%s' or '%s'", strings.Join(FileExtensionsTypes[:LenFileExtensionsTypes-1], "', '"), FileExtensionsTypes[LenFileExtensionsTypes-1])
+}
+
+// extractFunction is a function type representing the signature for extracting certificate information.
+// It takes parameters 'name', 'certData', 'password', and 'failOnError', and returns a slice of 'CertificateInfo' and an error.
 type extractFunction func(name string, certData []byte, password string, failOnError bool) ([]CertificateInfo, error)
 
-// Map each certificate type to its extraction function
+// TypeToExtractionFunction maps each certificate type to its corresponding extraction function.
+// The map allows dynamic selection of the appropriate extraction function based on the certificate type.
 var TypeToExtractionFunction = map[string]extractFunction{
 	"p12":        ExtractP12CertificatesInfo,
 	"pem":        ExtractPEMCertificatesInfo,
@@ -16,7 +42,7 @@ var TypeToExtractionFunction = map[string]extractFunction{
 	"truststore": ExtractTrustStoreCertificatesInfo,
 }
 
-// Map each file extension to its canonical certificate type
+// FileExtensionsToType maps each file extension to its canonical certificate type.
 var FileExtensionsToType = map[string]string{
 	"p12":        "p12",
 	"pkcs12":     "p12",
@@ -30,12 +56,6 @@ var FileExtensionsToType = map[string]string{
 	"truststore": "truststore",
 	"ts":         "truststore",
 }
-
-// FileExtensionsTypes is a map of file extensions to certificate types
-var FileExtensionsTypes = utils.ExtractMapKeys(FileExtensionsToType, true)
-
-// LenFileExtensionsTypes is the length of FileExtensionsTypes
-var LenFileExtensionsTypes = len(FileExtensionsTypes)
 
 // Certificate represents a certificate configuration
 type Certificate struct {
