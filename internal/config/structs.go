@@ -7,7 +7,7 @@ import (
 // Config represents the config file
 var App Config
 
-// ConfigCopy represents the config file with sensitive data redacted
+// AppCopy represents the config file with sensitive data redacted
 var AppCopy Config
 
 // Config represents the config file
