@@ -96,7 +96,7 @@ Endpoints:
 			log.Fatalf("Unable to extract hostname and port: %s", err)
 		}
 
-		server.RunServer(hostname, port)
+		server.Run(hostname, port)
 	},
 }
 

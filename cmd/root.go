@@ -32,8 +32,12 @@ const (
 	version = "v0.0.26"
 )
 
-var cfgFile string
-var verbose, silent, printVersion bool
+var (
+	cfgFile      string
+	verbose      bool
+	silent       bool
+	printVersion bool
+)
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -50,7 +54,6 @@ var rootCmd = &cobra.Command{
 	`, strings.Join(certificates.FileExtensionsTypes[:certificates.LenFileExtensionsTypes-1], "', '"), certificates.FileExtensionsTypes[certificates.LenFileExtensionsTypes-1]),
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		// Enter here before any subcommand is executed
-
 		if verbose {
 			log.SetLevel(log.DebugLevel)
 			log.Debugf("Verbose output enabled")
