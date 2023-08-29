@@ -20,7 +20,6 @@ import (
 	"certalert/internal/config"
 	"fmt"
 	"os"
-	"strings"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -43,7 +42,7 @@ var (
 var rootCmd = &cobra.Command{
 	Use:   "certalert",
 	Short: "CertAlert is a tool to monitor the expiration dates of digital certificates",
-	Long: fmt.Sprintf(`CertAlert can handle a variety of certificate types, including '%s' or '%s' files.
+	Long: fmt.Sprintf(`CertAlert can handle a variety of certificate types, including %s files.
 
 	You can execute specific commands for different actions:
 	1. Use the 'serve' command to start a server that provides a '/metrics' endpoint for Prometheus to scrape.
@@ -51,7 +50,7 @@ var rootCmd = &cobra.Command{
 	3. Use the 'print' command to print certificates in different formats.
 
 	For a full list of commands and options, use 'certalert --help'.
-	`, strings.Join(certificates.FileExtensionsTypes[:certificates.LenFileExtensionsTypes-1], "', '"), certificates.FileExtensionsTypes[certificates.LenFileExtensionsTypes-1]),
+	`, certificates.FileExtensionsTypesString),
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		// Enter here before any subcommand is executed
 		if verbose {
