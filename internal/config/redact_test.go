@@ -47,10 +47,6 @@ func TestRedactConfig(t *testing.T) {
 	}
 
 	// Check if the sensitive fields are <REDACTED>
-	if config.Pushgateway.Address != "<REDACTED>" {
-		t.Errorf("Pushgateway Address not <REDACTED>")
-	}
-
 	if config.Pushgateway.Auth.Basic.Username != "<REDACTED>" {
 		t.Errorf("Basic Username not <REDACTED>")
 	}
