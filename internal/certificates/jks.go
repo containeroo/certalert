@@ -9,6 +9,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// ExtractJKSCertificatesInfo extracts certificate information from a JKS file
 func ExtractJKSCertificatesInfo(name string, certData []byte, password string, failOnError bool) ([]CertificateInfo, error) {
 	var certInfoList []CertificateInfo
 

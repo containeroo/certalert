@@ -7,7 +7,7 @@ import (
 	pkcs12 "software.sslmate.com/src/go-pkcs12"
 )
 
-// ExtractP12CertificatesInfo reads the P12 file, extracts certificate information, and returns a list of CertificateInfo
+// ExtractP12CertificatesInfo extracts certificate information from a P12 file
 func ExtractTrustStoreCertificatesInfo(name string, certData []byte, password string, failOnError bool) ([]CertificateInfo, error) {
 	var certInfoList []CertificateInfo
 
