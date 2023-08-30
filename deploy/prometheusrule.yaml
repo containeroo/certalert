@@ -11,7 +11,7 @@ spec:
             description:
               Certificate will expire in {{ $value | humanizeDuration }}
               (instance {{ $labels.instance }})
-            summary: SSL certificate «{{ $labels.instance }}» expires soon
+            summary: SSL certificate «{{ $labels.exported_instance }}» expires soon
           expr: certalert_certificate_epoch_seconds - time() < 86400 * 29
           for: 5m
           labels:
