@@ -132,7 +132,7 @@ type TemplateData struct {
 }
 
 // CSS is the CSS that is used in the template
-const CSS = `
+const CSS string = `
 .table {
 	border-collapse: collapse;
 	width: 60%;
@@ -193,7 +193,7 @@ thead th {
 `
 
 // JS is the JS that is used in the template
-const JS = `
+const JS string = `
 let currentColumn = -1;
 let sortAscending = true;
 
@@ -229,7 +229,7 @@ function sortTable(columnIndex) {
 
 // tplBase is the base template
 // Add "content" to this base template
-const tplBase = `
+const tplBase string = `
 <!DOCTYPE html>
 <html>
 <head>
@@ -251,7 +251,7 @@ const tplBase = `
 `
 
 // tplCertificates is the template for the /certificates route
-const tplCertificates = `
+const tplCertificates string = `
 {{ define "content" }}
 	<table class="table">
 			<thead>
@@ -287,7 +287,7 @@ const tplCertificates = `
 `
 
 // tplEndpoints is the template for the / route
-const tplEndpoints = `
+const tplEndpoints string = `
 {{ define "content" }}
 	<table class="table">
 		<thead>
