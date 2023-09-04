@@ -449,3 +449,26 @@ func TestParse(t *testing.T) {
 		})
 	}
 }
+
+func TestIsValidURL(t *testing.T) {
+	testCases := []struct {
+		urlStr       string
+		expectedBool bool
+	}{
+		{"http:/www.google.com", false}, // Malformed
+		{"https://www.google.com", true},
+		{"http://www.google.com", true},
+		{"ftp://files.com", true},
+		{"www.google.com", false}, // Missing scheme (like http, https)
+		{"http://", false},        // Malformed
+		{"http://10.0.0.69", true},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.urlStr, func(t *testing.T) {
+			if isValidURL(tc.urlStr) != tc.expectedBool {
+				t.Errorf("Expected %v for %s", tc.expectedBool, tc.urlStr)
+			}
+		})
+	}
+}

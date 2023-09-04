@@ -5,7 +5,9 @@ import (
 	"certalert/internal/resolve"
 	"certalert/internal/utils"
 	"fmt"
+	"net/url"
 	"path/filepath"
+	"reflect"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
@@ -162,4 +164,25 @@ func (c *Config) parsePushgatewayConfig() (err error) {
 	}
 
 	return nil
+}
+
+// validateAuthConfig validates the auth config
+func validateAuthConfig(authConfig Auth) error {
+	basicValue := reflect.ValueOf(authConfig.Basic)
+	bearerValue := reflect.ValueOf(authConfig.Bearer)
+
+	basicZero := reflect.Zero(basicValue.Type())
+	bearerZero := reflect.Zero(bearerValue.Type())
+
+	if basicValue.Interface() != basicZero.Interface() && bearerValue.Interface() != bearerZero.Interface() {
+		return fmt.Errorf("Both 'auth.basic' and 'auth.bearer' are defined.")
+	}
+
+	return nil
+}
+
+// isValidURL tests a string to determine if it is a well-structured URL.
+func isValidURL(str string) bool {
+	u, err := url.Parse(str)
+	return err == nil && u.Scheme != "" && u.Host != ""
 }

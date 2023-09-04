@@ -5,14 +5,6 @@ import (
 	"strings"
 )
 
-// redactVariable redacts sensitive data from the config if it is not prefixed with env: or file:
-func redactVariable(s string) string {
-	if strings.HasPrefix(s, "env:") || strings.HasPrefix(s, "file:") {
-		return s
-	}
-	return "<REDACTED>"
-}
-
 // RedactConfig redacts sensitive data from a config
 func RedactConfig(config *Config) error {
 	if utils.HasKey(config.Pushgateway, "Auth.Basic.Username") {
@@ -32,4 +24,12 @@ func RedactConfig(config *Config) error {
 	}
 
 	return nil
+}
+
+// redactVariable redacts sensitive data from the config if it is not prefixed with env: or file:
+func redactVariable(s string) string {
+	if strings.HasPrefix(s, "env:") || strings.HasPrefix(s, "file:") {
+		return s
+	}
+	return "<REDACTED>"
 }
