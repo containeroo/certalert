@@ -17,7 +17,7 @@ const (
 // ResolveVariable takes a string and resolves its value based on its prefix.
 // If the string is prefixed with "env:", it's treated as an environment variable and resolved accordingly.
 // If the string is prefixed with "file:", it's treated as a path to a file, optionally followed by a key
-// (e.g., "file:/path/to/file:{key}") which specifies which line to retrieve from the file.
+// (e.g., "file:/path/to/file//key") which specifies which line to retrieve from the file.
 // If no prefix is present, the string is returned as is.
 func ResolveVariable(value string) (string, error) {
 	if strings.HasPrefix(value, envPrefix) {
