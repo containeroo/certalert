@@ -1,21 +1,9 @@
 package config
 
-import (
-	"net"
-	"strconv"
-)
+import "net/url"
 
-// ExtractHostAndPort extracts the hostname and port from the listen address
-func ExtractHostAndPort(address string) (string, int, error) {
-	host, portStr, err := net.SplitHostPort(address)
-	if err != nil {
-		return "", 0, err
-	}
-
-	port, err := strconv.Atoi(portStr)
-	if err != nil {
-		return "", 0, err
-	}
-
-	return host, port, nil
+// isValidURL tests a string to determine if it is a well-structured URL.
+func isValidURL(str string) bool {
+	u, err := url.Parse(str)
+	return err == nil && u.Scheme != "" && u.Host != ""
 }
