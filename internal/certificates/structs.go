@@ -8,24 +8,20 @@ import (
 	"time"
 )
 
-// FileExtensionsTypes contains a sorted list of unique certificate types extracted from 'FileExtensionsToType'
-var FileExtensionsTypes = []string{}
+// FileExtensionsTypesSorted contains a sorted list of unique certificate types extracted from 'FileExtensionsToType'
+var FileExtensionsTypesSorted = []string{}
 
-// LenFileExtensionsTypes holds the length of 'FileExtensionsTypes'
-var LenFileExtensionsTypes = len(FileExtensionsTypes)
+// FileExtensionsTypesSortedString is a formatted string containing the sorted certificate types for user-friendly display
+var FileExtensionsTypesSortedString string
 
-// FileExtensionsTypesString is a formatted string containing the sorted certificate types for user-friendly display
-var FileExtensionsTypesString string
-
-// init initializes 'FileExtensionsTypes', 'LenFileExtensionsTypes', and 'FileExtensionsTypesString'
+// init initializes 'FileExtensionsTypesSorted' and 'FileExtensionsTypesSortedString'
 func init() {
-	FileExtensionsTypes = utils.ExtractMapKeys(FileExtensionsToType)
-	// Sort the list of certificate types
-	sort.Strings(FileExtensionsTypes)
+	FileExtensionsTypesSorted = utils.ExtractMapKeys(FileExtensionsToType)
+	sort.Strings(FileExtensionsTypesSorted)
 
-	LenFileExtensionsTypes = len(FileExtensionsTypes)
+	lenFileExtensionsTypesSorted := len(FileExtensionsTypesSorted)
 
-	FileExtensionsTypesString = fmt.Sprintf("'%s' or '%s'", strings.Join(FileExtensionsTypes[:LenFileExtensionsTypes-1], "', '"), FileExtensionsTypes[LenFileExtensionsTypes-1])
+	FileExtensionsTypesSortedString = fmt.Sprintf("'%s' or '%s'", strings.Join(FileExtensionsTypesSorted[:lenFileExtensionsTypesSorted-1], "', '"), FileExtensionsTypesSorted[lenFileExtensionsTypesSorted-1])
 }
 
 // extractFunction is a function type representing the signature for extracting certificate information.

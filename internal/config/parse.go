@@ -5,7 +5,6 @@ import (
 	"certalert/internal/resolve"
 	"certalert/internal/utils"
 	"fmt"
-	"net/url"
 	"path/filepath"
 	"reflect"
 	"strings"
@@ -83,8 +82,8 @@ func (c *Config) parseCertificatesConfig() (err error) {
 			}
 		}
 
-		if !utils.IsInList(cert.Type, certificates.FileExtensionsTypes) {
-			if err := handleError(cert, idx, fmt.Sprintf("Certificate '%s' has an invalid type '%s'. Must be one of %s.", cert.Name, cert.Type, certificates.FileExtensionsTypesString)); err != nil {
+		if !utils.IsInList(cert.Type, certificates.FileExtensionsTypesSorted) {
+			if err := handleError(cert, idx, fmt.Sprintf("Certificate '%s' has an invalid type '%s'. Must be one of %s.", cert.Name, cert.Type, certificates.FileExtensionsTypesSortedString)); err != nil {
 				return err
 			}
 		}
@@ -132,7 +131,7 @@ func (c *Config) parsePushgatewayConfig() (err error) {
 	}
 	c.Pushgateway.Address = resolvedAddress
 
-	if err := validateAuthConfig(c.Pushgateway.Auth); err != nil {
+	if err := c.validateAuthConfig(); err != nil {
 		if err := handlePushgatewayError(err.Error()); err != nil {
 			return err
 		}
@@ -167,9 +166,9 @@ func (c *Config) parsePushgatewayConfig() (err error) {
 }
 
 // validateAuthConfig validates the auth config
-func validateAuthConfig(authConfig Auth) error {
-	basicValue := reflect.ValueOf(authConfig.Basic)
-	bearerValue := reflect.ValueOf(authConfig.Bearer)
+func (c *Config) validateAuthConfig() error {
+	basicValue := reflect.ValueOf(c.Pushgateway.Auth.Basic)
+	bearerValue := reflect.ValueOf(c.Pushgateway.Auth.Bearer)
 
 	basicZero := reflect.Zero(basicValue.Type())
 	bearerZero := reflect.Zero(bearerValue.Type())
@@ -179,10 +178,4 @@ func validateAuthConfig(authConfig Auth) error {
 	}
 
 	return nil
-}
-
-// isValidURL tests a string to determine if it is a well-structured URL.
-func isValidURL(str string) bool {
-	u, err := url.Parse(str)
-	return err == nil && u.Scheme != "" && u.Host != ""
 }
