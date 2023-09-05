@@ -91,7 +91,7 @@ Endpoints:
 			log.Fatalf("Unable to redact config: %s", err)
 		}
 
-		hostname, port, err := config.ExtractHostAndPort(listenAddress)
+		hostname, port, err := utils.ExtractHostAndPort(listenAddress)
 		if err != nil {
 			log.Fatalf("Unable to extract hostname and port: %s", err)
 		}
