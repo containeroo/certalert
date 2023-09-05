@@ -15,7 +15,7 @@ func TestCreateTempFile(t *testing.T) {
 		}
 		defer os.Remove(tmpfile.Name())
 
-		data, err := ioutil.ReadFile(tmpfile.Name())
+		data, err := os.ReadFile(tmpfile.Name())
 		if err != nil {
 			t.Fatalf("Failed to read temp file: %v", err)
 		}
