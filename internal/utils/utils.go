@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net"
+	"net/url"
 	"os"
 	"reflect"
 	"strconv"
@@ -140,4 +141,10 @@ func ExtractHostAndPort(address string) (string, int, error) {
 	}
 
 	return host, port, nil
+}
+
+// IsValidURL tests a string to determine if it is a well-structured URL.
+func IsValidURL(str string) bool {
+	u, err := url.Parse(str)
+	return err == nil && u.Scheme != "" && u.Host != ""
 }

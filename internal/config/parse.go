@@ -124,7 +124,7 @@ func (c *Config) parsePushgatewayConfig() (err error) {
 			return err
 		}
 	}
-	if resolvedAddress != "" && !isValidURL(resolvedAddress) {
+	if resolvedAddress != "" && !utils.IsValidURL(resolvedAddress) {
 		if err := handlePushgatewayError(fmt.Sprintf("Invalid pushgateway address '%s'.", resolvedAddress)); err != nil {
 			return err
 		}
