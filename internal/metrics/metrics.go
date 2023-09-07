@@ -25,10 +25,12 @@ var (
 	)
 )
 
+// Metrics represents the prometheus metrics
 type Metrics struct {
 	Registry *prometheus.Registry
 }
 
+// Init initializes the prometheus metrics
 func init() {
 	PromMetrics = *NewMetrics()
 }

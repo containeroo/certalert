@@ -5,6 +5,7 @@ import (
 	"fmt"
 )
 
+// FormatHandlers maps each output format to its corresponding conversion function.
 var FormatHandlers = map[string]func(interface{}) (string, error){
 	"yaml": convertToYaml,
 	"json": convertToJson,
