@@ -112,23 +112,25 @@ func (c *Config) parsePushgatewayConfig() (err error) {
 		log.Warn(errMsg)
 		return nil
 	}
-	resolvedAddress, err := resolve.ResolveVariable(c.Pushgateway.Address)
-	if err != nil {
-		if err := handlePushgatewayError(fmt.Sprintf("Failed to resolve address for pushgateway. %v", err)); err != nil {
-			return err
+	if utils.HasKey(c.Pushgateway, "address") {
+		resolvedAddress, err := resolve.ResolveVariable(c.Pushgateway.Address)
+		if err != nil {
+			if err := handlePushgatewayError(fmt.Sprintf("Failed to resolve address for pushgateway. %v", err)); err != nil {
+				return err
+			}
 		}
-	}
-	if resolvedAddress == "" && c.Pushgateway.Address != "" {
-		if err := handlePushgatewayError("Pushgateway address was resolved to empty."); err != nil {
-			return err
+		if resolvedAddress == "" && c.Pushgateway.Address != "" {
+			if err := handlePushgatewayError("Pushgateway address was resolved to empty."); err != nil {
+				return err
+			}
 		}
-	}
-	if resolvedAddress != "" && !utils.IsValidURL(resolvedAddress) {
-		if err := handlePushgatewayError(fmt.Sprintf("Invalid pushgateway address '%s'.", resolvedAddress)); err != nil {
-			return err
+		if resolvedAddress != "" && !utils.IsValidURL(resolvedAddress) {
+			if err := handlePushgatewayError(fmt.Sprintf("Invalid pushgateway address '%s'.", resolvedAddress)); err != nil {
+				return err
+			}
 		}
+		c.Pushgateway.Address = resolvedAddress
 	}
-	c.Pushgateway.Address = resolvedAddress
 
 	if err := c.Pushgateway.Auth.Validate(); err != nil {
 		if err := handlePushgatewayError(err.Error()); err != nil {
@@ -136,21 +138,25 @@ func (c *Config) parsePushgatewayConfig() (err error) {
 		}
 	}
 
-	c.Pushgateway.Auth.Basic.Password, err = resolve.ResolveVariable(c.Pushgateway.Auth.Basic.Password)
-	if err != nil {
-		if err := handlePushgatewayError(fmt.Sprintf("Failed to resolve basic auth password for pushgateway. %v", err)); err != nil {
-			return err
+	if utils.HasKey(c.Pushgateway.Auth, "basic.password") {
+		c.Pushgateway.Auth.Basic.Password, err = resolve.ResolveVariable(c.Pushgateway.Auth.Basic.Password)
+		if err != nil {
+			if err := handlePushgatewayError(fmt.Sprintf("Failed to resolve basic auth password for pushgateway. %v", err)); err != nil {
+				return err
+			}
 		}
 	}
 
-	c.Pushgateway.Auth.Bearer.Token, err = resolve.ResolveVariable(c.Pushgateway.Auth.Bearer.Token)
-	if err != nil {
-		if err := handlePushgatewayError(fmt.Sprintf("Failed to resolve bearer token for pushgateway. %v", err)); err != nil {
-			return err
+	if utils.HasKey(c.Pushgateway.Auth, "bearer.token") {
+		c.Pushgateway.Auth.Bearer.Token, err = resolve.ResolveVariable(c.Pushgateway.Auth.Bearer.Token)
+		if err != nil {
+			if err := handlePushgatewayError(fmt.Sprintf("Failed to resolve bearer token for pushgateway. %v", err)); err != nil {
+				return err
+			}
 		}
 	}
 
-	if c.Pushgateway.Job == "" {
+	if utils.HasKey(c.Pushgateway, "job") && c.Pushgateway.Job == "" {
 		c.Pushgateway.Job = "certalert"
 	} else {
 		c.Pushgateway.Job, err = resolve.ResolveVariable(c.Pushgateway.Job)

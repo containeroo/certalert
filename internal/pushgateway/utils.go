@@ -4,6 +4,7 @@ import (
 	"certalert/internal/certificates"
 	"certalert/internal/config"
 	"certalert/internal/metrics"
+	"certalert/internal/utils"
 	"crypto/tls"
 	"fmt"
 	"net/http"
@@ -27,9 +28,9 @@ func createPusher(address, job string, auth config.Auth, insecureSkipVerify bool
 		Collector(metrics.CertificateEpoch).
 		Client(httpClient)
 
-	if auth.Bearer.Token != "" {
+	if utils.HasKey(auth, "bearer.token") && auth.Bearer.Token != "" {
 		pusher = pusher.BasicAuth("Bearer", auth.Bearer.Token)
-	} else if auth.Basic.Username != "" {
+	} else if utils.HasKey(auth, "basic.username") && auth.Basic.Username != "" {
 		pusher = pusher.BasicAuth(auth.Basic.Username, auth.Basic.Password)
 	}
 
@@ -39,7 +40,7 @@ func createPusher(address, job string, auth config.Auth, insecureSkipVerify bool
 // pushToGateway pushes the certificate information to the pushgateway
 func pushToGateway(pusher *push.Pusher, cert certificates.CertificateInfo) error {
 	gauge := metrics.CertificateEpoch.WithLabelValues(cert.Name, cert.Type, cert.Subject)
-	gauge.Set(float64(cert.Epoch)) // Assuming CertificateInfo has a field called ExpirationEpoch
+	gauge.Set(float64(cert.Epoch))
 
 	if err := pusher.Push(); err != nil {
 		return fmt.Errorf("Could not push to Pushgateway: %w", err)

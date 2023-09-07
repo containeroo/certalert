@@ -296,10 +296,10 @@ func TestParsePushgatewayConfig(t *testing.T) {
 				Pushgateway: Pushgateway{
 					Address: "http://localhost:9091",
 					Auth: Auth{
-						Basic: Basic{
+						Basic: &Basic{
 							Password: "env:BASIC_PASSWORD",
 						},
-						Bearer: Bearer{
+						Bearer: &Bearer{
 							Token: "env:BEARER_TOKEN",
 						},
 					},
@@ -324,7 +324,7 @@ func TestParsePushgatewayConfig(t *testing.T) {
 				Pushgateway: Pushgateway{
 					Address: "http://localhost:9091",
 					Auth: Auth{
-						Basic: Basic{
+						Basic: &Basic{
 							Password: "env:INVALID_ENV",
 						},
 					},
@@ -339,7 +339,7 @@ func TestParsePushgatewayConfig(t *testing.T) {
 				Pushgateway: Pushgateway{
 					Address: "http://localhost:9091",
 					Auth: Auth{
-						Bearer: Bearer{
+						Bearer: &Bearer{
 							Token: "env:INVALID_ENV",
 						},
 					},
