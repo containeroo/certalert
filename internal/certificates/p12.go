@@ -14,7 +14,7 @@ func ExtractP12CertificatesInfo(name string, certData []byte, password string, f
 	// Decode the P12 data
 	_, certificate, caCerts, err := pkcs12.DecodeChain(certData, password)
 	if err != nil {
-		return certInfoList, handleError(&certInfoList, name, "p12", fmt.Sprintf("Failed to decode P12 file '%s': %v", name, err), failOnError)
+		return certInfoList, handleFailOnError(&certInfoList, name, "p12", fmt.Sprintf("Failed to decode P12 file '%s': %v", name, err), failOnError)
 	}
 
 	// Prepare for extraction

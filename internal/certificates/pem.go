@@ -24,7 +24,7 @@ func ExtractPEMCertificatesInfo(name string, certData []byte, password string, f
 		case "CERTIFICATE":
 			cert, err := x509.ParseCertificate(block.Bytes)
 			if err != nil {
-				if err := handleError(&certInfoList, name, "pem", fmt.Sprintf("Failed to parse certificate '%s': %v", name, err), failOnError); err != nil {
+				if err := handleFailOnError(&certInfoList, name, "pem", fmt.Sprintf("Failed to parse certificate '%s': %v", name, err), failOnError); err != nil {
 					return certInfoList, err
 				}
 			}
@@ -52,7 +52,7 @@ func ExtractPEMCertificatesInfo(name string, certData []byte, password string, f
 	}
 
 	if len(certInfoList) == 0 {
-		return certInfoList, handleError(&certInfoList, name, "pem", fmt.Sprintf("Failed to decode any certificate in '%s'", name), failOnError)
+		return certInfoList, handleFailOnError(&certInfoList, name, "pem", fmt.Sprintf("Failed to decode any certificate in '%s'", name), failOnError)
 	}
 
 	return certInfoList, nil

@@ -23,7 +23,7 @@ func Process(certificates []Certificate, failOnError bool) (certificatesInfo []C
 		if err != nil {
 			// Accessibility of the file is checked in the config validation, if reached
 			// here, the file exists but can't be read for some reason.
-			if err := handleError(&certInfoList, cert.Name, cert.Type, fmt.Sprintf("Failed to read certificate file '%s'. %v", cert.Path, err), failOnError); err != nil {
+			if err := handleFailOnError(&certInfoList, cert.Name, cert.Type, fmt.Sprintf("Failed to read certificate file '%s'. %v", cert.Path, err), failOnError); err != nil {
 				return nil, err
 			}
 			continue
@@ -33,7 +33,7 @@ func Process(certificates []Certificate, failOnError bool) (certificatesInfo []C
 		inferredType, found := FileExtensionsToType[cert.Type]
 		if !found {
 			// This should never happen as the config validation ensures that the type is valid
-			if err := handleError(&certInfoList, cert.Name, cert.Type, fmt.Sprintf("Unknown certificate type '%s'", cert.Type), failOnError); err != nil {
+			if err := handleFailOnError(&certInfoList, cert.Name, cert.Type, fmt.Sprintf("Unknown certificate type '%s'", cert.Type), failOnError); err != nil {
 				return nil, err
 			}
 			continue
@@ -42,7 +42,7 @@ func Process(certificates []Certificate, failOnError bool) (certificatesInfo []C
 		extractFunc, found := TypeToExtractionFunction[inferredType]
 		if !found {
 			// This should never happen as the config validation ensures that the type is valid
-			if err := handleError(&certInfoList, cert.Name, cert.Type, fmt.Sprintf("Unknown certificate type '%s'", cert.Type), failOnError); err != nil {
+			if err := handleFailOnError(&certInfoList, cert.Name, cert.Type, fmt.Sprintf("Unknown certificate type '%s'", cert.Type), failOnError); err != nil {
 				return nil, err
 			}
 			continue

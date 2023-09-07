@@ -15,7 +15,7 @@ func ExtractJKSCertificatesInfo(name string, certData []byte, password string, f
 
 	ks := keystore.New()
 	if err := ks.Load(bytes.NewReader(certData), []byte(password)); err != nil {
-		return certInfoList, handleError(&certInfoList, name, "jks", fmt.Sprintf("Failed to load JKS file '%s': %v", name, err), failOnError)
+		return certInfoList, handleFailOnError(&certInfoList, name, "jks", fmt.Sprintf("Failed to load JKS file '%s': %v", name, err), failOnError)
 	}
 
 	for _, alias := range ks.Aliases() {
@@ -24,7 +24,7 @@ func ExtractJKSCertificatesInfo(name string, certData []byte, password string, f
 		if ks.IsPrivateKeyEntry(alias) {
 			entry, err := ks.GetPrivateKeyEntry(alias, []byte(password))
 			if err != nil {
-				if err := handleError(&certInfoList, name, "jks", fmt.Sprintf("Failed to get private key in JKS file '%s': %v", name, err), failOnError); err != nil {
+				if err := handleFailOnError(&certInfoList, name, "jks", fmt.Sprintf("Failed to get private key in JKS file '%s': %v", name, err), failOnError); err != nil {
 					return certInfoList, err
 				}
 				continue
@@ -33,14 +33,14 @@ func ExtractJKSCertificatesInfo(name string, certData []byte, password string, f
 		} else if ks.IsTrustedCertificateEntry(alias) {
 			entry, err := ks.GetTrustedCertificateEntry(alias)
 			if err != nil {
-				if err := handleError(&certInfoList, name, "jks", fmt.Sprintf("Failed to get certificates in JKS file '%s': %v", name, err), failOnError); err != nil {
+				if err := handleFailOnError(&certInfoList, name, "jks", fmt.Sprintf("Failed to get certificates in JKS file '%s': %v", name, err), failOnError); err != nil {
 					return certInfoList, err
 				}
 				continue
 			}
 			certificates = []keystore.Certificate{entry.Certificate}
 		} else {
-			if err := handleError(&certInfoList, name, "jks", fmt.Sprintf("Unknown entry type for alias '%s' in JKS file '%s'", alias, name), failOnError); err != nil {
+			if err := handleFailOnError(&certInfoList, name, "jks", fmt.Sprintf("Unknown entry type for alias '%s' in JKS file '%s'", alias, name), failOnError); err != nil {
 				return certInfoList, err
 			}
 			continue
@@ -49,7 +49,7 @@ func ExtractJKSCertificatesInfo(name string, certData []byte, password string, f
 		for _, cert := range certificates {
 			certificate, err := x509.ParseCertificate(cert.Content)
 			if err != nil {
-				if err := handleError(&certInfoList, name, "jks", fmt.Sprintf("Failed to parse certificate '%s': %v", name, err), failOnError); err != nil {
+				if err := handleFailOnError(&certInfoList, name, "jks", fmt.Sprintf("Failed to parse certificate '%s': %v", name, err), failOnError); err != nil {
 					return certInfoList, err
 				}
 				continue

@@ -27,8 +27,8 @@ func certExistsInSlice(cert CertificateInfo, slice []CertificateInfo) bool {
 	return false
 }
 
-// handleError is a helper function to handle failOnError
-func handleError(certInfoList *[]CertificateInfo, certName, certType, errMsg string, failOnError bool) error {
+// handleFailOnError is a helper function to handle failOnError
+func handleFailOnError(certInfoList *[]CertificateInfo, certName, certType, errMsg string, failOnError bool) error {
 	if failOnError {
 		return fmt.Errorf(errMsg)
 	}

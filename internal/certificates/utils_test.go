@@ -33,11 +33,11 @@ func TestGetCertificateByName(t *testing.T) {
 	}
 }
 
-func TestHandleError(t *testing.T) {
+func TesthandleFailOnError(t *testing.T) {
 	var certInfoList []CertificateInfo
 
 	t.Run("failOnError is true", func(t *testing.T) {
-		err := handleError(&certInfoList, "certName", "certType", "An error occurred", true)
+		err := handleFailOnError(&certInfoList, "certName", "certType", "An error occurred", true)
 		if err == nil {
 			t.Fatalf("Expected an error, got nil")
 		} else if err.Error() != "An error occurred" {
@@ -46,7 +46,7 @@ func TestHandleError(t *testing.T) {
 	})
 
 	t.Run("failOnError is false", func(t *testing.T) {
-		err := handleError(&certInfoList, "certName", "certType", "Another error occurred", false)
+		err := handleFailOnError(&certInfoList, "certName", "certType", "Another error occurred", false)
 		if err != nil {
 			t.Fatalf("Did not expect an error, got: %v", err)
 		}
