@@ -9,7 +9,7 @@ import (
 )
 
 // FileExtensionsTypesSorted contains a sorted list of unique certificate types extracted from 'FileExtensionsToType'
-var FileExtensionsTypesSorted = []string{}
+var FileExtensionsTypesSorted []string
 
 // FileExtensionsTypesSortedString is a formatted string containing the sorted certificate types for user-friendly display
 var FileExtensionsTypesSortedString string
