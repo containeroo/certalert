@@ -99,6 +99,7 @@ func CheckFileAccessibility(filePath string) error {
 // HasKey is a utility function designed to check if a given key exists
 // within a map, struct, or interface. This function also supports checking
 // for nested keys, separated by dots (e.g., "key1.key2.key3").
+// Attention. Keys are case-sensitive!
 func HasKey(s interface{}, key string) bool {
 	v := reflect.ValueOf(s) // Obtain the Value of the passed interface{}
 
@@ -106,6 +107,11 @@ func HasKey(s interface{}, key string) bool {
 	keys := strings.Split(key, ".")
 
 	for i, k := range keys {
+		if v.Kind() == reflect.Ptr {
+			// If the current object is a pointer, dereference it
+			v = v.Elem()
+		}
+
 		switch v.Kind() {
 		// If the current object is a map
 		case reflect.Map: // Look for the key within the map

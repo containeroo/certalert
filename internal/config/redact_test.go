@@ -32,9 +32,18 @@ func TestRedactConfig(t *testing.T) {
 	// Create a mock Config object
 	config := &Config{}
 	config.Pushgateway.Address = "http://example.com"
-	config.Pushgateway.Auth.Basic.Username = "username"
-	config.Pushgateway.Auth.Basic.Password = "password"
-	config.Pushgateway.Auth.Bearer.Token = "token"
+
+	a := &Auth{
+		Basic: &Basic{
+			Username: "username",
+			Password: "password",
+		},
+		Bearer: &Bearer{
+			Token: "token",
+		},
+	}
+
+	config.Pushgateway.Auth = *a
 	config.Certs = append(config.Certs, certificates.Certificate{
 		Name:     "TestCert",
 		Password: "password",
