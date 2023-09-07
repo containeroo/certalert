@@ -131,7 +131,7 @@ func (c *Config) parsePushgatewayConfig() (err error) {
 	}
 	c.Pushgateway.Address = resolvedAddress
 
-	if err := c.validateAuthConfig(); err != nil {
+	if err := c.Pushgateway.Auth.Validate(); err != nil {
 		if err := handlePushgatewayError(err.Error()); err != nil {
 			return err
 		}
@@ -165,10 +165,10 @@ func (c *Config) parsePushgatewayConfig() (err error) {
 	return nil
 }
 
-// validateAuthConfig validates the auth config
-func (c *Config) validateAuthConfig() error {
-	basicValue := reflect.ValueOf(c.Pushgateway.Auth.Basic)
-	bearerValue := reflect.ValueOf(c.Pushgateway.Auth.Bearer)
+// Validate validates the auth config
+func (a *Auth) Validate() error {
+	basicValue := reflect.ValueOf(a.Basic)
+	bearerValue := reflect.ValueOf(a.Bearer)
 
 	basicZero := reflect.Zero(basicValue.Type())
 	bearerZero := reflect.Zero(bearerValue.Type())
