@@ -16,7 +16,8 @@ func GetCertificateByName(name string, certificates []Certificate) (*Certificate
 	return nil, fmt.Errorf("Certificate '%s' not found", name)
 }
 
-// certExistsInSlice checks if a certificate exists in a slice
+// certExistsInSlice checks if a certificate exists in a slice by comparing the name, subject and type.
+// The certificate epoch is not compared!
 func certExistsInSlice(cert CertificateInfo, slice []CertificateInfo) bool {
 	for _, c := range slice {
 		if cert.Name == c.Name && cert.Subject == c.Subject && cert.Type == c.Type {

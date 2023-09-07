@@ -14,8 +14,8 @@ var AppCopy Config
 // Config represents the config file
 type Config struct {
 	Version          string                     `mapstructure:"version"`
-	AutoReloadConfig bool                       `mapstructure:"autoReloadConfig,omitempty" "yaml:"autoReloadConfig,omitempty"`
-	FailOnError      bool                       `mapstructure:"failOnError,omitempty "yaml:"failOnError,omitempty"`
+	AutoReloadConfig bool                       `mapstructure:"autoReloadConfig,omitempty" yaml:"autoReloadConfig,omitempty"`
+	FailOnError      bool                       `mapstructure:"failOnError,omitempty" yaml:"failOnError,omitempty"`
 	Server           Server                     `mapstructure:"server,omitempty" yaml:"server,omitempty"`
 	Pushgateway      Pushgateway                `mapstructure:"pushgateway,omitempty" yaml:"pushgateway,omitempty"`
 	Certs            []certificates.Certificate `mapstructure:"certs"`
