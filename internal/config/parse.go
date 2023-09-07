@@ -165,10 +165,13 @@ func (c *Config) parsePushgatewayConfig() (err error) {
 		}
 	}
 
-	if utils.HasKey(c.Pushgateway, "job") && c.Pushgateway.Job == "" {
-		c.Pushgateway.Job = "certalert"
-	} else {
-		c.Pushgateway.Job, err = resolve.ResolveVariable(c.Pushgateway.Job)
+	if utils.HasKey(c.Pushgateway, "job") {
+		jobName := c.Pushgateway.Job
+		if jobName == "" {
+			jobName = "certalert"
+		}
+
+		c.Pushgateway.Job, err = resolve.ResolveVariable(jobName)
 		if err != nil {
 			if err := handlePushgatewayError(fmt.Sprintf("Failed to resolve jobName for pushgateway. %v", err)); err != nil {
 				return err
