@@ -3,7 +3,6 @@ package config
 import (
 	"certalert/internal/certificates"
 	"fmt"
-	"reflect"
 )
 
 // Config represents the config file
@@ -44,13 +43,7 @@ type Auth struct {
 
 // Validate checks if basic auth and bearer auth are both defined
 func (a *Auth) Validate() error {
-	basicValue := reflect.ValueOf(a.Basic)
-	bearerValue := reflect.ValueOf(a.Bearer)
-
-	basicZero := reflect.Zero(basicValue.Type())
-	bearerZero := reflect.Zero(bearerValue.Type())
-
-	if basicValue.Interface() != basicZero.Interface() && bearerValue.Interface() != bearerZero.Interface() {
+	if a.Basic != nil && a.Bearer != nil {
 		return fmt.Errorf("Both 'auth.basic' and 'auth.bearer' are defined.")
 	}
 
