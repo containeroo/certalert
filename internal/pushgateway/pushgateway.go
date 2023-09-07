@@ -3,8 +3,8 @@ package pushgateway
 import (
 	"certalert/internal/certificates"
 	"certalert/internal/config"
+	"certalert/internal/utils"
 	"fmt"
-	"net/url"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -15,8 +15,8 @@ func Send(address string, jobName string, auth config.Auth, certs []certificates
 		return fmt.Errorf("Pushgateway address is empty")
 	}
 
-	if _, err := url.Parse(address); err != nil {
-		return fmt.Errorf("Invalid pushgateway address '%s': %w", address, err)
+	if !utils.IsValidURL(address) {
+		return fmt.Errorf("Invalid pushgateway address '%s'", address)
 	}
 
 	pusher := createPusher(address, jobName, auth, insecureSkipVerify)
