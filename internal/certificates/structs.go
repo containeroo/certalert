@@ -38,6 +38,7 @@ var TypeToExtractionFunction = map[string]extractFunction{
 }
 
 // FileExtensionsToType maps each file extension to its canonical certificate type.
+// The canonical type is used to select the appropriate extraction function from 'TypeToExtractionFunction'.
 var FileExtensionsToType = map[string]string{
 	"p12":        "p12",
 	"pkcs12":     "p12",
