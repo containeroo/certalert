@@ -17,7 +17,8 @@ const (
 // ResolveVariable takes a string and resolves its value based on its prefix.
 // If the string is prefixed with "env:", it's treated as an environment variable and resolved accordingly.
 // If the string is prefixed with "file:", it's treated as a path to a file, optionally followed by a key
-// (e.g., "file:/path/to/file//key") which specifies which line to retrieve from the file.
+// (e.g., "file:/path/to/file//key") which specifies which line to retrieve from the file. The key is expected
+// to be in the format "key = value".
 // If no prefix is present, the string is returned as is.
 func ResolveVariable(value string) (string, error) {
 	if strings.HasPrefix(value, envPrefix) {
@@ -42,6 +43,7 @@ func resolveEnvVariable(envVar string) (string, error) {
 }
 
 // resolveFileVariable resolves a string as a path to a file with an optional key.
+// The key is expected to be in the format "key = value".
 func resolveFileVariable(filePathWithKey string) (string, error) {
 	lastSeparatorIndex := strings.LastIndex(filePathWithKey, keyDelim)
 	filePath := filePathWithKey // default filePath (whole value)
@@ -73,6 +75,7 @@ func resolveFileVariable(filePathWithKey string) (string, error) {
 }
 
 // searchKeyInFile searches for a specified key in a file and returns its associated value.
+// The key is expected to be in the format "key = value".
 func searchKeyInFile(file *os.File, key string) (string, error) {
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
