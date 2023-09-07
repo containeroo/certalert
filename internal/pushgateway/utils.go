@@ -11,6 +11,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/push"
 )
 
+// createPusher creates a configured pusher
 func createPusher(address, job string, auth config.Auth, insecureSkipVerify bool) *push.Pusher {
 	var httpClient *http.Client
 	if insecureSkipVerify {
@@ -35,6 +36,7 @@ func createPusher(address, job string, auth config.Auth, insecureSkipVerify bool
 	return pusher
 }
 
+// pushToGateway pushes the certificate information to the pushgateway
 func pushToGateway(pusher *push.Pusher, cert certificates.CertificateInfo) error {
 	gauge := metrics.CertificateEpoch.WithLabelValues(cert.Name, cert.Type, cert.Subject)
 	gauge.Set(float64(cert.Epoch)) // Assuming CertificateInfo has a field called ExpirationEpoch

@@ -6,7 +6,6 @@ import (
 	"certalert/internal/utils"
 	"fmt"
 	"path/filepath"
-	"reflect"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
@@ -160,21 +159,6 @@ func (c *Config) parsePushgatewayConfig() (err error) {
 				return err
 			}
 		}
-	}
-
-	return nil
-}
-
-// Validate validates the auth config
-func (a *Auth) Validate() error {
-	basicValue := reflect.ValueOf(a.Basic)
-	bearerValue := reflect.ValueOf(a.Bearer)
-
-	basicZero := reflect.Zero(basicValue.Type())
-	bearerZero := reflect.Zero(bearerValue.Type())
-
-	if basicValue.Interface() != basicZero.Interface() && bearerValue.Interface() != bearerZero.Interface() {
-		return fmt.Errorf("Both 'auth.basic' and 'auth.bearer' are defined.")
 	}
 
 	return nil
