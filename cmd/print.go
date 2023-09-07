@@ -53,7 +53,6 @@ Examples:
 	certalert print my-cert --output yaml
 	`,
 	Run: func(cmd *cobra.Command, args []string) {
-
 		if !utils.IsInList(outputFormat, supportedOutputFormats) {
 			fmt.Printf("Unsupported output format: %s. Supported formats are: %s\n", outputFormat, strings.Join(supportedOutputFormats, ", "))
 			cmd.Help()
@@ -64,8 +63,7 @@ Examples:
 			// Handle --all flag
 			output, err := print.ConvertCertificatesToFormat(outputFormat, config.App.Certs, config.App.FailOnError)
 			if err != nil {
-				log.Error(err)
-				os.Exit(1)
+				log.Fatal(err)
 			}
 			fmt.Println(output)
 			return
@@ -83,8 +81,7 @@ Examples:
 		for _, arg := range args {
 			certificate, err := certificates.GetCertificateByName(arg, config.App.Certs)
 			if err != nil {
-				log.Error(err)
-				os.Exit(1)
+				log.Fatal(err)
 			}
 			certs = append(certs, *certificate)
 		}
@@ -92,8 +89,7 @@ Examples:
 		// Print the certificates
 		output, err := print.ConvertCertificatesToFormat(outputFormat, certs, config.App.FailOnError)
 		if err != nil {
-			log.Error(err)
-			os.Exit(1)
+			log.Fatal(err)
 		}
 		fmt.Println(output)
 	},

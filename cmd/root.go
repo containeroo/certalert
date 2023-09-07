@@ -53,17 +53,17 @@ var rootCmd = &cobra.Command{
 	`, certificates.FileExtensionsTypesSortedString),
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		// Enter here before any subcommand is executed
+		if printVersion {
+			fmt.Println("CertAlert version:", version)
+			os.Exit(0)
+		}
+
 		if verbose {
 			log.SetLevel(log.DebugLevel)
 			log.Debugf("Verbose output enabled")
 		} else if silent {
 			log.SetLevel(log.ErrorLevel)
 			log.Debugf("Silent output enabled")
-		}
-
-		if printVersion {
-			fmt.Println("CertAlert version:", version)
-			os.Exit(0)
 		}
 
 		if err := config.App.Parse(); err != nil {
