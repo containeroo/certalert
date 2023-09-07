@@ -138,6 +138,15 @@ func (c *Config) parsePushgatewayConfig() (err error) {
 		}
 	}
 
+	if utils.HasKey(c.Pushgateway.Auth, "basic.username") {
+		c.Pushgateway.Auth.Basic.Username, err = resolve.ResolveVariable(c.Pushgateway.Auth.Basic.Username)
+		if err != nil {
+			if err := handlePushgatewayError(fmt.Sprintf("Failed to resolve basic auth username for pushgateway. %v", err)); err != nil {
+				return err
+			}
+		}
+	}
+
 	if utils.HasKey(c.Pushgateway.Auth, "basic.password") {
 		c.Pushgateway.Auth.Basic.Password, err = resolve.ResolveVariable(c.Pushgateway.Auth.Basic.Password)
 		if err != nil {

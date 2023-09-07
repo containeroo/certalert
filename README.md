@@ -4,12 +4,12 @@
 
 ## Features
 
-**Real-time Monitoring**: Automatically scans the expiration dates of certificates upon each `/metrics` endpoint request by Prometheus.
+**Real-time Monitoring**: Automatically scans the expiration dates of certificates upon each `/metrics` endpoint request by Prometheus.\
 **Flexible Export**: Supports exporting metrics directly to a Pushgateway server or outputs them in `JSON`, `YAML`, or `text table` formats.
 
 ## Exposed Metrics
 
-**certalert_certificate_epoch_seconds**: This metric represents the expiration date of each SSL/TLS certificate, expressed in epoch format.
+**certalert_certificate_epoch_seconds**: This metric represents the expiration date of each SSL/TLS certificate, expressed in epoch format.\
 **certalert_certificate_extraction_status**: This metric signifies the status of the certificate extraction process. A value of `0` indicates successful extraction, while a value of `1` signifies a failure. In the case of a failure, the reason label will provide additional details on the issue encountered.
 
 ## Usage
@@ -24,7 +24,7 @@ The primary function is to utilize the `serve` command to initiate a web server 
 - `-f, --fail-on-error`: Exits `certalert` immediately upon encountering an error.
 - `-V, --version`: Print the current version and exit.
 
-### Basic Commands
+## Basic Commands
 
 1. **serve**: Launches a web server to expose certificate metrics.
 
@@ -105,19 +105,21 @@ The endpont `/-/reload` also reloads the configuration.
 Below are the available properties for the `Pushgateway` and its nested types:
 
 - **pushgateway**
-  - **address**: The URL of the Pushgateway server.
-  - **job**: The job label to be attached to pushed metrics.
+  - **address**: The URL of the Pushgateway server. *
+  - **job**: The job label to be attached to pushed metrics. *
   - **insecureSkipVerify** Skip TLS certificate verification. Defaults to `false`.
   - **auth**: This nested structure holds the authentication details needed for the Pushgateway server. It supports two types of authentication: `Basic` and `Bearer`.
 
 - **auth**
   - **basic**: This nested structure holds the basic authentication details.
-    - **username**: Username used for basic authentication.
-    - **password**: Password used for basic authentication.
+    - **username**: Username used for basic authentication. *
+    - **password**: Password used for basic authentication. *
   - **bearer**: This nested structure holds the bearer authentication details.
-    - **token**: Bearer token used for bearer authentication.
+    - **token**: Bearer token used for bearer authentication. *
 
 Please ensure each property is correctly configured to prevent any unexpected behaviors. Remember to provide necessary authentication details under the `Auth` structure based on the type of authentication your Pushgateway server uses.
+
+\*Can be provided as `plain text`, from an `environment variable`, or from a `file`. See `Providing Credentials` for more details.
 
 ### Certificate
 
@@ -129,7 +131,7 @@ Here are the available properties for the certificate:
 - **type**: This denotes the type of the certificate. If it's not explicitly specified, the system will attempt to determine the type based on the file extension. Allowed types are: `p12`, `pkcs12`, `pfx`, `pem`, `crt`, `jks`, `p7`, `p7b`, `p7c`, `truststore` or `ts`.
 - **password**: This optional property allows you to set the password for the certificate.
 
-#### Providing Credentials
+### Providing Credentials
 
 Credentials such as passwords or tokens can be provided in one of the following formats:
 
@@ -141,7 +143,7 @@ Credentials such as passwords or tokens can be provided in one of the following 
 
 Make sure each credential property is correctly configured to prevent any unexpected behaviors.
 
-__Example__
+### Example
 
 ```yaml
 ---
@@ -177,7 +179,7 @@ certs:
 
 ## Available Endpoints
 
-`certalert` provides the following web-accessible endpoints:
+`CertAlert` provides the following web-accessible endpoints:
 
 | Endpoint        | Purpose                                                                            |
 | :-------------- | :--------------------------------------------------------------------------------- |
@@ -192,7 +194,7 @@ certs:
 
 The certificate format is inferred from its file extension. However, you can override this automatic detection by specifying the `type` field.
 
-With `certalert`, the focus is exclusively on extracting certificates. Should there be additional components, they will be skipped.
+With `CertAlert`, the focus is exclusively on extracting certificates. Should there be additional components, they will be skipped.
 
 ### JKS (Java KeyStore)
 
