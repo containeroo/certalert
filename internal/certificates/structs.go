@@ -25,7 +25,6 @@ func init() {
 }
 
 // extractFunction is a function type representing the signature for extracting certificate information.
-// It takes parameters 'name', 'certData', 'password', and 'failOnError', and returns a slice of 'CertificateInfo' and an error.
 type extractFunction func(name string, certData []byte, password string, failOnError bool) ([]CertificateInfo, error)
 
 // TypeToExtractionFunction maps each certificate type to its corresponding extraction function.
