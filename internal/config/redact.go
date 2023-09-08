@@ -6,6 +6,11 @@ import (
 )
 
 // RedactConfig redacts sensitive data from a config
+// This is a very simple implementation that only redacts the following:
+// - Pushgateway.Auth.Basic.Username
+// - Pushgateway.Auth.Basic.Password
+// - Pushgateway.Auth.Bearer.Token
+// - Certs.Password
 func RedactConfig(config *Config) error {
 	if utils.HasKey(config.Pushgateway, "Auth.Basic.Username") {
 		config.Pushgateway.Auth.Basic.Username = redactVariable(config.Pushgateway.Auth.Basic.Username)
