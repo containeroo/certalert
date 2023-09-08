@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"encoding/json"
 	"fmt"
 	"net"
 	"net/url"
@@ -18,26 +17,50 @@ func BoolPtr(b bool) *bool {
 
 // DeepCopy deep copies the source to the destination.
 // The dest argument should be a pointer to the type you want to copy into.
-func DeepCopy(src interface{}, dest interface{}) error {
-	// Marshal the source object to a JSON byte array
-	bytes, err := json.Marshal(src)
-	if err != nil {
-		return fmt.Errorf("error while marshaling: %v", err)
+func DeepCopy(src, dest interface{}) error {
+	srcValue := reflect.ValueOf(src)
+	destValue := reflect.ValueOf(dest)
+
+	// Check if dest is a pointer
+	if destValue.Kind() != reflect.Ptr || destValue.IsNil() {
+		return fmt.Errorf("destination is not a valid pointer")
 	}
 
-	// Make sure dest is a pointer
-	destVal := reflect.ValueOf(dest)
-	if destVal.Kind() != reflect.Ptr {
-		return fmt.Errorf("destination is not a pointer")
+	// Check if src and dest have the same type
+	if srcValue.Type() != destValue.Elem().Type() {
+		return fmt.Errorf("source and destination types do not match")
 	}
 
-	// Unmarshal the JSON byte array to the destination object
-	err = json.Unmarshal(bytes, dest)
-	if err != nil {
-		return fmt.Errorf("error while unmarshaling: %v", err)
-	}
+	// Perform a deep copy of the struct fields
+	deepCopyStruct(srcValue, destValue.Elem())
 
 	return nil
+}
+
+// deepCopyStruct recursively copies fields from srcValue to destValue.
+func deepCopyStruct(srcValue, destValue reflect.Value) {
+	switch srcValue.Kind() {
+	case reflect.Ptr:
+		if srcValue.IsNil() {
+			destValue.Set(reflect.Zero(destValue.Type()))
+			return
+		}
+		srcValue = srcValue.Elem()
+		destValue = destValue.Elem()
+		deepCopyStruct(srcValue, destValue)
+
+	case reflect.Struct:
+		for i := 0; i < srcValue.NumField(); i++ {
+			srcField := srcValue.Field(i)
+			destField := destValue.Field(i)
+			if destField.CanSet() {
+				deepCopyStruct(srcField, destField)
+			}
+		}
+
+	default:
+		destValue.Set(srcValue)
+	}
 }
 
 // IsInList checks if a value is in a list
@@ -78,20 +101,14 @@ func ExtractMapKeys(m interface{}) []string {
 
 // CheckFileAccessibility checks if a file exists and is accessible
 func CheckFileAccessibility(filePath string) error {
-	// Check if the file exists
-	if _, err := os.Stat(filePath); err != nil {
+	file, err := os.Open(filePath)
+	if err != nil {
 		if os.IsNotExist(err) {
 			return fmt.Errorf("File does not exist: %s", filePath)
 		}
-		return fmt.Errorf("Error stating file '%s': %v", filePath, err)
-	}
-
-	// Try to open the file to check for readability
-	file, err := os.Open(filePath)
-	if err != nil {
 		return fmt.Errorf("Failed to open file '%s': %v", filePath, err)
 	}
-	file.Close() // Close immediately after opening, as we just want to check readability.
+	defer file.Close()
 
 	return nil
 }

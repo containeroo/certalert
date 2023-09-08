@@ -66,18 +66,18 @@ func (c *Config) parseCertificatesConfig() (err error) {
 		}
 
 		if cert.Type == "" {
-			ext := filepath.Ext(cert.Path)     // Get the file extension
-			ext = strings.TrimPrefix(ext, ".") // Remove the dot
-
-			if inferredType, ok := certificates.FileExtensionsToType[ext]; ok {
-				cert.Type = inferredType
-			} else if ext != "" {
-				errMsg := fmt.Sprintf("Certificate '%s' has no 'type' defined. Type can't be inferred due to unclear file extension (.%s).", cert.Name, ext)
-				return handleFailOnError(cert, idx, errMsg)
-			} else {
+			ext := strings.TrimPrefix(filepath.Ext(cert.Path), ".") // extract file extation and remove leading dot
+			if ext == "" {
 				errMsg := fmt.Sprintf("Certificate '%s' has no 'type' defined and is missing a file extension.", cert.Name)
 				return handleFailOnError(cert, idx, errMsg)
 			}
+
+			inferredType, ok := certificates.FileExtensionsToType[ext]
+			if !ok {
+				errMsg := fmt.Sprintf("Certificate '%s' has no 'type' defined. Type can't be inferred due to unclear file extension (.%s).", cert.Name, ext)
+				return handleFailOnError(cert, idx, errMsg)
+			}
+			cert.Type = inferredType
 		}
 
 		// The Type can be specified in the config file, but it must be one of the supported types
@@ -96,10 +96,9 @@ func (c *Config) parseCertificatesConfig() (err error) {
 		cert.Password = pw
 
 		c.Certs[idx] = cert
-
 	}
-	return nil
 
+	return nil
 }
 
 // parsePushgatewayConfig validates the pushgateway config
