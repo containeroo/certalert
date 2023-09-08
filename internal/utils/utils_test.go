@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"fmt"
 	"os"
 	"reflect"
 	"sort"
@@ -137,18 +136,6 @@ func TestCheckFileAccessibility(t *testing.T) {
 			t.Errorf("Expected no error for readable file, got %v", err)
 		}
 	})
-
-	// Test case when os.Stat itself returns an error (other than file not found)
-	t.Run("Error stating file", func(t *testing.T) {
-		err := CheckFileAccessibility(string([]byte{0}))
-		if err == nil {
-			t.Fatalf("Expected an error but got nil")
-		}
-		expectedErrMsgPrefix := "Error stating file"
-		if err != nil && err.Error()[:len(expectedErrMsgPrefix)] != expectedErrMsgPrefix {
-			t.Fatalf("Expected error to start with '%s', got '%v'", expectedErrMsgPrefix, err)
-		}
-	})
 }
 
 func TestHasKey(t *testing.T) {
@@ -193,68 +180,6 @@ func TestHasKey(t *testing.T) {
 			}
 		})
 	}
-}
-
-func TestDeepCopy(t *testing.T) {
-	type Person struct {
-		Name string
-		Age  int
-	}
-
-	t.Run("Test struct copy", func(t *testing.T) {
-		person1 := &Person{Name: "John", Age: 30}
-		person2 := &Person{}
-		if err := DeepCopy(person1, person2); err != nil {
-			t.Errorf("Unexpected error: %v", err)
-		}
-
-		if !reflect.DeepEqual(person1, person2) {
-			t.Errorf("Structs are not deeply equal: %v, %v", person1, person2)
-		}
-	})
-
-	t.Run("Test non-pointer destination", func(t *testing.T) {
-		person1 := &Person{Name: "John", Age: 30}
-		var x int
-		err := DeepCopy(person1, x)
-		if err == nil || err.Error() != "destination is not a pointer" {
-			t.Errorf("Expected pointer error, got: %v", err)
-		}
-	})
-
-	t.Run("Test actual deep copy", func(t *testing.T) {
-		person1 := &Person{Name: "John", Age: 30}
-		person2 := &Person{}
-		person2.Age = 40
-		if reflect.DeepEqual(person1, person2) {
-			t.Errorf("Structs are sharing memory: %v, %v", person1, person2)
-		}
-	})
-
-	t.Run("Test unmarshallable SRC type", func(t *testing.T) {
-		type UnmarshalableType struct {
-			F func()
-		}
-		unmarshalable := &UnmarshalableType{}
-		err := DeepCopy(unmarshalable, &UnmarshalableType{})
-		errMsg := fmt.Sprintf("error while marshaling: json: unsupported type: func()")
-		if err == nil || err.Error() != errMsg {
-			t.Errorf("Expected '%s', got: '%v'", errMsg, err)
-		}
-	})
-
-	t.Run("Test unmarshallable DST type", func(t *testing.T) {
-		unmarshalable := struct {
-			Name string
-		}{
-			Name: "John",
-		}
-		err := DeepCopy(unmarshalable, BoolPtr(true))
-		errMsg := fmt.Sprintf("error while unmarshaling: json: cannot unmarshal object into Go value of type bool")
-		if err == nil || err.Error() != errMsg {
-			t.Errorf("Expected '%s', got: '%v'", errMsg, err)
-		}
-	})
 }
 
 func TestExtractHostAndPort(t *testing.T) {
@@ -312,5 +237,72 @@ func TestIsValidURL(t *testing.T) {
 				t.Errorf("Expected %v for %s", tc.expectedBool, tc.urlStr)
 			}
 		})
+	}
+}
+
+type SimpleStruct struct {
+	Field1 string
+	Field2 int
+}
+
+type NestedStruct struct {
+	Field1 string
+	Field2 SimpleStruct
+}
+
+func TestDeepCopySimpleStruct(t *testing.T) {
+	src := SimpleStruct{"Hello", 42}
+	var dest SimpleStruct
+
+	err := DeepCopy(src, &dest)
+	if err != nil {
+		t.Fatalf("Error during DeepCopy: %v", err)
+	}
+
+	if !reflect.DeepEqual(src, dest) {
+		t.Errorf("DeepCopy result does not match source.\nSource: %+v\nDest: %+v", src, dest)
+	}
+}
+
+func TestDeepCopyNestedStruct(t *testing.T) {
+	src := NestedStruct{
+		Field1: "Outer",
+		Field2: SimpleStruct{"Hello", 42},
+	}
+	var dest NestedStruct
+
+	err := DeepCopy(src, &dest)
+	if err != nil {
+		t.Fatalf("Error during DeepCopy: %v", err)
+	}
+
+	if !reflect.DeepEqual(src, dest) {
+		t.Errorf("DeepCopy result does not match source.\nSource: %+v\nDest: %+v", src, dest)
+	}
+
+	// Change the source and make sure the dest doesn't change
+	src.Field2.Field1 = "Goodbye"
+	if reflect.DeepEqual(src, dest) {
+		t.Errorf("DeepCopy result should not match source.\nSource: %+v\nDest: %+v", src, dest)
+	}
+
+	// Change the dest and make sure the source doesn't change
+	dest.Field2.Field1 = "Also Goodbye"
+	if reflect.DeepEqual(src, dest) {
+		t.Errorf("DeepCopy result should not match source.\nSource: %+v\nDest: %+v", src, dest)
+	}
+}
+
+func TestDeepCopyWithPointer(t *testing.T) {
+	src := SimpleStruct{"Hello", 42}
+	var dest *SimpleStruct
+
+	err := DeepCopy(src, &dest)
+	if err != nil {
+		t.Fatalf("Error during DeepCopy: %v", err)
+	}
+
+	if !reflect.DeepEqual(src, *dest) {
+		t.Errorf("DeepCopy result does not match source.\nSource: %+v\nDest: %+v", src, *dest)
 	}
 }

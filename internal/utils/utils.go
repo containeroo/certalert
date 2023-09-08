@@ -15,54 +15,6 @@ func BoolPtr(b bool) *bool {
 	return &b
 }
 
-// DeepCopy deep copies the source to the destination.
-// The dest argument should be a pointer to the type you want to copy into.
-func DeepCopy(src, dest interface{}) error {
-	srcValue := reflect.ValueOf(src)
-	destValue := reflect.ValueOf(dest)
-
-	// Check if dest is a pointer
-	if destValue.Kind() != reflect.Ptr || destValue.IsNil() {
-		return fmt.Errorf("destination is not a valid pointer")
-	}
-
-	// Check if src and dest have the same type
-	if srcValue.Type() != destValue.Elem().Type() {
-		return fmt.Errorf("source and destination types do not match")
-	}
-
-	// Perform a deep copy of the struct fields
-	deepCopyStruct(srcValue, destValue.Elem())
-
-	return nil
-}
-
-// deepCopyStruct recursively copies fields from srcValue to destValue.
-func deepCopyStruct(srcValue, destValue reflect.Value) {
-	switch srcValue.Kind() {
-	case reflect.Ptr:
-		if srcValue.IsNil() {
-			destValue.Set(reflect.Zero(destValue.Type()))
-			return
-		}
-		srcValue = srcValue.Elem()
-		destValue = destValue.Elem()
-		deepCopyStruct(srcValue, destValue)
-
-	case reflect.Struct:
-		for i := 0; i < srcValue.NumField(); i++ {
-			srcField := srcValue.Field(i)
-			destField := destValue.Field(i)
-			if destField.CanSet() {
-				deepCopyStruct(srcField, destField)
-			}
-		}
-
-	default:
-		destValue.Set(srcValue)
-	}
-}
-
 // IsInList checks if a value is in a list
 func IsInList(value string, list []string) bool {
 	for _, v := range list {
@@ -170,4 +122,70 @@ func ExtractHostAndPort(address string) (string, int, error) {
 func IsValidURL(str string) bool {
 	u, err := url.Parse(str)
 	return err == nil && u.Scheme != "" && u.Host != ""
+}
+
+// DeepCopy deep copies the source to the destination.
+// The dest argument should be a pointer to the type you want to copy into.
+func DeepCopy(src, dest interface{}) error {
+	srcValue := reflect.ValueOf(src)
+	destValue := reflect.ValueOf(dest)
+
+	// Check if dest is a pointer
+	if destValue.Kind() != reflect.Ptr || destValue.IsNil() {
+		return fmt.Errorf("destination is not a valid pointer")
+	}
+
+	// Create a map to keep track of copied objects to handle circular references
+	copiedObjects := make(map[uintptr]reflect.Value)
+
+	// Perform a deep copy
+	deepCopy(srcValue, destValue.Elem(), copiedObjects)
+
+	return nil
+}
+
+// deepCopy performs a deep copy of the source to the destination.
+func deepCopy(src, dest reflect.Value, copiedObjects map[uintptr]reflect.Value) {
+	// Check for circular references
+	if src.Kind() == reflect.Ptr && copiedObjects[src.Pointer()].IsValid() {
+		dest.Set(copiedObjects[src.Pointer()])
+		return
+	}
+
+	if dest.Kind() != reflect.Ptr { // Destination is not a pointer
+		switch src.Kind() {
+		case reflect.Struct:
+			// Create a new struct and add it to the copied objects map
+			for i := 0; i < src.NumField(); i++ {
+				srcField := src.Field(i)
+				destField := dest.Field(i)
+				if destField.CanSet() {
+					deepCopy(srcField, destField, copiedObjects)
+				}
+			}
+		default:
+			dest.Set(src)
+		}
+		return
+	}
+
+	if src.Kind() != reflect.Ptr { // Source is not a pointer, create a new pointer and copy the value
+		newSrc := reflect.New(src.Type())           // Create a new pointer
+		deepCopy(src, newSrc.Elem(), copiedObjects) // Copy the value
+		dest.Set(newSrc)                            // Set the destination to the new pointer
+
+		return
+	}
+
+	// Both source and destination are pointers
+	if src.IsNil() { // If source is nil, set destination to nil
+		dest.Set(reflect.Zero(dest.Type()))
+		return
+	}
+
+	// If source is not nil, create a new pointer and copy the value
+	newSrc := reflect.New(src.Elem().Type())           // Create a new pointer
+	copiedObjects[src.Pointer()] = newSrc              // Add the new pointer to the copied objects map
+	deepCopy(src.Elem(), newSrc.Elem(), copiedObjects) // Copy the value
+	dest.Set(newSrc)                                   // Set the destination to the new pointer
 }
