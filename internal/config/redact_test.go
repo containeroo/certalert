@@ -49,7 +49,6 @@ func TestRedactConfig(t *testing.T) {
 		Password: "password",
 	})
 
-	// Run RedactConfig
 	err := RedactConfig(config)
 	if err != nil {
 		t.Fatalf("Unexpected error: %v", err)

@@ -30,11 +30,7 @@ func hasFieldRecursive(value reflect.Value, keys []string) bool {
 		return true
 	}
 
-	// Remove "[]" suffix from field name, if present
-	fieldName := keys[0]
-	if strings.HasSuffix(fieldName, "[]") {
-		fieldName = strings.TrimSuffix(fieldName, "[]")
-	}
+	fieldName := strings.TrimSuffix(keys[0], "[]")
 
 	switch value.Kind() {
 	case reflect.Map:
@@ -54,11 +50,11 @@ func hasFieldRecursive(value reflect.Value, keys []string) bool {
 			// Iterate over the slice elements and update them
 			for i := 0; i < field.Len(); i++ {
 				sliceValue := field.Index(i)
-				if hasFieldRecursive(sliceValue, keys[1:]) {
-					return true
+				if !hasFieldRecursive(sliceValue, keys[1:]) {
+					return false
 				}
-				return false
 			}
+			return true
 		}
 		return hasFieldRecursive(field, keys[1:])
 	case reflect.Interface:
@@ -89,14 +85,16 @@ func getFieldValueRecursive(value reflect.Value, keys []string) (interface{}, bo
 		return value.Interface(), true
 	}
 
+	fieldName := keys[0]
+
 	switch value.Kind() {
 	case reflect.Map:
-		mapKey := reflect.ValueOf(keys[0])
+		mapKey := reflect.ValueOf(fieldName)
 		if value.MapIndex(mapKey).IsValid() {
 			return getFieldValueRecursive(value.MapIndex(mapKey), keys[1:])
 		}
 	case reflect.Struct:
-		field := value.FieldByName(keys[0])
+		field := value.FieldByName(fieldName)
 		if field.IsValid() {
 			return getFieldValueRecursive(field, keys[1:])
 		}
@@ -156,6 +154,7 @@ func updateFieldRecursive(value reflect.Value, fieldNames []string, newValue int
 			value.Set(newValueResult)
 			return nil
 		}
+
 		val := reflect.ValueOf(newValue)
 		valType := val.Type()
 
@@ -167,11 +166,7 @@ func updateFieldRecursive(value reflect.Value, fieldNames []string, newValue int
 		return nil
 	}
 
-	// Remove "[]" suffix from field name, if present
-	fieldName := fieldNames[0]
-	if strings.HasSuffix(fieldName, "[]") {
-		fieldName = strings.TrimSuffix(fieldName, "[]")
-	}
+	fieldName := strings.TrimSuffix(fieldNames[0], "[]")
 
 	switch value.Kind() {
 	case reflect.Map:

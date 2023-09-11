@@ -7,8 +7,8 @@ import (
 
 func TestHasFieldByPath(t *testing.T) {
 	type TestStruct struct {
-		Field1 string
-		Field2 int
+		Field1 string `mapstructure:"field1,omitempty"`
+		Field2 int    `mapstructure:"field2,omitempty"`
 	}
 
 	testMap := map[string]int{
@@ -19,18 +19,42 @@ func TestHasFieldByPath(t *testing.T) {
 	nestedMap := map[string]interface{}{
 		"level1": map[string]int{
 			"level2": 3,
+			"level4": 4,
 		},
 	}
 
-	testSlice := struct {
-		Level []struct {
+	type testSlice struct {
+		Levels []struct {
 			Level2 string
 		}
-	}{
-		Level: []struct {
-			Level2 string
-		}{
-			{Level2: "test"},
+	}
+
+	type MyType struct {
+		Levels []TestStruct
+	}
+
+	m := MyType{
+		Levels: []TestStruct{
+			{
+				Field1: "value1",
+				Field2: 1,
+			},
+			{
+				Field1: "value2",
+				Field2: 2,
+			},
+		},
+	}
+
+	m2 := MyType{
+		Levels: []TestStruct{
+			{
+				Field1: "value1",
+				Field2: 1,
+			},
+			{
+				Field2: 2,
+			},
 		},
 	}
 
@@ -40,7 +64,8 @@ func TestHasFieldByPath(t *testing.T) {
 		key  string
 		want bool
 	}{
-		{"Has field in slice", testSlice, "Level[].Level2", true},
+		{"Multiple nested levels not found", m2, "Levels[].Field1", false},
+		{"Multiple nested levels", m, "Levels[].Field1", true},
 		{"Doesn't have field in struct", TestStruct{Field1: "value1", Field2: 1}, "Field3", false},
 		{"Has field in struct", TestStruct{Field1: "value1", Field2: 1}, "Field1", true},
 		{"Has key in map", testMap, "key1", true},
@@ -126,7 +151,6 @@ func TestUpdateFieldByPath(t *testing.T) {
 }
 
 func TestUpdateFieldRecursive(t *testing.T) {
-
 	type Person struct {
 		Name    string
 		Age     int
