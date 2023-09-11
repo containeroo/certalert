@@ -112,6 +112,51 @@ func TestUpdateFieldByPath(t *testing.T) {
 	}
 }
 
-func TestGetFieldByPath(t *testing.T) {
+func TestGetFieldValueByPath(t *testing.T) {
+	// Define a sample struct for testing
+	type Person struct {
+		Name    string
+		Age     int
+		Address struct {
+			Street string
+			City   string
+		}
+	}
 
+	// Initialize a sample struct
+	p := &Person{
+		Name: "Alice",
+		Age:  30,
+		Address: struct {
+			Street string
+			City   string
+		}{
+			Street: "123 Main St",
+			City:   "New York",
+		},
+	}
+
+	// Test getting fields using the function
+	tests := []struct {
+		path      string
+		expectVal interface{}
+		found     bool
+	}{
+		{path: "Name", expectVal: "Alice", found: true},
+		{path: "Age", expectVal: 30, found: true},
+		{path: "Address.Street", expectVal: "123 Main St", found: true},
+		{path: "Address.City", expectVal: "New York", found: true},
+		{path: "InvalidField", expectVal: nil, found: false},
+		{path: "Address.InvalidField", expectVal: nil, found: false},
+	}
+
+	for _, test := range tests {
+		val, found := GetFieldValueByPath(p, test.path)
+		if found != test.found {
+			t.Errorf("GetFieldValueByPath(%s) found = %v, expectFound = %v", test.path, found, test.found)
+		}
+		if val != test.expectVal {
+			t.Errorf("GetFieldValueByPath(%s) val = %v, expectVal = %v", test.path, val, test.expectVal)
+		}
+	}
 }
