@@ -65,11 +65,11 @@ func CheckFileAccessibility(filePath string) error {
 	return nil
 }
 
-// HasKey is a utility function designed to check if a given key exists
+// HasFieldByPath is a utility function designed to check if a given key exists
 // within a map, struct, or interface. This function also supports checking
 // for nested keys, separated by dots (e.g., "key1.key2.key3").
 // Attention. Keys are case-sensitive!
-func HasKey(s interface{}, key string) bool {
+func HasFieldByPath(s interface{}, key string) bool {
 	v := reflect.ValueOf(s) // Obtain the Value of the passed interface{}
 
 	keys := strings.Split(key, ".") // Split the key string by dots to handle nested keys
@@ -87,7 +87,7 @@ func HasKey(s interface{}, key string) bool {
 		case reflect.Interface:
 			v = v.Elem() // Dereference the interface to get its underlying value
 			// Use recursion to continue checking for the remaining nested keys
-			return HasKey(v.Interface(), strings.Join(keys[i:], "."))
+			return HasFieldByPath(v.Interface(), strings.Join(keys[i:], "."))
 		default:
 			return false
 		}
@@ -98,6 +98,60 @@ func HasKey(s interface{}, key string) bool {
 	}
 
 	return true
+}
+
+// UpdateFieldByPath updates a field in a struct identified by a path with a new value.
+// The path is a dot-separated string that represents the hierarchy of struct fields.
+// Returns an error if the field is not found or if the update fails.
+func UpdateFieldByPath(data interface{}, path string, newValue interface{}) error {
+	fieldNames := strings.Split(path, ".")
+
+	// Use reflection to traverse the struct and update the field
+	return updateFieldRecursive(reflect.ValueOf(data).Elem(), fieldNames, newValue)
+}
+
+// updateFieldRecursive recursively traverses the struct and updates the field.
+// Returns an error if the field is not found or if the update fails.
+func updateFieldRecursive(value reflect.Value, fieldNames []string, newValue interface{}) error {
+	if len(fieldNames) == 1 { // We have reached the final field
+		return setField(value, fieldNames[0], newValue)
+	}
+
+	// Obtain the field
+	field := value.FieldByName(fieldNames[0])
+	if !field.IsValid() {
+		return fmt.Errorf("No such field: %s in obj", fieldNames[0])
+	}
+
+	// Check if the field is a struct
+	fieldType := field.Type()
+	if fieldType.Kind() != reflect.Struct {
+		return fmt.Errorf("Field %s is not a struct", fieldNames[0])
+	}
+
+	// Recursively update the nested field
+	return updateFieldRecursive(field, fieldNames[1:], newValue)
+}
+
+// setField sets the value of a field in a struct.
+// Returns an error if the field is not found or if the update fails.
+func setField(value reflect.Value, fieldName string, newValue interface{}) error {
+	field := value.FieldByName(fieldName)
+	if !field.IsValid() {
+		return fmt.Errorf("No such field: %s in obj", fieldName)
+	}
+
+	// Check if the field is settable
+	fieldType := field.Type()
+	val := reflect.ValueOf(newValue)
+	valType := val.Type()
+	if !valType.AssignableTo(fieldType) {
+		return fmt.Errorf("Provided value type %s cannot be assigned to field type %s", valType, fieldType)
+	}
+
+	field.Set(val)
+
+	return nil
 }
 
 // ExtractHostAndPort extracts the hostname and port from the listen address

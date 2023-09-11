@@ -111,7 +111,7 @@ func (c *Config) parsePushgatewayConfig() (err error) {
 		log.Warn(errMsg)
 		return nil
 	}
-	if utils.HasKey(c.Pushgateway, "Address") {
+	if utils.HasFieldByPath(c.Pushgateway, "Address") {
 		resolvedAddress, err := resolve.ResolveVariable(c.Pushgateway.Address)
 		if err != nil {
 			if err := handleFailOnError(fmt.Sprintf("Failed to resolve address for pushgateway. %v", err)); err != nil {
@@ -137,7 +137,7 @@ func (c *Config) parsePushgatewayConfig() (err error) {
 		}
 	}
 
-	if utils.HasKey(c.Pushgateway.Auth, "Basic.Username") {
+	if utils.HasFieldByPath(c.Pushgateway.Auth, "Basic.Username") {
 		c.Pushgateway.Auth.Basic.Username, err = resolve.ResolveVariable(c.Pushgateway.Auth.Basic.Username)
 		if err != nil {
 			if err := handleFailOnError(fmt.Sprintf("Failed to resolve basic auth username for pushgateway. %v", err)); err != nil {
@@ -146,7 +146,7 @@ func (c *Config) parsePushgatewayConfig() (err error) {
 		}
 	}
 
-	if utils.HasKey(c.Pushgateway.Auth, "Basic.Password") {
+	if utils.HasFieldByPath(c.Pushgateway.Auth, "Basic.Password") {
 		c.Pushgateway.Auth.Basic.Password, err = resolve.ResolveVariable(c.Pushgateway.Auth.Basic.Password)
 		if err != nil {
 			if err := handleFailOnError(fmt.Sprintf("Failed to resolve basic auth password for pushgateway. %v", err)); err != nil {
@@ -155,7 +155,7 @@ func (c *Config) parsePushgatewayConfig() (err error) {
 		}
 	}
 
-	if utils.HasKey(c.Pushgateway.Auth, "Bearer.Token") {
+	if utils.HasFieldByPath(c.Pushgateway.Auth, "Bearer.Token") {
 		c.Pushgateway.Auth.Bearer.Token, err = resolve.ResolveVariable(c.Pushgateway.Auth.Bearer.Token)
 		if err != nil {
 			if err := handleFailOnError(fmt.Sprintf("Failed to resolve bearer token for pushgateway. %v", err)); err != nil {
@@ -164,7 +164,7 @@ func (c *Config) parsePushgatewayConfig() (err error) {
 		}
 	}
 
-	if utils.HasKey(c.Pushgateway, "Job") {
+	if utils.HasFieldByPath(c.Pushgateway, "Job") {
 		jobName := c.Pushgateway.Job
 		if jobName == "" {
 			jobName = "certalert"

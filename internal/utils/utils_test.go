@@ -138,7 +138,7 @@ func TestCheckFileAccessibility(t *testing.T) {
 	})
 }
 
-func TestHasKey(t *testing.T) {
+func TestHasFieldByPath(t *testing.T) {
 	type TestStruct struct {
 		Field1 string
 		Field2 int
@@ -173,7 +173,7 @@ func TestHasKey(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			got := HasKey(tc.obj, tc.key)
+			got := HasFieldByPath(tc.obj, tc.key)
 
 			if got != tc.want {
 				t.Fatalf("Expected %v, but got %v", tc.want, got)
@@ -304,5 +304,68 @@ func TestDeepCopyWithPointer(t *testing.T) {
 
 	if !reflect.DeepEqual(src, *dest) {
 		t.Errorf("DeepCopy result does not match source.\nSource: %+v\nDest: %+v", src, *dest)
+	}
+}
+
+// Define a sample struct for testing
+type Person struct {
+	Name    string
+	Age     int
+	Address struct {
+		Street string
+		City   string
+	}
+}
+
+func TestUpdateFieldByPath(t *testing.T) {
+	// Initialize a sample struct
+	p := &Person{
+		Name: "Alice",
+		Age:  30,
+		Address: struct {
+			Street string
+			City   string
+		}{
+			Street: "123 Main St",
+			City:   "New York",
+		},
+	}
+
+	// Test updating fields using the function
+	tests := []struct {
+		path      string
+		newValue  interface{}
+		expectErr bool
+	}{
+		{path: "Name", newValue: "Bob", expectErr: false},
+		{path: "Age", newValue: 35, expectErr: false}, // Pass an integer for Age
+		{path: "Address.Street", newValue: "456 Elm St", expectErr: false},
+		{path: "Address.City", newValue: "Los Angeles", expectErr: false},
+		{path: "InvalidField", newValue: "Value", expectErr: true},
+		{path: "Address.InvalidField", newValue: "Value", expectErr: true},
+	}
+
+	for _, test := range tests {
+		err := UpdateFieldByPath(p, test.path, test.newValue)
+		if (err != nil) != test.expectErr {
+			t.Errorf("UpdateFieldByPath(%s, %s) error = %v, expectErr = %v", test.path, test.newValue, err, test.expectErr)
+		}
+	}
+
+	// Verify the updated struct
+	expected := &Person{
+		Name: "Bob",
+		Age:  35,
+		Address: struct {
+			Street string
+			City   string
+		}{
+			Street: "456 Elm St",
+			City:   "Los Angeles",
+		},
+	}
+
+	if !reflect.DeepEqual(p, expected) {
+		t.Errorf("Updated struct does not match the expected result")
 	}
 }
