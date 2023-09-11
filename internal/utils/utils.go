@@ -72,22 +72,19 @@ func CheckFileAccessibility(filePath string) error {
 func HasKey(s interface{}, key string) bool {
 	v := reflect.ValueOf(s) // Obtain the Value of the passed interface{}
 
-	// Split the key string by dots to handle nested keys
-	keys := strings.Split(key, ".")
+	keys := strings.Split(key, ".") // Split the key string by dots to handle nested keys
 
 	for i, k := range keys {
-		if v.Kind() == reflect.Ptr {
-			// If the current object is a pointer, dereference it
+		if v.Kind() == reflect.Ptr { // If the current object is a pointer, dereference it
 			v = v.Elem()
 		}
 
 		switch v.Kind() {
-		// If the current object is a map
-		case reflect.Map: // Look for the key within the map
+		case reflect.Map:
 			v = v.MapIndex(reflect.ValueOf(k)) // Look for the key within the map
-		case reflect.Struct: // If the current object is a struct
+		case reflect.Struct:
 			v = v.FieldByName(k) // Retrieve the field with the name corresponding to the key
-		case reflect.Interface: // If the current object is an interface
+		case reflect.Interface:
 			v = v.Elem() // Dereference the interface to get its underlying value
 			// Use recursion to continue checking for the remaining nested keys
 			return HasKey(v.Interface(), strings.Join(keys[i:], "."))
