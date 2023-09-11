@@ -17,19 +17,13 @@ func RedactConfig(config *Config) error {
 		"Pushgateway.Auth.Basic.Username",
 		"Pushgateway.Auth.Basic.Password",
 		"Pushgateway.Auth.Bearer.Token",
+		"Certs[].Password",
 	}
 
 	for _, path := range toRedact {
-		if foundVar, found := utils.GetFieldValueByPath(config, path); found {
-			foundVar = redactVariable(foundVar.(string))
-			if err := utils.UpdateFieldByPath(config, path, foundVar); err != nil {
-				return fmt.Errorf("Failed to redact config: %s", err)
-			}
+		if err := utils.UpdateFieldByPath(config, path, redactVariable); err != nil {
+			return fmt.Errorf("Failed to redact config: %s", err)
 		}
-	}
-
-	for idx, cert := range config.Certs {
-		config.Certs[idx].Password = redactVariable(cert.Password)
 	}
 
 	return nil
@@ -37,7 +31,7 @@ func RedactConfig(config *Config) error {
 
 // redactVariable redacts sensitive data from the config if it is not prefixed with env: or file:
 func redactVariable(s string) string {
-	if strings.HasPrefix(s, "env:") || strings.HasPrefix(s, "file:") {
+	if strings.HasPrefix(s, "env:") || strings.HasPrefix(s, "file:") || s == "" {
 		return s
 	}
 	return "<REDACTED>"
