@@ -9,6 +9,8 @@ import (
 // HasFieldByPath is a utility function designed to check if a given key exists
 // within a map, struct, or interface. This function also supports checking
 // for nested keys, separated by dots (e.g., "key1.key2.key3").
+// To check if a field exists within a slice or array, append "[]" to the field name.
+// Returns true if the field exists, false otherwise.
 // Attention. Keys are case-sensitive!
 func HasFieldByPath(data interface{}, path string) bool {
 	v := reflect.ValueOf(data)
