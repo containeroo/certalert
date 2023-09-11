@@ -33,7 +33,7 @@ func TestGetCertificateByName(t *testing.T) {
 	}
 }
 
-func TesthandleFailOnError(t *testing.T) {
+func TestHandleFailOnError(t *testing.T) {
 	var certInfoList []CertificateInfo
 
 	t.Run("failOnError is true", func(t *testing.T) {
