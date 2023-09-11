@@ -70,34 +70,30 @@ func CheckFileAccessibility(filePath string) error {
 // for nested keys, separated by dots (e.g., "key1.key2.key3").
 // Attention. Keys are case-sensitive!
 func HasFieldByPath(s interface{}, path string) bool {
-	v := reflect.ValueOf(s) // Obtain the Value of the passed interface{}
+	keys := strings.Split(path, ".")
 
-	keys := strings.Split(path, ".") // Split the key string by dots to handle nested keys
+	return hasFieldRecursive(reflect.ValueOf(s), keys)
+}
 
-	for i, k := range keys {
-		if v.Kind() == reflect.Ptr { // If the current object is a pointer, dereference it
-			v = v.Elem()
-		}
-
-		switch v.Kind() {
-		case reflect.Map:
-			v = v.MapIndex(reflect.ValueOf(k)) // Look for the key within the map
-		case reflect.Struct:
-			v = v.FieldByName(k) // Retrieve the field with the name corresponding to the key
-		case reflect.Interface:
-			v = v.Elem() // Dereference the interface to get its underlying value
-			// Use recursion to continue checking for the remaining nested keys
-			return HasFieldByPath(v.Interface(), strings.Join(keys[i:], "."))
-		default:
-			return false
-		}
-
-		if !v.IsValid() {
-			return false
-		}
+func hasFieldRecursive(v reflect.Value, keys []string) bool {
+	if len(keys) == 0 { // We have reached the final key
+		return true
 	}
 
-	return true
+	if v.Kind() == reflect.Ptr {
+		v = v.Elem() // Dereference the pointer
+	}
+
+	switch v.Kind() {
+	case reflect.Map:
+		return hasFieldRecursive(v.MapIndex(reflect.ValueOf(keys[0])), keys[1:])
+	case reflect.Struct:
+		return hasFieldRecursive(v.FieldByName(keys[0]), keys[1:])
+	case reflect.Interface:
+		return hasFieldRecursive(v.Elem(), keys)
+	default:
+		return false
+	}
 }
 
 // UpdateFieldByPath updates a field in a struct identified by a path with a new value.
@@ -106,7 +102,6 @@ func HasFieldByPath(s interface{}, path string) bool {
 func UpdateFieldByPath(data interface{}, path string, newValue interface{}) error {
 	fieldNames := strings.Split(path, ".")
 
-	// Use reflection to traverse the struct and update the field
 	return updateFieldRecursive(reflect.ValueOf(data).Elem(), fieldNames, newValue)
 }
 
