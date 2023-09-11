@@ -56,7 +56,7 @@ func (c *Config) parseCertificatesConfig() (err error) {
 
 		if cert.Name == "" {
 			file := filepath.Base(cert.Path)
-			// replace dots, spaces and underscores with dashes
+			// Replace dots, spaces and underscores with dashes
 			cert.Name = strings.Map(func(r rune) rune {
 				if r == '.' || r == ' ' || r == '_' {
 					return '-'
