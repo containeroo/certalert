@@ -75,25 +75,33 @@ func HasFieldByPath(s interface{}, path string) bool {
 	return hasFieldRecursive(reflect.ValueOf(s), keys)
 }
 
+// hasFieldRecursive recursively traverses the struct and checks if the field exists.
+// Returns true if the field exists, false otherwise.
 func hasFieldRecursive(v reflect.Value, keys []string) bool {
-	if len(keys) == 0 { // We have reached the final key
-		return true
-	}
-
 	if v.Kind() == reflect.Ptr {
 		v = v.Elem() // Dereference the pointer
 	}
 
+	if len(keys) == 0 { // No more keys to check
+		return true
+	}
+
 	switch v.Kind() {
 	case reflect.Map:
-		return hasFieldRecursive(v.MapIndex(reflect.ValueOf(keys[0])), keys[1:])
+		mapKey := reflect.ValueOf(keys[0])
+		if v.MapIndex(mapKey).IsValid() {
+			return hasFieldRecursive(v.MapIndex(mapKey), keys[1:])
+		}
 	case reflect.Struct:
-		return hasFieldRecursive(v.FieldByName(keys[0]), keys[1:])
+		field := v.FieldByName(keys[0])
+		if field.IsValid() {
+			return hasFieldRecursive(field, keys[1:])
+		}
 	case reflect.Interface:
 		return hasFieldRecursive(v.Elem(), keys)
-	default:
-		return false
 	}
+
+	return false
 }
 
 // UpdateFieldByPath updates a field in a struct identified by a path with a new value.

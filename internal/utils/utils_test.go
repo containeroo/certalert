@@ -161,8 +161,8 @@ func TestHasFieldByPath(t *testing.T) {
 		key  string
 		want bool
 	}{
-		{"Has field in struct", TestStruct{Field1: "value1", Field2: 1}, "Field1", true},
 		{"Doesn't have field in struct", TestStruct{Field1: "value1", Field2: 1}, "Field3", false},
+		{"Has field in struct", TestStruct{Field1: "value1", Field2: 1}, "Field1", true},
 		{"Has key in map", testMap, "key1", true},
 		{"Doesn't have key in map", testMap, "key3", false},
 		{"Has nested key in map", nestedMap, "level1.level2", true},
