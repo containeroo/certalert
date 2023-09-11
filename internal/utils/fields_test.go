@@ -181,6 +181,7 @@ func TestGetFieldValueByPath(t *testing.T) {
 	type Person struct {
 		Name    string
 		Age     int
+		Empty   string
 		Address struct {
 			Street string
 			City   string
@@ -189,8 +190,9 @@ func TestGetFieldValueByPath(t *testing.T) {
 
 	// Initialize a sample struct
 	p := &Person{
-		Name: "Alice",
-		Age:  30,
+		Name:  "Alice",
+		Age:   30,
+		Empty: "",
 		Address: struct {
 			Street string
 			City   string
@@ -206,6 +208,7 @@ func TestGetFieldValueByPath(t *testing.T) {
 		expectVal interface{}
 		found     bool
 	}{
+		{path: "Empty", expectVal: "", found: true},
 		{path: "Name", expectVal: "Alice", found: true},
 		{path: "Age", expectVal: 30, found: true},
 		{path: "Address.Street", expectVal: "123 Main St", found: true},
