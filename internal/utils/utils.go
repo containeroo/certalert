@@ -69,10 +69,10 @@ func CheckFileAccessibility(filePath string) error {
 // within a map, struct, or interface. This function also supports checking
 // for nested keys, separated by dots (e.g., "key1.key2.key3").
 // Attention. Keys are case-sensitive!
-func HasFieldByPath(s interface{}, key string) bool {
+func HasFieldByPath(s interface{}, path string) bool {
 	v := reflect.ValueOf(s) // Obtain the Value of the passed interface{}
 
-	keys := strings.Split(key, ".") // Split the key string by dots to handle nested keys
+	keys := strings.Split(path, ".") // Split the key string by dots to handle nested keys
 
 	for i, k := range keys {
 		if v.Kind() == reflect.Ptr { // If the current object is a pointer, dereference it
@@ -141,12 +141,11 @@ func setField(value reflect.Value, fieldName string, newValue interface{}) error
 		return fmt.Errorf("No such field: %s in obj", fieldName)
 	}
 
-	// Check if the field is settable
-	fieldType := field.Type()
 	val := reflect.ValueOf(newValue)
 	valType := val.Type()
-	if !valType.AssignableTo(fieldType) {
-		return fmt.Errorf("Provided value type %s cannot be assigned to field type %s", valType, fieldType)
+
+	if !valType.AssignableTo(field.Type()) {
+		return fmt.Errorf("Provided value type %s cannot be assigned to field type %s", valType, field.Type())
 	}
 
 	field.Set(val)
