@@ -56,7 +56,7 @@ func (c *Config) parseCertificatesConfig() (err error) {
 
 		if cert.Name == "" {
 			file := filepath.Base(cert.Path)
-			// replace dots, spaces and underscores with dashes
+			// Replace dots, spaces and underscores with dashes
 			cert.Name = strings.Map(func(r rune) rune {
 				if r == '.' || r == ' ' || r == '_' {
 					return '-'
@@ -66,21 +66,21 @@ func (c *Config) parseCertificatesConfig() (err error) {
 		}
 
 		if cert.Type == "" {
-			ext := filepath.Ext(cert.Path)     // try to guess the type based on the file extension
-			ext = strings.TrimPrefix(ext, ".") // remove the dot
-
-			if inferredType, ok := certificates.FileExtensionsToType[ext]; ok {
-				cert.Type = inferredType
-			} else {
-				reason := "missing file extension."
-				if ext != "" {
-					reason = fmt.Sprintf("unclear file extension (.%s).", ext)
-				}
-				errMsg := fmt.Sprintf("Certificate '%s' has no 'type' defined. Type can't be inferred due to the %s", cert.Name, reason)
+			ext := strings.TrimPrefix(filepath.Ext(cert.Path), ".") // extract file extation and remove leading dot
+			if ext == "" {
+				errMsg := fmt.Sprintf("Certificate '%s' has no 'type' defined and is missing a file extension.", cert.Name)
 				return handleFailOnError(cert, idx, errMsg)
 			}
+
+			inferredType, ok := certificates.FileExtensionsToType[ext]
+			if !ok {
+				errMsg := fmt.Sprintf("Certificate '%s' has no 'type' defined. Type can't be inferred due to unclear file extension (.%s).", cert.Name, ext)
+				return handleFailOnError(cert, idx, errMsg)
+			}
+			cert.Type = inferredType
 		}
 
+		// The Type can be specified in the config file, but it must be one of the supported types
 		if !utils.IsInList(cert.Type, certificates.FileExtensionsTypesSorted) {
 			if err := handleFailOnError(cert, idx, fmt.Sprintf("Certificate '%s' has an invalid type '%s'. Must be one of %s.", cert.Name, cert.Type, certificates.FileExtensionsTypesSortedString)); err != nil {
 				return err
@@ -96,10 +96,9 @@ func (c *Config) parseCertificatesConfig() (err error) {
 		cert.Password = pw
 
 		c.Certs[idx] = cert
-
 	}
-	return nil
 
+	return nil
 }
 
 // parsePushgatewayConfig validates the pushgateway config
@@ -112,7 +111,7 @@ func (c *Config) parsePushgatewayConfig() (err error) {
 		log.Warn(errMsg)
 		return nil
 	}
-	if utils.HasKey(c.Pushgateway, "Address") {
+	if utils.HasStructField(c.Pushgateway, "Address") {
 		resolvedAddress, err := resolve.ResolveVariable(c.Pushgateway.Address)
 		if err != nil {
 			if err := handleFailOnError(fmt.Sprintf("Failed to resolve address for pushgateway. %v", err)); err != nil {
@@ -138,7 +137,7 @@ func (c *Config) parsePushgatewayConfig() (err error) {
 		}
 	}
 
-	if utils.HasKey(c.Pushgateway.Auth, "Basic.Username") {
+	if utils.HasStructField(c.Pushgateway.Auth, "Basic.Username") {
 		c.Pushgateway.Auth.Basic.Username, err = resolve.ResolveVariable(c.Pushgateway.Auth.Basic.Username)
 		if err != nil {
 			if err := handleFailOnError(fmt.Sprintf("Failed to resolve basic auth username for pushgateway. %v", err)); err != nil {
@@ -147,7 +146,7 @@ func (c *Config) parsePushgatewayConfig() (err error) {
 		}
 	}
 
-	if utils.HasKey(c.Pushgateway.Auth, "Basic.Password") {
+	if utils.HasStructField(c.Pushgateway.Auth, "Basic.Password") {
 		c.Pushgateway.Auth.Basic.Password, err = resolve.ResolveVariable(c.Pushgateway.Auth.Basic.Password)
 		if err != nil {
 			if err := handleFailOnError(fmt.Sprintf("Failed to resolve basic auth password for pushgateway. %v", err)); err != nil {
@@ -156,7 +155,7 @@ func (c *Config) parsePushgatewayConfig() (err error) {
 		}
 	}
 
-	if utils.HasKey(c.Pushgateway.Auth, "Bearer.Token") {
+	if utils.HasStructField(c.Pushgateway.Auth, "Bearer.Token") {
 		c.Pushgateway.Auth.Bearer.Token, err = resolve.ResolveVariable(c.Pushgateway.Auth.Bearer.Token)
 		if err != nil {
 			if err := handleFailOnError(fmt.Sprintf("Failed to resolve bearer token for pushgateway. %v", err)); err != nil {
@@ -165,7 +164,7 @@ func (c *Config) parsePushgatewayConfig() (err error) {
 		}
 	}
 
-	if utils.HasKey(c.Pushgateway, "Job") {
+	if utils.HasStructField(c.Pushgateway, "Job") {
 		jobName := c.Pushgateway.Job
 		if jobName == "" {
 			jobName = "certalert"

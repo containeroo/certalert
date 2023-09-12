@@ -28,7 +28,7 @@ import (
 )
 
 const (
-	version = "v0.0.28"
+	version = "v0.0.29"
 )
 
 var (
@@ -65,13 +65,15 @@ var rootCmd = &cobra.Command{
 			log.SetLevel(log.ErrorLevel)
 			log.Debugf("Silent output enabled")
 		}
-
-		if err := config.App.Parse(); err != nil {
-			log.Fatalf("Error parsing config file: %v", err)
-		}
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		// Enter here if no subcommand is specified
+
+		// Parse config to see if there are any errors
+		if err := config.App.Parse(); err != nil {
+			log.Fatalf("Error parsing config file: %v", err)
+		}
+
 		if printVersion {
 			fmt.Println("CertAlert version:", version)
 			os.Exit(0)
@@ -98,7 +100,6 @@ func init() {
 
 	rootCmd.PersistentFlags().BoolVarP(&config.App.FailOnError, "fail-on-error", "f", false, "Exit immediately upon encountering an error.")
 	rootCmd.PersistentFlags().BoolVarP(&printVersion, "version", "V", false, "print version and exit.")
-
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -122,5 +123,4 @@ func initConfig() {
 	if err := config.App.Read(viper.ConfigFileUsed()); err != nil {
 		log.Fatalf("Error reading config file: %v", err)
 	}
-
 }

@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"fmt"
 	"os"
 	"reflect"
 	"sort"
@@ -137,124 +136,6 @@ func TestCheckFileAccessibility(t *testing.T) {
 			t.Errorf("Expected no error for readable file, got %v", err)
 		}
 	})
-
-	// Test case when os.Stat itself returns an error (other than file not found)
-	t.Run("Error stating file", func(t *testing.T) {
-		err := CheckFileAccessibility(string([]byte{0}))
-		if err == nil {
-			t.Fatalf("Expected an error but got nil")
-		}
-		expectedErrMsgPrefix := "Error stating file"
-		if err != nil && err.Error()[:len(expectedErrMsgPrefix)] != expectedErrMsgPrefix {
-			t.Fatalf("Expected error to start with '%s', got '%v'", expectedErrMsgPrefix, err)
-		}
-	})
-}
-
-func TestHasKey(t *testing.T) {
-	type TestStruct struct {
-		Field1 string
-		Field2 int
-	}
-
-	testMap := map[string]int{
-		"key1": 1,
-		"key2": 2,
-	}
-
-	nestedMap := map[string]interface{}{
-		"level1": map[string]int{
-			"level2": 3,
-		},
-	}
-
-	testCases := []struct {
-		name string
-		obj  interface{}
-		key  string
-		want bool
-	}{
-		{"Has field in struct", TestStruct{Field1: "value1", Field2: 1}, "Field1", true},
-		{"Doesn't have field in struct", TestStruct{Field1: "value1", Field2: 1}, "Field3", false},
-		{"Has key in map", testMap, "key1", true},
-		{"Doesn't have key in map", testMap, "key3", false},
-		{"Has nested key in map", nestedMap, "level1.level2", true},
-		{"Has partial nested key in map", nestedMap, "level1", true},
-		{"Doesn't have nested key in map", nestedMap, "level1.level3", false},
-		{"Has invalid type", []int{1, 2, 3}, "0", false}, // This should go into the default case.
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			got := HasKey(tc.obj, tc.key)
-
-			if got != tc.want {
-				t.Fatalf("Expected %v, but got %v", tc.want, got)
-			}
-		})
-	}
-}
-
-func TestDeepCopy(t *testing.T) {
-	type Person struct {
-		Name string
-		Age  int
-	}
-
-	t.Run("Test struct copy", func(t *testing.T) {
-		person1 := &Person{Name: "John", Age: 30}
-		person2 := &Person{}
-		if err := DeepCopy(person1, person2); err != nil {
-			t.Errorf("Unexpected error: %v", err)
-		}
-
-		if !reflect.DeepEqual(person1, person2) {
-			t.Errorf("Structs are not deeply equal: %v, %v", person1, person2)
-		}
-	})
-
-	t.Run("Test non-pointer destination", func(t *testing.T) {
-		person1 := &Person{Name: "John", Age: 30}
-		var x int
-		err := DeepCopy(person1, x)
-		if err == nil || err.Error() != "destination is not a pointer" {
-			t.Errorf("Expected pointer error, got: %v", err)
-		}
-	})
-
-	t.Run("Test actual deep copy", func(t *testing.T) {
-		person1 := &Person{Name: "John", Age: 30}
-		person2 := &Person{}
-		person2.Age = 40
-		if reflect.DeepEqual(person1, person2) {
-			t.Errorf("Structs are sharing memory: %v, %v", person1, person2)
-		}
-	})
-
-	t.Run("Test unmarshallable SRC type", func(t *testing.T) {
-		type UnmarshalableType struct {
-			F func()
-		}
-		unmarshalable := &UnmarshalableType{}
-		err := DeepCopy(unmarshalable, &UnmarshalableType{})
-		errMsg := fmt.Sprintf("error while marshaling: json: unsupported type: func()")
-		if err == nil || err.Error() != errMsg {
-			t.Errorf("Expected '%s', got: '%v'", errMsg, err)
-		}
-	})
-
-	t.Run("Test unmarshallable DST type", func(t *testing.T) {
-		unmarshalable := struct {
-			Name string
-		}{
-			Name: "John",
-		}
-		err := DeepCopy(unmarshalable, BoolPtr(true))
-		errMsg := fmt.Sprintf("error while unmarshaling: json: cannot unmarshal object into Go value of type bool")
-		if err == nil || err.Error() != errMsg {
-			t.Errorf("Expected '%s', got: '%v'", errMsg, err)
-		}
-	})
 }
 
 func TestExtractHostAndPort(t *testing.T) {
@@ -310,6 +191,115 @@ func TestIsValidURL(t *testing.T) {
 		t.Run(tc.urlStr, func(t *testing.T) {
 			if IsValidURL(tc.urlStr) != tc.expectedBool {
 				t.Errorf("Expected %v for %s", tc.expectedBool, tc.urlStr)
+			}
+		})
+	}
+}
+
+func TestDeepCopyNestedStruct(t *testing.T) {
+	type SimpleStruct struct {
+		Field1 string
+		Field2 int
+	}
+	type NestedStruct struct {
+		Field1 string
+		Field2 SimpleStruct
+	}
+
+	src := NestedStruct{
+		Field1: "Outer",
+		Field2: SimpleStruct{"Hello", 42},
+	}
+	var dest NestedStruct
+
+	err := DeepCopy(src, &dest)
+	if err != nil {
+		t.Fatalf("Error during DeepCopy: %v", err)
+	}
+
+	if !reflect.DeepEqual(src, dest) {
+		t.Errorf("DeepCopy result does not match source.\nSource: %+v\nDest: %+v", src, dest)
+	}
+
+	// Change the source and make sure the dest doesn't change
+	src.Field2.Field1 = "Goodbye"
+	if reflect.DeepEqual(src, dest) {
+		t.Errorf("DeepCopy result should not match source.\nSource: %+v\nDest: %+v", src, dest)
+	}
+
+	// Change the dest and make sure the source doesn't change
+	dest.Field2.Field1 = "Also Goodbye"
+	if reflect.DeepEqual(src, dest) {
+		t.Errorf("DeepCopy result should not match source.\nSource: %+v\nDest: %+v", src, dest)
+	}
+}
+
+func TestStructHasField(t *testing.T) {
+	type InnerStruct struct {
+		InnerField int
+	}
+
+	type MyStruct struct {
+		Name  string
+		Value int
+		Inner InnerStruct
+	}
+
+	tests := []struct {
+		name   string
+		s      interface{}
+		key    string
+		expect bool
+	}{
+		{
+			name:   "FieldNestedExists",
+			s:      MyStruct{},
+			key:    "Inner.InnerField",
+			expect: true,
+		},
+		{
+			name:   "FieldExists",
+			s:      MyStruct{},
+			key:    "Name",
+			expect: true,
+		},
+		{
+			name:   "FieldNotExists",
+			s:      MyStruct{},
+			key:    "NonExistentField",
+			expect: false,
+		},
+		{
+			name:   "FieldInPtr",
+			s:      &MyStruct{},
+			key:    "Name",
+			expect: true,
+		},
+		{
+			name:   "FieldNestedInPtr",
+			s:      &MyStruct{},
+			key:    "Inner.InnerField",
+			expect: true,
+		},
+		{
+			name:   "FieldInInterface",
+			s:      interface{}(&MyStruct{}),
+			key:    "Name",
+			expect: true,
+		},
+		{
+			name:   "FieldNestedInInterface",
+			s:      interface{}(&MyStruct{}),
+			key:    "Inner.InnerField",
+			expect: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			actual := HasStructField(tt.s, tt.key)
+			if actual != tt.expect {
+				t.Errorf("Expected %t, but got %t for key '%s'", tt.expect, actual, tt.key)
 			}
 		})
 	}

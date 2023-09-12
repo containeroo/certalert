@@ -62,12 +62,12 @@ Endpoints:
 				log.Fatalf("Error reading config file: %v", err)
 			}
 
-			if err := config.App.Parse(); err != nil {
-				log.Fatalf("Unable to parse config: %s", err)
-			}
-
 			if err := utils.DeepCopy(config.App, &config.AppCopy); err != nil {
 				log.Fatalf("Unable to copy config: %s", err)
+			}
+
+			if err := config.App.Parse(); err != nil {
+				log.Fatalf("Unable to parse config: %s", err)
 			}
 
 			if err := config.RedactConfig(&config.AppCopy); err != nil {
@@ -87,6 +87,11 @@ Endpoints:
 		if err := utils.DeepCopy(config.App, &config.AppCopy); err != nil {
 			log.Fatalf("Unable to copy config: %s", err)
 		}
+
+		if err := config.App.Parse(); err != nil {
+			log.Fatalf("Error parsing config file: %v", err)
+		}
+
 		if err := config.RedactConfig(&config.AppCopy); err != nil {
 			log.Fatalf("Unable to redact config: %s", err)
 		}

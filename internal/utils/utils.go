@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"encoding/json"
 	"fmt"
 	"net"
 	"net/url"
@@ -9,35 +8,13 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+
+	"github.com/mitchellh/copystructure"
 )
 
 // BoolPtr returns a pointer to a bool
 func BoolPtr(b bool) *bool {
 	return &b
-}
-
-// DeepCopy deep copies the source to the destination.
-// The dest argument should be a pointer to the type you want to copy into.
-func DeepCopy(src interface{}, dest interface{}) error {
-	// Marshal the source object to a JSON byte array
-	bytes, err := json.Marshal(src)
-	if err != nil {
-		return fmt.Errorf("error while marshaling: %v", err)
-	}
-
-	// Make sure dest is a pointer
-	destVal := reflect.ValueOf(dest)
-	if destVal.Kind() != reflect.Ptr {
-		return fmt.Errorf("destination is not a pointer")
-	}
-
-	// Unmarshal the JSON byte array to the destination object
-	err = json.Unmarshal(bytes, dest)
-	if err != nil {
-		return fmt.Errorf("error while unmarshaling: %v", err)
-	}
-
-	return nil
 }
 
 // IsInList checks if a value is in a list
@@ -78,60 +55,16 @@ func ExtractMapKeys(m interface{}) []string {
 
 // CheckFileAccessibility checks if a file exists and is accessible
 func CheckFileAccessibility(filePath string) error {
-	// Check if the file exists
-	if _, err := os.Stat(filePath); err != nil {
+	file, err := os.Open(filePath)
+	if err != nil {
 		if os.IsNotExist(err) {
 			return fmt.Errorf("File does not exist: %s", filePath)
 		}
-		return fmt.Errorf("Error stating file '%s': %v", filePath, err)
-	}
-
-	// Try to open the file to check for readability
-	file, err := os.Open(filePath)
-	if err != nil {
 		return fmt.Errorf("Failed to open file '%s': %v", filePath, err)
 	}
-	file.Close() // Close immediately after opening, as we just want to check readability.
+	defer file.Close()
 
 	return nil
-}
-
-// HasKey is a utility function designed to check if a given key exists
-// within a map, struct, or interface. This function also supports checking
-// for nested keys, separated by dots (e.g., "key1.key2.key3").
-// Attention. Keys are case-sensitive!
-func HasKey(s interface{}, key string) bool {
-	v := reflect.ValueOf(s) // Obtain the Value of the passed interface{}
-
-	// Split the key string by dots to handle nested keys
-	keys := strings.Split(key, ".")
-
-	for i, k := range keys {
-		if v.Kind() == reflect.Ptr {
-			// If the current object is a pointer, dereference it
-			v = v.Elem()
-		}
-
-		switch v.Kind() {
-		// If the current object is a map
-		case reflect.Map: // Look for the key within the map
-			v = v.MapIndex(reflect.ValueOf(k)) // Look for the key within the map
-		case reflect.Struct: // If the current object is a struct
-			v = v.FieldByName(k) // Retrieve the field with the name corresponding to the key
-		case reflect.Interface: // If the current object is an interface
-			v = v.Elem() // Dereference the interface to get its underlying value
-			// Use recursion to continue checking for the remaining nested keys
-			return HasKey(v.Interface(), strings.Join(keys[i:], "."))
-		default:
-			return false
-		}
-
-		if !v.IsValid() {
-			return false
-		}
-	}
-
-	return true
 }
 
 // ExtractHostAndPort extracts the hostname and port from the listen address
@@ -153,4 +86,45 @@ func ExtractHostAndPort(address string) (string, int, error) {
 func IsValidURL(str string) bool {
 	u, err := url.Parse(str)
 	return err == nil && u.Scheme != "" && u.Host != ""
+}
+
+// DeepCopy copies the value of src to dest
+func DeepCopy(src, dest interface{}) error {
+	copied, err := copystructure.Copy(src)
+	if err != nil {
+		return err
+	}
+	// Set the value of dest to the copied value
+	reflect.ValueOf(dest).Elem().Set(reflect.ValueOf(copied))
+	return nil
+}
+
+// HasStructField checks if a struct has a field with the given key
+func HasStructField(s interface{}, key string) bool {
+	v := reflect.ValueOf(s) // Obtain the Value of the passed interface{}
+
+	keys := strings.Split(key, ".") // Split the key string by dots to handle nested keys
+
+	for i, k := range keys {
+		if v.Kind() == reflect.Ptr { // If the current object is a pointer, dereference it
+			v = v.Elem()
+		}
+
+		switch v.Kind() {
+		case reflect.Struct:
+			v = v.FieldByName(k) // Retrieve the field with the name corresponding to the key
+		case reflect.Interface:
+			v = v.Elem() // Dereference the interface to get its underlying value
+			// Use recursion to continue checking for the remaining nested keys
+			return HasStructField(v.Interface(), strings.Join(keys[i:], "."))
+		default:
+			return false
+		}
+
+		if !v.IsValid() {
+			return false
+		}
+	}
+
+	return true
 }

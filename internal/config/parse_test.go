@@ -183,7 +183,7 @@ func TestParseCertificatesConfig(t *testing.T) {
 				},
 				FailOnError: true,
 			},
-			expectedError: "Certificate 'test_cert' has no 'type' defined. Type can't be inferred due to the missing file extension.",
+			expectedError: "Certificate 'test_cert' has no 'type' defined and is missing a file extension.",
 		},
 		{
 			name: "cert type guessed invalid",
@@ -197,7 +197,7 @@ func TestParseCertificatesConfig(t *testing.T) {
 				},
 				FailOnError: true,
 			},
-			expectedError: "Certificate 'test_cert' has no 'type' defined. Type can't be inferred due to the unclear file extension (.invalid).",
+			expectedError: "Certificate 'test_cert' has no 'type' defined. Type can't be inferred due to unclear file extension (.invalid).",
 		},
 		{
 			name: "cert type guessed p12",

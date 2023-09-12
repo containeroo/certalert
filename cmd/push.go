@@ -50,6 +50,13 @@ Examples:
 `,
 
 	Run: func(cmd *cobra.Command, args []string) {
+
+		// Parse config file in subcommand, because it is not needed for all subcommands
+		// or there is a special order in which the flags should be parsed
+		if err := config.App.Parse(); err != nil {
+			log.Fatalf("Error parsing config file: %v", err)
+		}
+
 		if pushAll {
 			// Handle --all flag
 			if err := pushgateway.Send(

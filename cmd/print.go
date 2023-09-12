@@ -59,6 +59,12 @@ Examples:
 			os.Exit(1)
 		}
 
+		// Parse config file in subcommand, because it is not needed for all subcommands
+		// or there is a special order in which the flags should be parsed
+		if err := config.App.Parse(); err != nil {
+			log.Fatalf("Error parsing config file: %v", err)
+		}
+
 		if printAll {
 			// Handle --all flag
 			output, err := print.ConvertCertificatesToFormat(outputFormat, config.App.Certs, config.App.FailOnError)

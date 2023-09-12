@@ -83,7 +83,7 @@ func epochToHumanReadable(epoch int64) string {
 		parts = append(parts, fmt.Sprintf("%d seconds", seconds))
 	}
 
-	return fmt.Sprintf(strings.Join(parts, ", "))
+	return fmt.Sprint(strings.Join(parts, ", "))
 }
 
 // formatTime formats the given time with the given format

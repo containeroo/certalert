@@ -29,7 +29,7 @@ func Process(certificates []Certificate, failOnError bool) (certificatesInfo []C
 			continue
 		}
 
-		// If user used FileExtensionsToType to specify the type, we need to convert it to the canonical type
+		// If user specify the type, we need to convert it to the canonical type
 		inferredType, found := FileExtensionsToType[cert.Type]
 		if !found {
 			// This should never happen as the config validation ensures that the type is valid

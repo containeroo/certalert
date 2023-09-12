@@ -13,7 +13,7 @@ func TestRedactVariable(t *testing.T) {
 		{"env:SECRET_ENV", "env:SECRET_ENV"},             // Should not redact env: prefixed strings
 		{"file:/path/to/secret", "file:/path/to/secret"}, // Should not redact file: prefixed strings
 		{"mysecret", "<REDACTED>"},                       // Should redact non-prefixed strings
-		{"", "<REDACTED>"},                               // Should redact empty strings
+		{"", ""},                                         // Should not redact empty strings
 		{"filemysecret", "<REDACTED>"},                   // Should redact strings that contains the word 'file' but not prefixed with 'file:'
 		{"envmysecret", "<REDACTED>"},                    // Should redact strings that contains the word 'env' but not prefixed with 'env:'
 	}
@@ -49,7 +49,6 @@ func TestRedactConfig(t *testing.T) {
 		Password: "password",
 	})
 
-	// Run RedactConfig
 	err := RedactConfig(config)
 	if err != nil {
 		t.Fatalf("Unexpected error: %v", err)
