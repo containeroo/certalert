@@ -28,9 +28,9 @@ func createPusher(address, job string, auth config.Auth, insecureSkipVerify bool
 		Collector(metrics.CertificateEpoch).
 		Client(httpClient)
 
-	if utils.HasFieldByPath(auth, "Bearer.Token") && auth.Bearer.Token != "" {
+	if utils.HasStructField(auth, "Bearer.Token") && auth.Bearer.Token != "" {
 		pusher = pusher.BasicAuth("Bearer", auth.Bearer.Token)
-	} else if utils.HasFieldByPath(auth, "Basic.Username") && auth.Basic.Username != "" {
+	} else if utils.HasStructField(auth, "Basic.Username") && auth.Basic.Username != "" {
 		pusher = pusher.BasicAuth(auth.Basic.Username, auth.Basic.Password)
 	}
 

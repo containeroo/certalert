@@ -7,6 +7,7 @@ import (
 	"os"
 	"reflect"
 	"strconv"
+	"strings"
 
 	"github.com/mitchellh/copystructure"
 )
@@ -96,4 +97,34 @@ func DeepCopy(src, dest interface{}) error {
 	// Set the value of dest to the copied value
 	reflect.ValueOf(dest).Elem().Set(reflect.ValueOf(copied))
 	return nil
+}
+
+// HasStructField checks if a struct has a field with the given key
+func HasStructField(s interface{}, key string) bool {
+	v := reflect.ValueOf(s) // Obtain the Value of the passed interface{}
+
+	keys := strings.Split(key, ".") // Split the key string by dots to handle nested keys
+
+	for i, k := range keys {
+		if v.Kind() == reflect.Ptr { // If the current object is a pointer, dereference it
+			v = v.Elem()
+		}
+
+		switch v.Kind() {
+		case reflect.Struct:
+			v = v.FieldByName(k) // Retrieve the field with the name corresponding to the key
+		case reflect.Interface:
+			v = v.Elem() // Dereference the interface to get its underlying value
+			// Use recursion to continue checking for the remaining nested keys
+			return HasStructField(v.Interface(), strings.Join(keys[i:], "."))
+		default:
+			return false
+		}
+
+		if !v.IsValid() {
+			return false
+		}
+	}
+
+	return true
 }

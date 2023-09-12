@@ -2,7 +2,6 @@ package config
 
 import (
 	"certalert/internal/utils"
-	"fmt"
 	"strings"
 )
 
@@ -13,16 +12,21 @@ import (
 // - Pushgateway.Auth.Bearer.Token
 // - Certs.Password
 func RedactConfig(config *Config) error {
-	toRedact := []string{
-		"Pushgateway.Auth.Basic.Username",
-		"Pushgateway.Auth.Basic.Password",
-		"Pushgateway.Auth.Bearer.Token",
-		"Certs[].Password",
+	if utils.HasStructField(config, "Pushgateway.Auth.Basic.Username") {
+		config.Pushgateway.Auth.Basic.Username = redactVariable(config.Pushgateway.Auth.Basic.Username)
 	}
 
-	for _, path := range toRedact {
-		if err := utils.UpdateFieldByPath(config, path, redactVariable); err != nil {
-			return fmt.Errorf("Failed to redact config: %s", err)
+	if utils.HasStructField(config, "Pushgateway.Auth.Basic.Password") {
+		config.Pushgateway.Auth.Basic.Password = redactVariable(config.Pushgateway.Auth.Basic.Password)
+	}
+
+	if utils.HasStructField(config, "Pushgateway.Auth.Bearer.Token") {
+		config.Pushgateway.Auth.Bearer.Token = redactVariable(config.Pushgateway.Auth.Bearer.Token)
+	}
+
+	for i, cert := range config.Certs {
+		if utils.HasStructField(cert, "Password") {
+			config.Certs[i].Password = redactVariable(cert.Password)
 		}
 	}
 

@@ -233,3 +233,74 @@ func TestDeepCopyNestedStruct(t *testing.T) {
 		t.Errorf("DeepCopy result should not match source.\nSource: %+v\nDest: %+v", src, dest)
 	}
 }
+
+func TestStructHasField(t *testing.T) {
+	type InnerStruct struct {
+		InnerField int
+	}
+
+	type MyStruct struct {
+		Name  string
+		Value int
+		Inner InnerStruct
+	}
+
+	tests := []struct {
+		name   string
+		s      interface{}
+		key    string
+		expect bool
+	}{
+		{
+			name:   "FieldNestedExists",
+			s:      MyStruct{},
+			key:    "Inner.InnerField",
+			expect: true,
+		},
+		{
+			name:   "FieldExists",
+			s:      MyStruct{},
+			key:    "Name",
+			expect: true,
+		},
+		{
+			name:   "FieldNotExists",
+			s:      MyStruct{},
+			key:    "NonExistentField",
+			expect: false,
+		},
+		{
+			name:   "FieldInPtr",
+			s:      &MyStruct{},
+			key:    "Name",
+			expect: true,
+		},
+		{
+			name:   "FieldNestedInPtr",
+			s:      &MyStruct{},
+			key:    "Inner.InnerField",
+			expect: true,
+		},
+		{
+			name:   "FieldInInterface",
+			s:      interface{}(&MyStruct{}),
+			key:    "Name",
+			expect: true,
+		},
+		{
+			name:   "FieldNestedInInterface",
+			s:      interface{}(&MyStruct{}),
+			key:    "Inner.InnerField",
+			expect: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			actual := HasStructField(tt.s, tt.key)
+			if actual != tt.expect {
+				t.Errorf("Expected %t, but got %t for key '%s'", tt.expect, actual, tt.key)
+			}
+		})
+	}
+}
