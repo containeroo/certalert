@@ -6,6 +6,30 @@ import (
 	"strings"
 )
 
+// parseInt parses an integer from a string.
+func parseInt(s string) (i int) {
+	fmt.Sscanf(s, "%d", &i)
+	return i
+}
+
+// parseField parses a field name and returns the index and field name.
+// If the field name does not contain an index, index is nil.
+func parseField(name string) (index *int, fieldName string) {
+	if strings.HasSuffix(name, "[]") {
+		return nil, name[:len(name)-2]
+	}
+
+	if !strings.Contains(name, "[") && !strings.Contains(name, "]") {
+		return nil, name
+	}
+
+	fieldName = name[:strings.Index(name, "[")] // Remove everything after the first '['
+	i := parseInt(name[strings.Index(name, "[")+1 : strings.Index(name, "]")])
+
+	index = &i
+	return index, fieldName
+}
+
 // HasFieldByPath is a utility function designed to check if a given key exists
 // within a map, struct, or interface. This function also supports checking
 // for nested keys, separated by dots (e.g., "key1.key2.key3").
@@ -30,7 +54,7 @@ func hasFieldRecursive(value reflect.Value, keys []string) bool {
 		return true
 	}
 
-	fieldName := strings.TrimSuffix(keys[0], "[]")
+	idx, fieldName := parseField(keys[0])
 
 	switch value.Kind() {
 	case reflect.Map:
@@ -47,14 +71,25 @@ func hasFieldRecursive(value reflect.Value, keys []string) bool {
 
 		// Check if the field is a slice or array
 		if field.Kind() == reflect.Slice || field.Kind() == reflect.Array {
-			// Iterate over the slice elements and update them
-			for i := 0; i < field.Len(); i++ {
-				sliceValue := field.Index(i)
-				if !hasFieldRecursive(sliceValue, keys[1:]) {
+			startIdx, endIdx := 0, field.Len() // Default to all elements
+
+			if idx != nil {
+				if *idx < 0 {
+					*idx += endIdx // Convert to positive index. This is possible due zero-based index.
+				}
+				if *idx < 0 || *idx >= endIdx { // Index out of bounds
 					return false
 				}
+				startIdx, endIdx = *idx, *idx+1 // Only check the specified index
 			}
-			return true
+
+			for i := startIdx; i < endIdx; i++ {
+				sliceValue := field.Index(i)
+				if hasFieldRecursive(sliceValue, keys[1:]) {
+					return true
+				}
+			}
+			return false
 		}
 		return hasFieldRecursive(field, keys[1:])
 	case reflect.Interface:
@@ -62,47 +97,6 @@ func hasFieldRecursive(value reflect.Value, keys []string) bool {
 	}
 
 	return false
-}
-
-// GetFieldValueByPath retrieves the value of a field in a struct identified by a path.
-// The path is a dot-separated string that represents the hierarchy of struct fields.
-// Returns the field's value and a boolean indicating whether the field exists or not.
-func GetFieldValueByPath(data interface{}, path string) (interface{}, bool) {
-	v := reflect.ValueOf(data)
-	keys := strings.Split(path, ".")
-
-	return getFieldValueRecursive(v, keys)
-}
-
-// getFieldValueRecursive recursively traverses the struct and retrieves the field's value.
-// Returns the field's value and a boolean indicating whether the field exists or not.
-func getFieldValueRecursive(value reflect.Value, keys []string) (interface{}, bool) {
-	if value.Kind() == reflect.Ptr {
-		value = value.Elem() // Dereference the pointer
-	}
-
-	if len(keys) == 0 { // No more keys to traverse
-		return value.Interface(), true
-	}
-
-	fieldName := keys[0]
-
-	switch value.Kind() {
-	case reflect.Map:
-		mapKey := reflect.ValueOf(fieldName)
-		if value.MapIndex(mapKey).IsValid() {
-			return getFieldValueRecursive(value.MapIndex(mapKey), keys[1:])
-		}
-	case reflect.Struct:
-		field := value.FieldByName(fieldName)
-		if field.IsValid() {
-			return getFieldValueRecursive(field, keys[1:])
-		}
-	case reflect.Interface:
-		return getFieldValueRecursive(value.Elem(), keys)
-	}
-
-	return nil, false
 }
 
 // UpdateFieldByPath updates a field in a struct identified by a path with a new value or function.
@@ -166,7 +160,7 @@ func updateFieldRecursive(value reflect.Value, fieldNames []string, newValue int
 		return nil
 	}
 
-	fieldName := strings.TrimSuffix(fieldNames[0], "[]")
+	idx, fieldName := parseField(fieldNames[0])
 
 	switch value.Kind() {
 	case reflect.Map:
@@ -175,12 +169,14 @@ func updateFieldRecursive(value reflect.Value, fieldNames []string, newValue int
 		if !mapValue.IsValid() {
 			return fmt.Errorf("No such key: %s in map", fieldName)
 		}
+
 		return updateFieldRecursive(mapValue, fieldNames[1:], newValue)
 	case reflect.Interface:
 		interfaceValue := value.Elem()
 		if !interfaceValue.IsValid() {
 			return fmt.Errorf("Nil interface encountered while traversing path")
 		}
+
 		return updateFieldRecursive(interfaceValue, fieldNames, newValue)
 	case reflect.Struct:
 		// Locate the field within the struct
@@ -191,15 +187,28 @@ func updateFieldRecursive(value reflect.Value, fieldNames []string, newValue int
 
 		// Check if the field is a slice or array
 		if field.Kind() == reflect.Slice || field.Kind() == reflect.Array {
-			// Iterate over the slice elements and update them
-			for i := 0; i < field.Len(); i++ {
+			startIdx, endIdx := 0, field.Len() // Default to all elements
+
+			if idx != nil {
+				if *idx < 0 {
+					*idx += endIdx // Convert to positive index. This is possible due zero-based index.
+				}
+				if *idx < 0 || *idx >= endIdx { // Index out of bounds
+					return nil
+				}
+				startIdx, endIdx = *idx, *idx+1 // Only check the specified index
+			}
+
+			for i := startIdx; i < endIdx; i++ {
 				sliceValue := field.Index(i)
 				if err := updateFieldRecursive(sliceValue, fieldNames[1:], newValue); err != nil {
 					return err
 				}
 			}
+			// If reached here, the field was updated successfully
 			return nil
 		}
+
 		return updateFieldRecursive(field, fieldNames[1:], newValue)
 	}
 

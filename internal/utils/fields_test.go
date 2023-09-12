@@ -41,12 +41,18 @@ func TestHasFieldByPath(t *testing.T) {
 		path     string
 		expected bool
 	}{
+		{"Items[].Name", true},
+		{"Items[-3].Name", false},
+		{"Items[3].Name", false},
+		{"Items[-1].Name", true},
+		{"Items[-2].Name", true},
+		{"Items[1].Name", true},
+		{"Items[1].Field1", false},
 		{"Name", true},
 		{"Age", true},
 		{"Address.Street", true},
 		{"Items[]", true},
 		{"Items[].Field1", false},
-		{"Items[].Name", true},
 	}
 
 	for _, test := range tests {
@@ -103,58 +109,6 @@ func TestUpdateFieldRecursive(t *testing.T) {
 	for _, item := range p.Items {
 		if item.Password != "NewPassword" {
 			t.Errorf("Item Password not updated correctly, expected 'NewPassword', got '%s'", item.Password)
-		}
-	}
-}
-
-func TestGetFieldValueByPath(t *testing.T) {
-	// Define a sample struct for testing
-	type Person struct {
-		Name    string
-		Age     int
-		Empty   string
-		Address struct {
-			Street string
-			City   string
-		}
-	}
-
-	// Initialize a sample struct
-	p := &Person{
-		Name:  "Alice",
-		Age:   30,
-		Empty: "",
-		Address: struct {
-			Street string
-			City   string
-		}{
-			Street: "123 Main St",
-			City:   "New York",
-		},
-	}
-
-	// Test getting fields using the function
-	tests := []struct {
-		path      string
-		expectVal interface{}
-		found     bool
-	}{
-		{path: "Empty", expectVal: "", found: true},
-		{path: "Name", expectVal: "Alice", found: true},
-		{path: "Age", expectVal: 30, found: true},
-		{path: "Address.Street", expectVal: "123 Main St", found: true},
-		{path: "Address.City", expectVal: "New York", found: true},
-		{path: "InvalidField", expectVal: nil, found: false},
-		{path: "Address.InvalidField", expectVal: nil, found: false},
-	}
-
-	for _, test := range tests {
-		val, found := GetFieldValueByPath(p, test.path)
-		if found != test.found {
-			t.Errorf("GetFieldValueByPath(%s) found = %v, expectFound = %v", test.path, found, test.found)
-		}
-		if val != test.expectVal {
-			t.Errorf("GetFieldValueByPath(%s) val = %v, expectVal = %v", test.path, val, test.expectVal)
 		}
 	}
 }
