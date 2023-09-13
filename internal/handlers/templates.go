@@ -2,6 +2,10 @@ package handlers
 
 // CSS is the CSS that is used in the template
 const CSS string = `
+body {
+	font-family: Georgia, Helvetica, Arial, sans-serif;
+}
+
 .table {
 	border-collapse: collapse;
 	width: 60%;
