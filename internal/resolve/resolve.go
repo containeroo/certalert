@@ -39,6 +39,7 @@ func resolveEnvVariable(envVar string) (string, error) {
 	if !found {
 		return "", fmt.Errorf("Environment variable '%s' not found.", envVar)
 	}
+
 	return resolvedVariable, nil
 }
 
