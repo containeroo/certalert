@@ -22,7 +22,7 @@ func ExtractPEMCertificatesInfo(name string, certData []byte, password string, f
 		certData = block.Bytes
 		switch block.Type {
 		case "CERTIFICATE":
-			cert, err := x509.ParseCertificate(block.Bytes)
+			cert, err := x509.ParseCertificate(certData)
 			if err != nil {
 				if err := handleFailOnError(&certInfoList, name, "pem", fmt.Sprintf("Failed to parse certificate '%s': %v", name, err), failOnError); err != nil {
 					return certInfoList, err
@@ -42,13 +42,11 @@ func ExtractPEMCertificatesInfo(name string, certData []byte, password string, f
 			certInfoList = append(certInfoList, certInfo)
 
 			log.Debugf("Certificate '%s' expires on %s", certInfo.Subject, certInfo.ExpiryAsTime())
-
-			certData = rest // Move to the next PEM block
 		default:
 			log.Debugf("Skip PEM block of type '%s'", block.Type)
 		}
-		certData = rest
-		continue
+
+		certData = rest // Move to the next PEM block
 	}
 
 	if len(certInfoList) == 0 {
