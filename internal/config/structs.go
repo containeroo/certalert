@@ -41,6 +41,17 @@ type Auth struct {
 	Bearer *Bearer `mapstructure:"bearer,omitempty" yaml:"bearer,omitempty"`
 }
 
+// Basic represents the pushgateway basic auth config
+type Basic struct {
+	Username string `mapstructure:"username,omitempty" yaml:"username,omitempty"`
+	Password string `mapstructure:"password,omitempty" yaml:"password,omitempty"`
+}
+
+// Bearer represents the pushgateway bearer auth config
+type Bearer struct {
+	Token string `mapstructure:"token,omitempty" yaml:"token,omitempty"`
+}
+
 // Validate checks if basic auth and bearer auth are both defined
 func (a *Auth) Validate() error {
 	if a.Basic != nil && a.Bearer != nil {
@@ -48,15 +59,4 @@ func (a *Auth) Validate() error {
 	}
 
 	return nil
-}
-
-// Basic represents the pushgateway basic auth config
-type Basic struct {
-	Password string `mapstructure:"password,omitempty" yaml:"password,omitempty"`
-	Username string `mapstructure:"username,omitempty" yaml:"username,omitempty"`
-}
-
-// Bearer represents the pushgateway bearer auth config
-type Bearer struct {
-	Token string `mapstructure:"token,omitempty" yaml:"token,omitempty"`
 }
