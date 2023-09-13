@@ -1,6 +1,8 @@
 package metrics
 
 import (
+	"log"
+
 	"github.com/prometheus/client_golang/prometheus"
 )
 
@@ -38,8 +40,13 @@ func init() {
 // NewMetrics registers all prometheus metrics
 func NewMetrics() *Metrics {
 	reg := prometheus.NewRegistry()
-	reg.Register(CertificateEpoch)            // Register the global metric
-	reg.Register(CertificateExtractionStatus) // Register the new metric
+
+	if err := reg.Register(CertificateEpoch); err != nil {
+		log.Fatalf("Unable to register CertificateEpoch metric: %s", err)
+	}
+	if err := reg.Register(CertificateExtractionStatus); err != nil {
+		log.Fatalf("Unable to register CertificateExtractionStatus metric: %s", err)
+	}
 
 	return &Metrics{
 		Registry: reg,
