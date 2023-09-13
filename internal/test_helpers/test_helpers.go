@@ -22,13 +22,3 @@ func CreateTempFile(content string) (*os.File, error) {
 
 	return tmpfile, nil
 }
-
-// ReadFile opens a file and returns a pointer to it.
-func ReadFile(filePath string) (*os.File, error) {
-	file, err := os.Open(filePath)
-	if err != nil {
-		return nil, fmt.Errorf("Failed to open file '%s': %v", filePath, err)
-	}
-
-	return file, nil
-}

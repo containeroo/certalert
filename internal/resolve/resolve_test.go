@@ -222,7 +222,10 @@ func TestSearchKeyInFile(t *testing.T) {
 		}
 		defer os.Remove(tmpfile.Name())
 
-		file, err := test_helpers.ReadFile(tmpfile.Name())
+		file, err := os.Open(tmpfile.Name())
+		if err != nil {
+			t.Fatalf("Failed to open file '%s': %v", tmpfile.Name(), err)
+		}
 		defer file.Close()
 
 		if err != nil {
@@ -246,7 +249,10 @@ func TestSearchKeyInFile(t *testing.T) {
 		}
 		defer os.Remove(tmpfile.Name())
 
-		file, err := test_helpers.ReadFile(tmpfile.Name())
+		file, err := os.Open(tmpfile.Name())
+		if err != nil {
+			t.Fatalf("Failed to open file '%s': %v", tmpfile.Name(), err)
+		}
 		defer file.Close()
 
 		if err != nil {

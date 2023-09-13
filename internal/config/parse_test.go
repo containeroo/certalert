@@ -2,6 +2,7 @@ package config
 
 import (
 	"certalert/internal/certificates"
+	"certalert/internal/test_helpers"
 	"certalert/internal/utils"
 	"fmt"
 	"os"
@@ -23,28 +24,16 @@ func unsetEnvVars(envs map[string]string) {
 	}
 }
 
-// createTempFile creates a temporary file with the given content and returns the file name.
-func createTempFile(content string, t *testing.T) string {
-	tempFile, err := os.CreateTemp("", "certalert")
-	if err != nil {
-		t.Fatalf("Failed to create temporary file: %v", err)
-	}
-
-	defer tempFile.Close()
-
-	if _, err := tempFile.WriteString(content); err != nil {
-		t.Fatalf("Failed to write to temporary file: %v", err)
-	}
-
-	return tempFile.Name()
-}
-
 func TestParseCertificatesConfig(t *testing.T) {
 	envs := map[string]string{
 		"BASIC_PASSWORD": "password",
 		"BEARER_TOKEN":   "token",
 	}
-	passwordFileName := createTempFile("password", t)
+	passwordFileName, err := test_helpers.CreateTempFile("password")
+	if err != nil {
+		t.Fatalf("Failed to create temp file: %v", err)
+	}
+
 	sortedFileExtensions := utils.ExtractMapKeys(certificates.FileExtensionsToType)
 	sort.Strings(sortedFileExtensions)
 
@@ -104,7 +93,7 @@ func TestParseCertificatesConfig(t *testing.T) {
 						Name:     "test_cert",
 						Path:     "../../tests/certs/pem/chain.pem",
 						Type:     "pem",
-						Password: fmt.Sprintf("file:%s", passwordFileName),
+						Password: fmt.Sprintf("file:%s", passwordFileName.Name()),
 						Enabled:  utils.BoolPtr(true),
 					},
 				},
@@ -121,7 +110,7 @@ func TestParseCertificatesConfig(t *testing.T) {
 						Path:     "../../tests/certs/pem/chain.pem",
 						Enabled:  utils.BoolPtr(false),
 						Type:     "pem",
-						Password: fmt.Sprintf("file:%s", passwordFileName),
+						Password: fmt.Sprintf("file:%s", passwordFileName.Name()),
 					},
 				},
 				FailOnError: true,
