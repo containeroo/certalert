@@ -190,6 +190,16 @@ thead th {
 .sort-desc:after {
   content: " ↓";
 }
+
+code {
+    background-color: #f0f0f0;
+    color: #333;
+    padding: 2px 4px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    font-family: 'Courier New', monospace;
+}
+
 `
 
 // JS is the JS that is used in the template
@@ -301,7 +311,11 @@ const tplEndpoints string = `
 				{{range .Endpoints}}
 				<tr>
 						<td><a href="{{.Path}}">{{.Path}}</a></td>
-						<td>{{range .Methods}}{{.}} {{end}}</td>
+            <td>
+              {{range .Methods}}
+                <code>{{.}}</code>
+              {{end}}
+            </td>
 						<td>{{.Description}}</td>
 				</tr>
 				{{end}}
