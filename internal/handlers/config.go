@@ -10,7 +10,7 @@ import (
 )
 
 func init() {
-	Register("/config", Config, "GET", "POST")
+	Register("/config", "Provides the currently active configuration file. Plaintext passwords are redacted", Config, []string{"GET", "POST"})
 }
 
 // Config is the handler for the /config route

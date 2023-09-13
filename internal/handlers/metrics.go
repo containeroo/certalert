@@ -11,7 +11,7 @@ import (
 )
 
 func init() {
-	Register("/metrics", Metrics, "GET", "POST")
+	Register("/metrics", "Delivers metrics for Prometheus to scrape", Metrics, []string{"GET", "POST"})
 }
 
 // SetMetricsForCertificateInfo sets metrics for a given certificate info.

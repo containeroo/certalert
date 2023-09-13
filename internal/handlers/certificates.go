@@ -9,7 +9,7 @@ import (
 )
 
 func init() {
-	Register("/certificates", Certificates, "GET")
+	Register("/certificates", "Fetches and displays all the certificates in a tabular format", Certificates, []string{"GET", "POST"})
 }
 
 // Certificates is the handler for the /certificates route

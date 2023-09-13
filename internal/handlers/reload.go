@@ -10,7 +10,7 @@ import (
 )
 
 func init() {
-	Register("/-/reload", Reload, "GET", "POST")
+	Register("/-/reload", "Reloads the configuration", Reload, []string{"GET", "POST"})
 }
 
 // Reload is the handler for the /reload route

@@ -127,7 +127,7 @@ func renderTemplate(baseTplStr string, tplStr string, data interface{}) (string,
 type TemplateData struct {
 	CSS       string
 	JS        string
-	Endpoints []Endpoint
+	Endpoints []Handler
 	CertInfos []certificates.CertificateInfo
 }
 
