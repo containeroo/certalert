@@ -2,6 +2,8 @@ package handlers
 
 import (
 	"net/http"
+
+	log "github.com/sirupsen/logrus"
 )
 
 func init() {
@@ -52,8 +54,6 @@ var Endpoints = []Endpoint{
 // Home is the handler for the / route
 // It displays all the endpoints
 func Home(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/html")
-
 	tplData := TemplateData{
 		Endpoints: Endpoints,
 		CSS:       CSS,
@@ -64,5 +64,8 @@ func Home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Write([]byte(tpl))
+	w.Header().Set("Content-Type", "text/html")
+	if _, err := w.Write([]byte(tpl)); err != nil {
+		log.Errorf("Unable to write response: %s", err)
+	}
 }

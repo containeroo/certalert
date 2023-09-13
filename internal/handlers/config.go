@@ -5,6 +5,7 @@ import (
 	"certalert/internal/config"
 	"net/http"
 
+	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
 )
 
@@ -25,5 +26,7 @@ func Config(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Content-Type", "text/plain")
-	w.Write(b.Bytes())
+	if _, err := w.Write(b.Bytes()); err != nil {
+		log.Errorf("Unable to write response: %s", err)
+	}
 }

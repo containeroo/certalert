@@ -4,6 +4,8 @@ import (
 	"certalert/internal/certificates"
 	"certalert/internal/config"
 	"net/http"
+
+	log "github.com/sirupsen/logrus"
 )
 
 func init() {
@@ -20,5 +22,7 @@ func Healthz(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "text/plain")
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("ok"))
+	if _, err := w.Write([]byte("ok")); err != nil {
+		log.Errorf("Unable to write response: %s", err)
+	}
 }
