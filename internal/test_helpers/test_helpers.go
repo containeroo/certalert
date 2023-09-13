@@ -29,5 +29,6 @@ func ReadFile(filePath string) (*os.File, error) {
 	if err != nil {
 		return nil, fmt.Errorf("Failed to open file '%s': %v", filePath, err)
 	}
+
 	return file, nil
 }

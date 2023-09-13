@@ -71,6 +71,7 @@ func resolveFileVariable(filePathWithKey string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("Failed to read file '%s'. %v", filePath, err)
 	}
+
 	return strings.TrimSpace(string(data)), nil
 }
 
@@ -85,5 +86,6 @@ func searchKeyInFile(file *os.File, key string) (string, error) {
 			return strings.TrimSpace(pair[1]), nil
 		}
 	}
+
 	return "", fmt.Errorf("Key '%s' not found in file '%s'.", key, file.Name())
 }

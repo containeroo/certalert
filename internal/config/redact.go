@@ -38,5 +38,6 @@ func redactVariable(s string) string {
 	if strings.HasPrefix(s, "env:") || strings.HasPrefix(s, "file:") || s == "" {
 		return s
 	}
+
 	return "<REDACTED>"
 }

@@ -13,6 +13,7 @@ func GetCertificateByName(name string, certificates []Certificate) (*Certificate
 			return &cert, nil
 		}
 	}
+
 	return nil, fmt.Errorf("Certificate '%s' not found", name)
 }
 
@@ -24,6 +25,7 @@ func certExistsInSlice(cert CertificateInfo, slice []CertificateInfo) bool {
 			return true
 		}
 	}
+
 	return false
 }
 
@@ -32,11 +34,13 @@ func handleFailOnError(certInfoList *[]CertificateInfo, certName, certType, errM
 	if failOnError {
 		return fmt.Errorf(errMsg)
 	}
+
 	log.Warningf("Failed to extract certificate information: %v", errMsg)
 	*certInfoList = append(*certInfoList, CertificateInfo{
 		Name:  certName,
 		Type:  certType,
 		Error: errMsg,
 	})
+
 	return nil
 }

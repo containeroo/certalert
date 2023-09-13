@@ -33,6 +33,7 @@ func (c *Config) parseCertificatesConfig() (err error) {
 			return fmt.Errorf(errMsg)
 		}
 		log.Warn(errMsg)
+
 		return nil
 	}
 

@@ -18,6 +18,7 @@ func convertToYaml(output interface{}) (string, error) {
 	if err := yamlEncoder.Encode(output); err != nil {
 		return "", err
 	}
+
 	return b.String(), nil
 }
 
@@ -29,6 +30,7 @@ func convertToJson(output interface{}) (string, error) {
 	if err := jsonEncoder.Encode(output); err != nil {
 		return "", err
 	}
+
 	return b.String(), nil
 }
 

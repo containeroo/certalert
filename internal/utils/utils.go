@@ -24,6 +24,7 @@ func IsInList(value string, list []string) bool {
 			return true
 		}
 	}
+
 	return false
 }
 
@@ -85,6 +86,7 @@ func ExtractHostAndPort(address string) (string, int, error) {
 // IsValidURL tests a string to determine if it is a well-structured URL.
 func IsValidURL(str string) bool {
 	u, err := url.Parse(str)
+
 	return err == nil && u.Scheme != "" && u.Host != ""
 }
 
@@ -96,6 +98,7 @@ func DeepCopy(src, dest interface{}) error {
 	}
 	// Set the value of dest to the copied value
 	reflect.ValueOf(dest).Elem().Set(reflect.ValueOf(copied))
+
 	return nil
 }
 

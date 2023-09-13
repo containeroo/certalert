@@ -22,5 +22,6 @@ func ConvertCertificatesToFormat(outputFormat string, certs []certificates.Certi
 	if handler, exists := FormatHandlers[outputFormat]; exists {
 		return handler(certificatesInfo)
 	}
+
 	return "", fmt.Errorf("Unsupported output format: %s", outputFormat)
 }
