@@ -19,7 +19,7 @@ func ExtractTrustStoreCertificatesInfo(name string, certData []byte, password st
 
 	// Extract certificates
 	for _, cert := range certs {
-		subject := cert.Subject.CommonName
+		subject := cert.Subject.ToRDNSequence().String()
 		if subject == "" {
 			subject = fmt.Sprintf("%d", len(certInfoList)+1)
 		}

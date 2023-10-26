@@ -53,7 +53,7 @@ func ExtractP7CertificatesInfo(name string, certData []byte, password string, fa
 				}
 			}
 
-			subject := cert.Subject.CommonName
+			subject := cert.Subject.ToRDNSequence().String()
 			if subject == "" {
 				subject = fmt.Sprintf("%d", len(certInfoList)+1)
 			}

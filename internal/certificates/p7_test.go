@@ -46,7 +46,7 @@ func TestExtractP7CertificatesInfo(t *testing.T) {
 			ExpectedResults: []CertificateInfo{
 				{
 					Name:    "TestCert",
-					Subject: "regular",
+					Subject: "CN=regular",
 					Epoch:   1723889513,
 					Type:    "p7",
 				},
@@ -59,7 +59,7 @@ func TestExtractP7CertificatesInfo(t *testing.T) {
 			ExpectedResults: []CertificateInfo{
 				{
 					Name:    "TestCert",
-					Subject: "regular",
+					Subject: "CN=regular",
 					Epoch:   1723889513,
 					Type:    "p7",
 				},

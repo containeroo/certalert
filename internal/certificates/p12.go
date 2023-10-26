@@ -22,7 +22,7 @@ func ExtractP12CertificatesInfo(name string, certData []byte, password string, f
 
 	// Extract certificates
 	for _, cert := range certs {
-		subject := cert.Subject.CommonName
+		subject := cert.Subject.ToRDNSequence().String()
 		if subject == "" {
 			subject = fmt.Sprintf("%d", len(certInfoList)+1)
 		}

@@ -29,7 +29,7 @@ func ExtractPEMCertificatesInfo(name string, certData []byte, password string, f
 				}
 			}
 
-			subject := cert.Subject.CommonName
+			subject := cert.Subject.ToRDNSequence().String()
 			if subject == "" {
 				subject = fmt.Sprintf("%d", len(certInfoList)+1)
 			}

@@ -24,9 +24,9 @@ func TestExtractP12CertificatesInfo(t *testing.T) {
 			ExpectedResults: []CertificateInfo{
 				{
 					Name:    "TestCert",
-					Type:    "p12",
 					Epoch:   1724097113,
-					Subject: "pkcs12",
+					Subject: "CN=pkcs12",
+					Type:    "p12",
 				},
 			},
 			ExpectedError: "",
@@ -38,7 +38,7 @@ func TestExtractP12CertificatesInfo(t *testing.T) {
 			ExpectedResults: []CertificateInfo{
 				{
 					Name:    "TestCert",
-					Subject: "without_password",
+					Subject: "CN=without_password",
 					Epoch:   1722925468,
 					Type:    "p12",
 				},
@@ -52,7 +52,7 @@ func TestExtractP12CertificatesInfo(t *testing.T) {
 			ExpectedResults: []CertificateInfo{
 				{
 					Name:    "TestCert",
-					Subject: "with_password",
+					Subject: "CN=with_password",
 					Epoch:   1722925469,
 					Type:    "p12",
 				},
@@ -80,7 +80,7 @@ func TestExtractP12CertificatesInfo(t *testing.T) {
 			ExpectedResults: []CertificateInfo{
 				{
 					Name:    "TestCert",
-					Subject: "1",
+					Subject: "O=Internet Widgits Pty Ltd,ST=Some-State,C=AU",
 					Epoch:   1722925468,
 					Type:    "p12",
 				},
@@ -94,25 +94,25 @@ func TestExtractP12CertificatesInfo(t *testing.T) {
 			ExpectedResults: []CertificateInfo{
 				{
 					Name:    "TestCert",
-					Subject: "final",
+					Subject: "CN=final",
 					Epoch:   1722925468,
 					Type:    "p12",
 				},
 				{
 					Name:    "TestCert",
-					Subject: "intermediate",
+					Subject: "CN=intermediate",
 					Epoch:   1722925468,
 					Type:    "p12",
 				},
 				{
 					Name:    "TestCert",
-					Subject: "root",
+					Subject: "CN=root",
 					Epoch:   1722925468,
 					Type:    "p12",
 				},
 				{
 					Name:    "TestCert",
-					Subject: "final",
+					Subject: "CN=final",
 					Epoch:   1722925468,
 					Type:    "p12",
 				},

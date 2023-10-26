@@ -55,7 +55,7 @@ func ExtractJKSCertificatesInfo(name string, certData []byte, password string, f
 				continue
 			}
 
-			subject := certificate.Subject.CommonName
+			subject := certificate.Subject.ToRDNSequence().String()
 			if subject == "" {
 				subject = fmt.Sprintf("%d", len(certInfoList)+1)
 			}
