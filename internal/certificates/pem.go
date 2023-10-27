@@ -10,7 +10,7 @@ import (
 
 // ExtractPEMCertificatesInfo extracts certificate information from a P7 file
 func ExtractPEMCertificatesInfo(name string, certData []byte, password string, failOnError bool) ([]CertificateInfo, error) {
-	var certInfoList []CertificateInfo
+	var certificateInfoList []CertificateInfo
 
 	// Parse all PEM blocks and filter by type
 	for {
@@ -19,29 +19,28 @@ func ExtractPEMCertificatesInfo(name string, certData []byte, password string, f
 			break
 		}
 
-		certData = block.Bytes
 		switch block.Type {
 		case "CERTIFICATE":
-			cert, err := x509.ParseCertificate(block.Bytes)
+			certificate, err := x509.ParseCertificate(block.Bytes)
 			if err != nil {
-				if err := handleFailOnError(&certInfoList, name, "pem", fmt.Sprintf("Failed to parse certificate '%s': %v", name, err), failOnError); err != nil {
-					return certInfoList, err
+				if err := handleFailOnError(&certificateInfoList, name, "pem", fmt.Sprintf("Failed to parse certificate '%s': %v", name, err), failOnError); err != nil {
+					return certificateInfoList, err
 				}
 			}
 
-			subject := cert.Subject.ToRDNSequence().String()
+			subject := certificate.Subject.ToRDNSequence().String()
 			if subject == "" {
-				subject = fmt.Sprintf("%d", len(certInfoList)+1)
+				subject = fmt.Sprintf("%d", len(certificateInfoList)+1)
 			}
-			certInfo := CertificateInfo{
+			certificateInfo := CertificateInfo{
 				Name:    name,
 				Subject: subject,
-				Epoch:   cert.NotAfter.Unix(),
+				Epoch:   certificate.NotAfter.Unix(),
 				Type:    "pem",
 			}
-			certInfoList = append(certInfoList, certInfo)
+			certificateInfoList = append(certificateInfoList, certificateInfo)
 
-			log.Debugf("Certificate '%s' expires on %s", certInfo.Subject, certInfo.ExpiryAsTime())
+			log.Debugf("Certificate '%s' expires on %s", certificateInfo.Subject, certificateInfo.ExpiryAsTime())
 
 			certData = rest // Move to the next PEM block
 		default:
@@ -51,9 +50,9 @@ func ExtractPEMCertificatesInfo(name string, certData []byte, password string, f
 		continue
 	}
 
-	if len(certInfoList) == 0 {
-		return certInfoList, handleFailOnError(&certInfoList, name, "pem", fmt.Sprintf("Failed to decode any certificate in '%s'", name), failOnError)
+	if len(certificateInfoList) == 0 {
+		return certificateInfoList, handleFailOnError(&certificateInfoList, name, "pem", fmt.Sprintf("Failed to decode any certificate in '%s'", name), failOnError)
 	}
 
-	return certInfoList, nil
+	return certificateInfoList, nil
 }

@@ -40,3 +40,11 @@ func handleFailOnError(certInfoList *[]CertificateInfo, certName, certType, errM
 	})
 	return nil
 }
+
+// generateCertificateSubject generates a descriptive subject for a certificate.
+func generateCertificateSubject(defaultSubject string, index int) string {
+	if defaultSubject == "" {
+		defaultSubject = fmt.Sprintf("Certificate %d", index)
+	}
+	return defaultSubject
+}
