@@ -10,74 +10,70 @@ import (
 )
 
 // ExtractP7CertificatesInfo extracts certificate information from a P7 file
-func ExtractP7CertificatesInfo(name string, certData []byte, password string, failOnError bool) ([]CertificateInfo, error) {
-	var certInfoList []CertificateInfo
+func ExtractP7CertificatesInfo(name string, certificateData []byte, password string, failOnError bool) ([]CertificateInfo, error) {
+	var certificateInfoList []CertificateInfo
 
 	// Parse all PEM blocks and filter by type
 	for {
-		block, rest := pem.Decode(certData)
+		block, rest := pem.Decode(certificateData)
 		if block == nil {
 			break
 		}
 
-		certData = block.Bytes
+		certificateData = block.Bytes
 		switch block.Type {
 		case "PKCS7":
-			p7, err := pkcs7.Parse(certData)
+			p7, err := pkcs7.Parse(certificateData)
 			if err != nil {
-				if err := handleFailOnError(&certInfoList, name, "p7", fmt.Sprintf("Failed to parse P7B file '%s': %v", name, err), failOnError); err != nil {
-					return certInfoList, err
+				if err := handleFailOnError(&certificateInfoList, name, "p7", fmt.Sprintf("Failed to parse P7B file '%s': %v", name, err), failOnError); err != nil {
+					return certificateInfoList, err
 				}
 			}
 
-			for _, cert := range p7.Certificates {
-				subject := cert.Subject.CommonName
-				if subject == "" {
-					subject = fmt.Sprintf("%d", len(certInfoList)+1)
-				}
-				certInfo := CertificateInfo{
+			for _, certificate := range p7.Certificates {
+				subject := generateCertificateSubject(certificate.Subject.ToRDNSequence().String(), len(certificateInfoList)+1)
+
+				certificateInfo := CertificateInfo{
 					Name:    name,
 					Subject: subject,
-					Epoch:   cert.NotAfter.Unix(),
+					Epoch:   certificate.NotAfter.Unix(),
 					Type:    "p7",
 				}
-				certInfoList = append(certInfoList, certInfo)
+				certificateInfoList = append(certificateInfoList, certificateInfo)
 
-				log.Debugf("Certificate '%s' expires on %s", certInfo.Subject, certInfo.ExpiryAsTime())
+				log.Debugf("Certificate '%s' expires on %s", subject, certificateInfo.ExpiryAsTime())
 			}
 		case "CERTIFICATE":
-			cert, err := x509.ParseCertificate(block.Bytes)
+			certificate, err := x509.ParseCertificate(block.Bytes)
 			if err != nil {
-				if err := handleFailOnError(&certInfoList, name, "p7", fmt.Sprintf("Failed to parse certificate '%s': %v", name, err), failOnError); err != nil {
-					return certInfoList, err
+				if err := handleFailOnError(&certificateInfoList, name, "p7", fmt.Sprintf("Failed to parse certificate '%s': %v", name, err), failOnError); err != nil {
+					return certificateInfoList, err
 				}
 			}
 
-			subject := cert.Subject.CommonName
-			if subject == "" {
-				subject = fmt.Sprintf("%d", len(certInfoList)+1)
-			}
-			certInfo := CertificateInfo{
+			subject := generateCertificateSubject(certificate.Subject.ToRDNSequence().String(), len(certificateInfoList)+1)
+
+			certificateInfo := CertificateInfo{
 				Name:    name,
 				Subject: subject,
-				Epoch:   cert.NotAfter.Unix(),
+				Epoch:   certificate.NotAfter.Unix(),
 				Type:    "p7",
 			}
-			certInfoList = append(certInfoList, certInfo)
+			certificateInfoList = append(certificateInfoList, certificateInfo)
 
-			log.Debugf("Certificate '%s' expires on %s", certInfo.Subject, certInfo.ExpiryAsTime())
+			log.Debugf("Certificate '%s' expires on %s", subject, certificateInfo.ExpiryAsTime())
 
-			certData = rest // Move to the next PEM block
+			certificateData = rest // Move to the next PEM block
 		default:
 			log.Debugf("Skip PEM block of type '%s'", block.Type)
 		}
-		certData = rest
+		certificateData = rest
 		continue
 	}
 
-	if len(certInfoList) == 0 {
-		return certInfoList, handleFailOnError(&certInfoList, name, "pem", fmt.Sprintf("Failed to decode any certificate in '%s'", name), failOnError)
+	if len(certificateInfoList) == 0 {
+		return certificateInfoList, handleFailOnError(&certificateInfoList, name, "pem", fmt.Sprintf("Failed to decode any certificate in '%s'", name), failOnError)
 	}
 
-	return certInfoList, nil
+	return certificateInfoList, nil
 }

@@ -35,7 +35,7 @@ func TestExtractPEMCertificatesInfo(t *testing.T) {
 			ExpectedResults: []CertificateInfo{
 				{
 					Name:    "TestCert",
-					Subject: "with_password",
+					Subject: "CN=with_password",
 					Epoch:   1722926986,
 					Type:    "pem",
 				},
@@ -54,7 +54,7 @@ func TestExtractPEMCertificatesInfo(t *testing.T) {
 			ExpectedResults: []CertificateInfo{
 				{
 					Name:    "TestCert",
-					Subject: "with_password",
+					Subject: "CN=with_password",
 					Epoch:   1722926986,
 					Type:    "pem",
 				},
@@ -67,19 +67,19 @@ func TestExtractPEMCertificatesInfo(t *testing.T) {
 			ExpectedResults: []CertificateInfo{
 				{
 					Name:    "TestCert",
-					Subject: "final",
+					Subject: "CN=final",
 					Epoch:   1722926985,
 					Type:    "pem",
 				},
 				{
 					Name:    "TestCert",
-					Subject: "intermediate",
+					Subject: "CN=intermediate",
 					Epoch:   1722926986,
 					Type:    "pem",
 				},
 				{
 					Name:    "TestCert",
-					Subject: "root",
+					Subject: "CN=root",
 					Epoch:   1722926986,
 					Type:    "pem",
 				},

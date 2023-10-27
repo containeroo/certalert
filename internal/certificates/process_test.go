@@ -50,15 +50,16 @@ func TestProcess(t *testing.T) {
 			},
 			ExpectedInfo: []CertificateInfo{
 				{
-					Name:  "ValidCert1",
-					Epoch: 1724096931,
-					Type:  "jks", Subject: "regular",
+					Name:    "ValidCert1",
+					Epoch:   1724096931,
+					Type:    "jks",
+					Subject: "CN=regular,OU=MyOrganization,O=MyCompany,L=MyCity,ST=MyState,C=MyCountry",
 				},
 				{
 					Name:    "ValidCert2",
 					Epoch:   1724097374,
 					Type:    "p12",
-					Subject: "with_password",
+					Subject: "CN=with_password",
 				},
 			},
 		},

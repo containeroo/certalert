@@ -8,31 +8,29 @@ import (
 )
 
 // ExtractP12CertificatesInfo extracts certificate information from a P12 file
-func ExtractTrustStoreCertificatesInfo(name string, certData []byte, password string, failOnError bool) ([]CertificateInfo, error) {
-	var certInfoList []CertificateInfo
+func ExtractTrustStoreCertificatesInfo(name string, certificateData []byte, password string, failOnError bool) ([]CertificateInfo, error) {
+	var certificateInfoList []CertificateInfo
 
 	// Decode the P12 data
-	certs, err := pkcs12.DecodeTrustStore(certData, password)
+	certificates, err := pkcs12.DecodeTrustStore(certificateData, password)
 	if err != nil {
-		return certInfoList, handleFailOnError(&certInfoList, name, "truststore", fmt.Sprintf("Failed to decode P12 file '%s': %v", name, err), failOnError)
+		return certificateInfoList, handleFailOnError(&certificateInfoList, name, "truststore", fmt.Sprintf("Failed to decode P12 file '%s': %v", name, err), failOnError)
 	}
 
 	// Extract certificates
-	for _, cert := range certs {
-		subject := cert.Subject.CommonName
-		if subject == "" {
-			subject = fmt.Sprintf("%d", len(certInfoList)+1)
-		}
-		certInfo := CertificateInfo{
+	for _, certificate := range certificates {
+		subject := generateCertificateSubject(certificate.Subject.ToRDNSequence().String(), len(certificateInfoList)+1)
+
+		certificateInfo := CertificateInfo{
 			Name:    name,
 			Subject: subject,
-			Epoch:   cert.NotAfter.Unix(),
+			Epoch:   certificate.NotAfter.Unix(),
 			Type:    "truststore",
 		}
-		certInfoList = append(certInfoList, certInfo)
+		certificateInfoList = append(certificateInfoList, certificateInfo)
 
-		log.Debugf("Certificate '%s' expires on %s", certInfo.Subject, certInfo.ExpiryAsTime())
+		log.Debugf("Certificate '%s' expires on %s", subject, certificateInfo.ExpiryAsTime())
 	}
 
-	return certInfoList, nil
+	return certificateInfoList, nil
 }
