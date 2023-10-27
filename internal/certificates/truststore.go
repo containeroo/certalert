@@ -8,11 +8,11 @@ import (
 )
 
 // ExtractP12CertificatesInfo extracts certificate information from a P12 file
-func ExtractTrustStoreCertificatesInfo(name string, certData []byte, password string, failOnError bool) ([]CertificateInfo, error) {
+func ExtractTrustStoreCertificatesInfo(name string, certificateData []byte, password string, failOnError bool) ([]CertificateInfo, error) {
 	var certificateInfoList []CertificateInfo
 
 	// Decode the P12 data
-	certificates, err := pkcs12.DecodeTrustStore(certData, password)
+	certificates, err := pkcs12.DecodeTrustStore(certificateData, password)
 	if err != nil {
 		return certificateInfoList, handleFailOnError(&certificateInfoList, name, "truststore", fmt.Sprintf("Failed to decode P12 file '%s': %v", name, err), failOnError)
 	}

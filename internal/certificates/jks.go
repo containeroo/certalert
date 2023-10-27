@@ -10,11 +10,11 @@ import (
 )
 
 // ExtractJKSCertificatesInfo extracts certificate information from a JKS file
-func ExtractJKSCertificatesInfo(name string, certData []byte, password string, failOnError bool) ([]CertificateInfo, error) {
+func ExtractJKSCertificatesInfo(name string, certificateData []byte, password string, failOnError bool) ([]CertificateInfo, error) {
 	var certificateInfoList []CertificateInfo
 
 	ks := keystore.New()
-	if err := ks.Load(bytes.NewReader(certData), []byte(password)); err != nil {
+	if err := ks.Load(bytes.NewReader(certificateData), []byte(password)); err != nil {
 		return certificateInfoList, handleFailOnError(&certificateInfoList, name, "jks", fmt.Sprintf("Failed to load JKS file '%s': %v", name, err), failOnError)
 	}
 

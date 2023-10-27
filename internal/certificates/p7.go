@@ -10,20 +10,20 @@ import (
 )
 
 // ExtractP7CertificatesInfo extracts certificate information from a P7 file
-func ExtractP7CertificatesInfo(name string, certData []byte, password string, failOnError bool) ([]CertificateInfo, error) {
+func ExtractP7CertificatesInfo(name string, certificateData []byte, password string, failOnError bool) ([]CertificateInfo, error) {
 	var certificateInfoList []CertificateInfo
 
 	// Parse all PEM blocks and filter by type
 	for {
-		block, rest := pem.Decode(certData)
+		block, rest := pem.Decode(certificateData)
 		if block == nil {
 			break
 		}
 
-		certData = block.Bytes
+		certificateData = block.Bytes
 		switch block.Type {
 		case "PKCS7":
-			p7, err := pkcs7.Parse(certData)
+			p7, err := pkcs7.Parse(certificateData)
 			if err != nil {
 				if err := handleFailOnError(&certificateInfoList, name, "p7", fmt.Sprintf("Failed to parse P7B file '%s': %v", name, err), failOnError); err != nil {
 					return certificateInfoList, err
@@ -63,11 +63,11 @@ func ExtractP7CertificatesInfo(name string, certData []byte, password string, fa
 
 			log.Debugf("Certificate '%s' expires on %s", subject, certificateInfo.ExpiryAsTime())
 
-			certData = rest // Move to the next PEM block
+			certificateData = rest // Move to the next PEM block
 		default:
 			log.Debugf("Skip PEM block of type '%s'", block.Type)
 		}
-		certData = rest
+		certificateData = rest
 		continue
 	}
 

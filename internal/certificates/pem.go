@@ -9,12 +9,12 @@ import (
 )
 
 // ExtractPEMCertificatesInfo extracts certificate information from a P7 file
-func ExtractPEMCertificatesInfo(name string, certData []byte, password string, failOnError bool) ([]CertificateInfo, error) {
+func ExtractPEMCertificatesInfo(name string, certificateData []byte, password string, failOnError bool) ([]CertificateInfo, error) {
 	var certificateInfoList []CertificateInfo
 
 	// Parse all PEM blocks and filter by type
 	for {
-		block, rest := pem.Decode(certData)
+		block, rest := pem.Decode(certificateData)
 		if block == nil {
 			break
 		}
@@ -42,11 +42,11 @@ func ExtractPEMCertificatesInfo(name string, certData []byte, password string, f
 
 			log.Debugf("Certificate '%s' expires on %s", certificateInfo.Subject, certificateInfo.ExpiryAsTime())
 
-			certData = rest // Move to the next PEM block
+			certificateData = rest // Move to the next PEM block
 		default:
 			log.Debugf("Skip PEM block of type '%s'", block.Type)
 		}
-		certData = rest
+		certificateData = rest
 		continue
 	}
 
