@@ -23,12 +23,12 @@ func init() {
 	FileExtensionsTypesSortedString = fmt.Sprintf("'%s' or '%s'", strings.Join(FileExtensionsTypesSorted[:lenFileExtensionsTypesSorted-1], "', '"), FileExtensionsTypesSorted[lenFileExtensionsTypesSorted-1])
 }
 
-// extractFunction is a function type representing the signature for extracting certificate information.
+// extractFunction 	is a function type representing the signature for extracting certificate information.
 type extractFunction func(cert Certificate, certData []byte, failOnError bool) ([]CertificateInfo, error)
 
-// ExtractionFunctionFabric maps each certificate type to its corresponding extraction function.
+// TypeToExtractionFunction maps each certificate type to its corresponding extraction function.
 // The map allows dynamic selection of the appropriate extraction function based on the certificate type.
-var ExtractionFunctionFabric = map[string]extractFunction{
+var TypeToExtractionFunction = map[string]extractFunction{
 	"p12":        ExtractP12CertificatesInfo,
 	"pem":        ExtractPEMCertificatesInfo,
 	"jks":        ExtractJKSCertificatesInfo,

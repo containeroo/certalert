@@ -39,7 +39,7 @@ func Process(certificates []Certificate, failOnError bool) (certificatesInfo []C
 			continue
 		}
 
-		extractFunc, found := ExtractionFunctionFabric[inferredType]
+		extractFunc, found := TypeToExtractionFunction[inferredType]
 		if !found {
 			// This should never happen as the config validation ensures that the type is valid
 			if err := handleFailOnError(&certInfoList, cert.Name, cert.Type, fmt.Sprintf("Unknown certificate type '%s'", cert.Type), failOnError); err != nil {
