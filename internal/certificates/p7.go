@@ -62,12 +62,11 @@ func ExtractP7CertificatesInfo(cert Certificate, certificateData []byte, failOnE
 			certificateInfoList = append(certificateInfoList, certificateInfo)
 
 			log.Debugf("Certificate '%s' expires on %s", subject, certificateInfo.ExpiryAsTime())
-
-			certificateData = rest // Move to the next PEM block
 		default:
 			log.Debugf("Skip PEM block of type '%s'", block.Type)
 		}
-		certificateData = rest
+
+		certificateData = rest // Move to the next PEM block
 		continue
 	}
 
