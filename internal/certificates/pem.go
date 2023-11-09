@@ -28,10 +28,8 @@ func ExtractPEMCertificatesInfo(cert Certificate, certificateData []byte, failOn
 				}
 			}
 
-			subject := certificate.Subject.ToRDNSequence().String()
-			if subject == "" {
-				subject = fmt.Sprintf("%d", len(certificateInfoList)+1)
-			}
+			subject := generateCertificateSubject(certificate.Subject.ToRDNSequence().String(), len(certificateInfoList)+1)
+
 			certificateInfo := CertificateInfo{
 				Name:    cert.Name,
 				Subject: subject,
@@ -40,13 +38,12 @@ func ExtractPEMCertificatesInfo(cert Certificate, certificateData []byte, failOn
 			}
 			certificateInfoList = append(certificateInfoList, certificateInfo)
 
-			log.Debugf("Certificate '%s' expires on %s", certificateInfo.Subject, certificateInfo.ExpiryAsTime())
-
-			certificateData = rest // Move to the next PEM block
+			log.Debugf("Certificate '%s' expires on %s", subject, certificateInfo.ExpiryAsTime())
 		default:
 			log.Debugf("Skip PEM block of type '%s'", block.Type)
 		}
-		certificateData = rest
+
+		certificateData = rest // Move to the next PEM block
 		continue
 	}
 
