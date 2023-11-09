@@ -68,5 +68,8 @@ func ExtractJKSCertificatesInfo(cert Certificate, certificateData []byte, failOn
 		}
 	}
 
+	// no check of len of certificateInfoList needed here, because if the JKS file is empty,
+	// ks.Load will throw an error and we will never get here
+
 	return certificateInfoList, nil
 }
