@@ -9,6 +9,7 @@ func TestExtractP7CertificatesInfo(t *testing.T) {
 	type testCase struct {
 		Name            string
 		FilePath        string
+		Cert            Certificate
 		ExpectedResults []CertificateInfo
 		ExpectedError   string
 	}
@@ -17,6 +18,9 @@ func TestExtractP7CertificatesInfo(t *testing.T) {
 		{
 			Name:     "Test P7B which no subject",
 			FilePath: "../../tests/certs/p7/no_subject.p7b",
+			Cert: Certificate{
+				Name: "TestCert",
+			},
 			ExpectedResults: []CertificateInfo{
 				{
 					Name:    "TestCert",
@@ -30,6 +34,9 @@ func TestExtractP7CertificatesInfo(t *testing.T) {
 		{
 			Name:     "Test P7B certificate which no subject",
 			FilePath: "../../tests/certs/p7/no_subject.crt",
+			Cert: Certificate{
+				Name: "TestCert",
+			},
 			ExpectedResults: []CertificateInfo{
 				{
 					Name:    "TestCert",
@@ -43,6 +50,9 @@ func TestExtractP7CertificatesInfo(t *testing.T) {
 		{
 			Name:     "Test P7B certificate with regular certificate",
 			FilePath: "../../tests/certs/p7/regular.pem",
+			Cert: Certificate{
+				Name: "TestCert",
+			},
 			ExpectedResults: []CertificateInfo{
 				{
 					Name:    "TestCert",
@@ -56,6 +66,9 @@ func TestExtractP7CertificatesInfo(t *testing.T) {
 		{
 			Name:     "Test P7B certificate with certificate and regular Private Key",
 			FilePath: "../../tests/certs/p7/cert_with_pk.p7",
+			Cert: Certificate{
+				Name: "TestCert",
+			},
 			ExpectedResults: []CertificateInfo{
 				{
 					Name:    "TestCert",
@@ -67,14 +80,20 @@ func TestExtractP7CertificatesInfo(t *testing.T) {
 			ExpectedError: "",
 		},
 		{
-			Name:            "Test P7B certificate with unknown PEM block",
-			FilePath:        "../../tests/certs/p7/message.p7",
+			Name:     "Test P7B certificate with unknown PEM block",
+			FilePath: "../../tests/certs/p7/message.p7",
+			Cert: Certificate{
+				Name: "TestCert",
+			},
 			ExpectedResults: []CertificateInfo{},
 			ExpectedError:   "Failed to decode any certificate in 'TestCert'",
 		},
 		{
 			Name:     "Test P7B certificate",
 			FilePath: "../../tests/certs/p7/cert1.p7b",
+			Cert: Certificate{
+				Name: "TestCert",
+			},
 			ExpectedResults: []CertificateInfo{
 				{
 					Name:    "TestCert",
@@ -88,6 +107,9 @@ func TestExtractP7CertificatesInfo(t *testing.T) {
 		{
 			Name:     "Test P7B certificate",
 			FilePath: "../../tests/certs/p7/cert2.p7b",
+			Cert: Certificate{
+				Name: "TestCert",
+			},
 			ExpectedResults: []CertificateInfo{
 				{
 					Name:    "TestCert",
@@ -99,8 +121,11 @@ func TestExtractP7CertificatesInfo(t *testing.T) {
 			ExpectedError: "",
 		},
 		{
-			Name:            "Test P7B certificate which is broken",
-			FilePath:        "../../tests/certs/p7/broken.p7b",
+			Name:     "Test P7B certificate which is broken",
+			FilePath: "../../tests/certs/p7/broken.p7b",
+			Cert: Certificate{
+				Name: "TestCert",
+			},
 			ExpectedResults: []CertificateInfo{},
 			ExpectedError:   "Failed to decode any certificate in 'TestCert'",
 		},
@@ -112,7 +137,7 @@ func TestExtractP7CertificatesInfo(t *testing.T) {
 			if err != nil {
 				t.Fatalf("Failed to read certificate file '%s'. %v", tc.Name, err)
 			}
-			certs, err := ExtractP7CertificatesInfo("TestCert", certData, "", true)
+			certs, err := ExtractP7CertificatesInfo(tc.Cert, certData, true)
 
 			if tc.ExpectedError == "" && err != nil {
 				t.Errorf("Test case '%s': unexpected error: %v", tc.Name, err)

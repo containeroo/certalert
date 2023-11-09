@@ -10,7 +10,7 @@ func TestExtractJKSCertificatesInfo(t *testing.T) {
 	type testCase struct {
 		Name            string
 		FilePath        string
-		Password        string
+		Cert            Certificate
 		ExpectedResults []CertificateInfo
 		ExpectedError   string
 	}
@@ -18,16 +18,22 @@ func TestExtractJKSCertificatesInfo(t *testing.T) {
 	// Define test cases
 	testCases := []testCase{
 		{
-			Name:            "Test JKS certificate - broken",
-			FilePath:        "../../tests/certs/jks/broken.jks",
-			Password:        "password",
+			Name:     "Test JKS certificate - broken",
+			FilePath: "../../tests/certs/jks/broken.jks",
+			Cert: Certificate{
+				Name:     "TestCert",
+				Password: "password",
+			},
 			ExpectedResults: []CertificateInfo{},
 			ExpectedError:   "Failed to load JKS file 'TestCert': got invalid magic",
 		},
 		{
 			Name:     "Test JKS certificate - valid",
 			FilePath: "../../tests/certs/jks/regular.jks",
-			Password: "password",
+			Cert: Certificate{
+				Name:     "TestCert",
+				Password: "password",
+			},
 			ExpectedResults: []CertificateInfo{
 				{
 					Name:    "TestCert",
@@ -41,7 +47,10 @@ func TestExtractJKSCertificatesInfo(t *testing.T) {
 		{
 			Name:     "Test JKS certificate - valid chain",
 			FilePath: "../../tests/certs/jks/chain.jks",
-			Password: "password",
+			Cert: Certificate{
+				Name:     "TestCert",
+				Password: "password",
+			},
 			ExpectedResults: []CertificateInfo{
 				{
 					Name:    "TestCert",
@@ -80,7 +89,8 @@ func TestExtractJKSCertificatesInfo(t *testing.T) {
 			if err != nil {
 				t.Errorf("Failed to read certificate file '%s'. %v", tc.Name, err)
 			}
-			certs, err := ExtractJKSCertificatesInfo("TestCert", certData, tc.Password, true)
+
+			certs, err := ExtractJKSCertificatesInfo(tc.Cert, certData, true)
 
 			if tc.ExpectedError == "" && err != nil {
 				t.Errorf("Test case '%s': unexpected error: %v", tc.Name, err)

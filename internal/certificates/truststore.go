@@ -8,25 +8,25 @@ import (
 )
 
 // ExtractP12CertificatesInfo extracts certificate information from a P12 file
-func ExtractTrustStoreCertificatesInfo(name string, certData []byte, password string, failOnError bool) ([]CertificateInfo, error) {
+func ExtractTrustStoreCertificatesInfo(cert Certificate, certData []byte, failOnError bool) ([]CertificateInfo, error) {
 	var certInfoList []CertificateInfo
 
 	// Decode the P12 data
-	certs, err := pkcs12.DecodeTrustStore(certData, password)
+	certs, err := pkcs12.DecodeTrustStore(certData, cert.Password)
 	if err != nil {
-		return certInfoList, handleFailOnError(&certInfoList, name, "truststore", fmt.Sprintf("Failed to decode P12 file '%s': %v", name, err), failOnError)
+		return certInfoList, handleFailOnError(&certInfoList, cert.Name, "truststore", fmt.Sprintf("Failed to decode P12 file '%s': %v", cert.Name, err), failOnError)
 	}
 
 	// Extract certificates
-	for _, cert := range certs {
-		subject := cert.Subject.CommonName
+	for _, c := range certs {
+		subject := c.Subject.CommonName
 		if subject == "" {
 			subject = fmt.Sprintf("%d", len(certInfoList)+1)
 		}
 		certInfo := CertificateInfo{
-			Name:    name,
+			Name:    cert.Name,
 			Subject: subject,
-			Epoch:   cert.NotAfter.Unix(),
+			Epoch:   c.NotAfter.Unix(),
 			Type:    "truststore",
 		}
 		certInfoList = append(certInfoList, certInfo)

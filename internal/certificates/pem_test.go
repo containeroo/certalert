@@ -10,6 +10,7 @@ func TestExtractPEMCertificatesInfo(t *testing.T) {
 	type testCase struct {
 		Name            string
 		FilePath        string
+		Cert            Certificate
 		ExpectedResults []CertificateInfo
 		ExpectedError   string
 	}
@@ -19,6 +20,9 @@ func TestExtractPEMCertificatesInfo(t *testing.T) {
 		{
 			Name:     "Test PEM which no subject",
 			FilePath: "../../tests/certs/pem/no_subject.crt",
+			Cert: Certificate{
+				Name: "TestCert",
+			},
 			ExpectedResults: []CertificateInfo{
 				{
 					Name:    "TestCert",
@@ -32,6 +36,9 @@ func TestExtractPEMCertificatesInfo(t *testing.T) {
 		{
 			Name:     "Test PEM certificate with password",
 			FilePath: "../../tests/certs/pem/with_password.pem",
+			Cert: Certificate{
+				Name: "TestCert",
+			},
 			ExpectedResults: []CertificateInfo{
 				{
 					Name:    "TestCert",
@@ -43,14 +50,20 @@ func TestExtractPEMCertificatesInfo(t *testing.T) {
 			ExpectedError: "",
 		},
 		{
-			Name:            "Test PEM certificate witch is broken",
-			FilePath:        "../../tests/certs/pem/broken.pem",
+			Name:     "Test PEM certificate witch is broken",
+			FilePath: "../../tests/certs/pem/broken.pem",
+			Cert: Certificate{
+				Name: "TestCert",
+			},
 			ExpectedResults: []CertificateInfo{},
 			ExpectedError:   "Failed to decode any certificate in 'TestCert'",
 		},
 		{
 			Name:     "Test PEM certificate with wrong password",
 			FilePath: "../../tests/certs/pem/with_password.pem",
+			Cert: Certificate{
+				Name: "TestCert",
+			},
 			ExpectedResults: []CertificateInfo{
 				{
 					Name:    "TestCert",
@@ -64,6 +77,9 @@ func TestExtractPEMCertificatesInfo(t *testing.T) {
 		{
 			Name:     "Test PEM certificate with chain",
 			FilePath: "../../tests/certs/pem/chain.pem",
+			Cert: Certificate{
+				Name: "TestCert",
+			},
 			ExpectedResults: []CertificateInfo{
 				{
 					Name:    "TestCert",
@@ -96,7 +112,7 @@ func TestExtractPEMCertificatesInfo(t *testing.T) {
 			if err != nil {
 				t.Errorf("Failed to read certificate file '%s'. %v", tc.Name, err)
 			}
-			certs, err := ExtractPEMCertificatesInfo("TestCert", certData, "", true)
+			certs, err := ExtractPEMCertificatesInfo(tc.Cert, certData, true)
 
 			if tc.ExpectedError == "" && err != nil {
 				t.Errorf("Test case '%s': unexpected error: %v", tc.Name, err)

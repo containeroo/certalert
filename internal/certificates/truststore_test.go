@@ -10,7 +10,7 @@ func TestExtractTrustStoreCertificatesInfo(t *testing.T) {
 	type testCase struct {
 		Name            string
 		FilePath        string
-		Password        string
+		Cert            Certificate
 		ExpectedResults []CertificateInfo
 		ExpectedError   string
 		FailOnError     bool
@@ -19,9 +19,12 @@ func TestExtractTrustStoreCertificatesInfo(t *testing.T) {
 	// Define test cases
 	testCases := []testCase{
 		{
-			Name:            "Test TrustStore certificate - broken (FailOnError=true)",
-			FilePath:        "../../tests/certs/truststore/broken.jks",
-			Password:        "password",
+			Name:     "Test TrustStore certificate - broken (FailOnError=true)",
+			FilePath: "../../tests/certs/truststore/broken.jks",
+			Cert: Certificate{
+				Name:     "TestCert",
+				Password: "password",
+			},
 			ExpectedResults: []CertificateInfo{},
 			ExpectedError:   "Failed to decode P12 file 'TestCert': pkcs12: error reading P12 data: asn1: structure error: tags don't match (16 vs {class:1 tag:2 length:114 isCompound:true}) {optional:false explicit:false application:false private:false defaultValue:<nil> tag:<nil> stringType:0 timeType:0 set:false omitEmpty:false} pfxPdu @2",
 			FailOnError:     true,
@@ -29,7 +32,10 @@ func TestExtractTrustStoreCertificatesInfo(t *testing.T) {
 		{
 			Name:     "Test TrustStore certificate - valid",
 			FilePath: "../../tests/certs/truststore/regular.jks",
-			Password: "password",
+			Cert: Certificate{
+				Name:     "TestCert",
+				Password: "password",
+			},
 			ExpectedResults: []CertificateInfo{
 				{
 					Name:    "TestCert",
@@ -44,7 +50,10 @@ func TestExtractTrustStoreCertificatesInfo(t *testing.T) {
 		{
 			Name:     "Test TrustStore certificate - valid chain",
 			FilePath: "../../tests/certs/truststore/chain.jks",
-			Password: "password",
+			Cert: Certificate{
+				Name:     "TestCert",
+				Password: "password",
+			},
 			ExpectedResults: []CertificateInfo{
 				{
 					Name:    "TestCert",
@@ -78,7 +87,7 @@ func TestExtractTrustStoreCertificatesInfo(t *testing.T) {
 			if err != nil {
 				t.Errorf("Failed to read certificate file '%s'. %v", tc.Name, err)
 			}
-			certs, err := ExtractTrustStoreCertificatesInfo("TestCert", certData, tc.Password, tc.FailOnError)
+			certs, err := ExtractTrustStoreCertificatesInfo(tc.Cert, certData, tc.FailOnError)
 
 			if tc.ExpectedError == "" && err != nil {
 				t.Errorf("Test case '%s': unexpected error: %v", tc.Name, err)

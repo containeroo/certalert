@@ -10,7 +10,7 @@ import (
 )
 
 // ExtractP7CertificatesInfo extracts certificate information from a P7 file
-func ExtractP7CertificatesInfo(name string, certData []byte, password string, failOnError bool) ([]CertificateInfo, error) {
+func ExtractP7CertificatesInfo(cert Certificate, certData []byte, failOnError bool) ([]CertificateInfo, error) {
 	var certInfoList []CertificateInfo
 
 	// Parse all PEM blocks and filter by type
@@ -25,20 +25,20 @@ func ExtractP7CertificatesInfo(name string, certData []byte, password string, fa
 		case "PKCS7":
 			p7, err := pkcs7.Parse(certData)
 			if err != nil {
-				if err := handleFailOnError(&certInfoList, name, "p7", fmt.Sprintf("Failed to parse P7B file '%s': %v", name, err), failOnError); err != nil {
+				if err := handleFailOnError(&certInfoList, cert.Name, "p7", fmt.Sprintf("Failed to parse P7B file '%s': %v", cert.Name, err), failOnError); err != nil {
 					return certInfoList, err
 				}
 			}
 
-			for _, cert := range p7.Certificates {
-				subject := cert.Subject.CommonName
+			for _, c := range p7.Certificates {
+				subject := c.Subject.CommonName
 				if subject == "" {
 					subject = fmt.Sprintf("%d", len(certInfoList)+1)
 				}
 				certInfo := CertificateInfo{
-					Name:    name,
+					Name:    cert.Name,
 					Subject: subject,
-					Epoch:   cert.NotAfter.Unix(),
+					Epoch:   c.NotAfter.Unix(),
 					Type:    "p7",
 				}
 				certInfoList = append(certInfoList, certInfo)
@@ -46,21 +46,21 @@ func ExtractP7CertificatesInfo(name string, certData []byte, password string, fa
 				log.Debugf("Certificate '%s' expires on %s", certInfo.Subject, certInfo.ExpiryAsTime())
 			}
 		case "CERTIFICATE":
-			cert, err := x509.ParseCertificate(block.Bytes)
+			c, err := x509.ParseCertificate(block.Bytes)
 			if err != nil {
-				if err := handleFailOnError(&certInfoList, name, "p7", fmt.Sprintf("Failed to parse certificate '%s': %v", name, err), failOnError); err != nil {
+				if err := handleFailOnError(&certInfoList, cert.Name, "p7", fmt.Sprintf("Failed to parse certificate '%s': %v", cert.Name, err), failOnError); err != nil {
 					return certInfoList, err
 				}
 			}
 
-			subject := cert.Subject.CommonName
+			subject := c.Subject.CommonName
 			if subject == "" {
 				subject = fmt.Sprintf("%d", len(certInfoList)+1)
 			}
 			certInfo := CertificateInfo{
-				Name:    name,
+				Name:    cert.Name,
 				Subject: subject,
-				Epoch:   cert.NotAfter.Unix(),
+				Epoch:   c.NotAfter.Unix(),
 				Type:    "p7",
 			}
 			certInfoList = append(certInfoList, certInfo)
@@ -74,7 +74,7 @@ func ExtractP7CertificatesInfo(name string, certData []byte, password string, fa
 	}
 
 	if len(certInfoList) == 0 {
-		return certInfoList, handleFailOnError(&certInfoList, name, "pem", fmt.Sprintf("Failed to decode any certificate in '%s'", name), failOnError)
+		return certInfoList, handleFailOnError(&certInfoList, cert.Name, "pem", fmt.Sprintf("Failed to decode any certificate in '%s'", cert.Name), failOnError)
 	}
 
 	return certInfoList, nil

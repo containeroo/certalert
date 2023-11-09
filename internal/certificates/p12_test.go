@@ -10,7 +10,7 @@ func TestExtractP12CertificatesInfo(t *testing.T) {
 	type testCase struct {
 		Name            string
 		FilePath        string
-		Password        string
+		Cert            Certificate
 		ExpectedResults []CertificateInfo
 		ExpectedError   string
 	}
@@ -20,7 +20,10 @@ func TestExtractP12CertificatesInfo(t *testing.T) {
 		{
 			Name:     "Test JKS certificate - JKS with pkcs12",
 			FilePath: "../../tests/certs/jks/pkcs12.jks",
-			Password: "password",
+			Cert: Certificate{
+				Name:     "TestCert",
+				Password: "password",
+			},
 			ExpectedResults: []CertificateInfo{
 				{
 					Name:    "TestCert",
@@ -34,7 +37,10 @@ func TestExtractP12CertificatesInfo(t *testing.T) {
 		{
 			Name:     "Test P12 certificate with no password",
 			FilePath: "../../tests/certs/p12/without_password.p12",
-			Password: "",
+			Cert: Certificate{
+				Name:     "TestCert",
+				Password: "",
+			},
 			ExpectedResults: []CertificateInfo{
 				{
 					Name:    "TestCert",
@@ -48,7 +54,10 @@ func TestExtractP12CertificatesInfo(t *testing.T) {
 		{
 			Name:     "Test P12 certificate with password",
 			FilePath: "../../tests/certs/p12/with_password.p12",
-			Password: "password",
+			Cert: Certificate{
+				Name:     "TestCert",
+				Password: "password",
+			},
 			ExpectedResults: []CertificateInfo{
 				{
 					Name:    "TestCert",
@@ -60,23 +69,32 @@ func TestExtractP12CertificatesInfo(t *testing.T) {
 			ExpectedError: "",
 		},
 		{
-			Name:            "Test P12 certificate with wrong password",
-			FilePath:        "../../tests/certs/p12/with_password.p12",
-			Password:        "wrong",
+			Name:     "Test P12 certificate with wrong password",
+			FilePath: "../../tests/certs/p12/with_password.p12",
+			Cert: Certificate{
+				Name:     "TestCert",
+				Password: "wrong",
+			},
 			ExpectedResults: []CertificateInfo{{}},
 			ExpectedError:   "Failed to decode P12 file 'TestCert': pkcs12: decryption password incorrect",
 		},
 		{
-			Name:            "Test P12 certificate with is broken",
-			FilePath:        "../../tests/certs/p12/broken.p12",
-			Password:        "",
+			Name:     "Test P12 certificate with is broken",
+			FilePath: "../../tests/certs/p12/broken.p12",
+			Cert: Certificate{
+				Name:     "TestCert",
+				Password: "",
+			},
 			ExpectedResults: []CertificateInfo{{}},
 			ExpectedError:   "Failed to decode P12 file 'TestCert': pkcs12: error reading P12 data: asn1: structure error: tags don't match (16 vs {class:1 tag:2 length:114 isCompound:true}) {optional:false explicit:false application:false private:false defaultValue:<nil> tag:<nil> stringType:0 timeType:0 set:false omitEmpty:false} pfxPdu @2",
 		},
 		{
 			Name:     "Test P12 certificate without subject",
 			FilePath: "../../tests/certs/p12/empty_subject.p12",
-			Password: "password",
+			Cert: Certificate{
+				Name:     "TestCert",
+				Password: "password",
+			},
 			ExpectedResults: []CertificateInfo{
 				{
 					Name:    "TestCert",
@@ -90,7 +108,10 @@ func TestExtractP12CertificatesInfo(t *testing.T) {
 		{
 			Name:     "Test P12 certificate with chain",
 			FilePath: "../../tests/certs/p12/chain.p12",
-			Password: "password",
+			Cert: Certificate{
+				Name:     "TestCert",
+				Password: "password",
+			},
 			ExpectedResults: []CertificateInfo{
 				{
 					Name:    "TestCert",
@@ -129,7 +150,7 @@ func TestExtractP12CertificatesInfo(t *testing.T) {
 			if err != nil {
 				t.Errorf("Failed to read certificate file '%s'. %v", tc.Name, err)
 			}
-			certs, err := ExtractP12CertificatesInfo("TestCert", certData, tc.Password, true)
+			certs, err := ExtractP12CertificatesInfo(tc.Cert, certData, true)
 
 			if tc.ExpectedError == "" && err != nil {
 				t.Errorf("Test case '%s': unexpected error: %v", tc.Name, err)
