@@ -10,21 +10,21 @@ import (
 )
 
 // ExtractJKSCertificatesInfo extracts certificate information from a JKS file
-func ExtractJKSCertificatesInfo(name string, certificateData []byte, password string, failOnError bool) ([]CertificateInfo, error) {
+func ExtractJKSCertificatesInfo(cert Certificate, certificateData []byte, failOnError bool) ([]CertificateInfo, error) {
 	var certificateInfoList []CertificateInfo
 
 	ks := keystore.New()
-	if err := ks.Load(bytes.NewReader(certificateData), []byte(password)); err != nil {
-		return certificateInfoList, handleFailOnError(&certificateInfoList, name, "jks", fmt.Sprintf("Failed to load JKS file '%s': %v", name, err), failOnError)
+	if err := ks.Load(bytes.NewReader(certificateData), []byte(cert.Password)); err != nil {
+		return certificateInfoList, handleFailOnError(&certificateInfoList, cert.Name, "jks", fmt.Sprintf("Failed to load JKS file '%s': %v", cert.Name, err), failOnError)
 	}
 
 	for _, alias := range ks.Aliases() {
 		var certificates []keystore.Certificate
 
 		if ks.IsPrivateKeyEntry(alias) {
-			entry, err := ks.GetPrivateKeyEntry(alias, []byte(password))
+			entry, err := ks.GetPrivateKeyEntry(alias, []byte(cert.Password))
 			if err != nil {
-				if err := handleFailOnError(&certificateInfoList, name, "jks", fmt.Sprintf("Failed to get private key in JKS file '%s': %v", name, err), failOnError); err != nil {
+				if err := handleFailOnError(&certificateInfoList, cert.Name, "jks", fmt.Sprintf("Failed to get private key in JKS file '%s': %v", cert.Name, err), failOnError); err != nil {
 					return certificateInfoList, err
 				}
 				continue
@@ -33,14 +33,14 @@ func ExtractJKSCertificatesInfo(name string, certificateData []byte, password st
 		} else if ks.IsTrustedCertificateEntry(alias) {
 			entry, err := ks.GetTrustedCertificateEntry(alias)
 			if err != nil {
-				if err := handleFailOnError(&certificateInfoList, name, "jks", fmt.Sprintf("Failed to get certificates in JKS file '%s': %v", name, err), failOnError); err != nil {
+				if err := handleFailOnError(&certificateInfoList, cert.Name, "jks", fmt.Sprintf("Failed to get certificates in JKS file '%s': %v", cert.Name, err), failOnError); err != nil {
 					return certificateInfoList, err
 				}
 				continue
 			}
 			certificates = []keystore.Certificate{entry.Certificate}
 		} else {
-			if err := handleFailOnError(&certificateInfoList, name, "jks", fmt.Sprintf("Unknown entry type for alias '%s' in JKS file '%s'", alias, name), failOnError); err != nil {
+			if err := handleFailOnError(&certificateInfoList, cert.Name, "jks", fmt.Sprintf("Unknown entry type for alias '%s' in JKS file '%s'", alias, cert.Name), failOnError); err != nil {
 				return certificateInfoList, err
 			}
 			continue
@@ -49,7 +49,7 @@ func ExtractJKSCertificatesInfo(name string, certificateData []byte, password st
 		for _, certificate := range certificates {
 			x509Cert, err := x509.ParseCertificate(certificate.Content)
 			if err != nil {
-				if err := handleFailOnError(&certificateInfoList, name, "jks", fmt.Sprintf("Failed to parse certificate '%s': %v", name, err), failOnError); err != nil {
+				if err := handleFailOnError(&certificateInfoList, cert.Name, "jks", fmt.Sprintf("Failed to parse certificate '%s': %v", cert.Name, err), failOnError); err != nil {
 					return certificateInfoList, err
 				}
 				continue
@@ -57,7 +57,7 @@ func ExtractJKSCertificatesInfo(name string, certificateData []byte, password st
 
 			subject := generateCertificateSubject(x509Cert.Subject.ToRDNSequence().String(), len(certificateInfoList)+1)
 			certificateInfo := CertificateInfo{
-				Name:    name,
+				Name:    cert.Name,
 				Subject: subject,
 				Epoch:   x509Cert.NotAfter.Unix(),
 				Type:    "jks",

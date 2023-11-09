@@ -9,7 +9,7 @@ import (
 )
 
 // ExtractPEMCertificatesInfo extracts certificate information from a P7 file
-func ExtractPEMCertificatesInfo(name string, certificateData []byte, password string, failOnError bool) ([]CertificateInfo, error) {
+func ExtractPEMCertificatesInfo(cert Certificate, certificateData []byte, failOnError bool) ([]CertificateInfo, error) {
 	var certificateInfoList []CertificateInfo
 
 	// Parse all PEM blocks and filter by type
@@ -23,7 +23,7 @@ func ExtractPEMCertificatesInfo(name string, certificateData []byte, password st
 		case "CERTIFICATE":
 			certificate, err := x509.ParseCertificate(block.Bytes)
 			if err != nil {
-				if err := handleFailOnError(&certificateInfoList, name, "pem", fmt.Sprintf("Failed to parse certificate '%s': %v", name, err), failOnError); err != nil {
+				if err := handleFailOnError(&certificateInfoList, cert.Name, "pem", fmt.Sprintf("Failed to parse certificate '%s': %v", cert.Name, err), failOnError); err != nil {
 					return certificateInfoList, err
 				}
 			}
@@ -33,7 +33,7 @@ func ExtractPEMCertificatesInfo(name string, certificateData []byte, password st
 				subject = fmt.Sprintf("%d", len(certificateInfoList)+1)
 			}
 			certificateInfo := CertificateInfo{
-				Name:    name,
+				Name:    cert.Name,
 				Subject: subject,
 				Epoch:   certificate.NotAfter.Unix(),
 				Type:    "pem",
@@ -51,7 +51,7 @@ func ExtractPEMCertificatesInfo(name string, certificateData []byte, password st
 	}
 
 	if len(certificateInfoList) == 0 {
-		return certificateInfoList, handleFailOnError(&certificateInfoList, name, "pem", fmt.Sprintf("Failed to decode any certificate in '%s'", name), failOnError)
+		return certificateInfoList, handleFailOnError(&certificateInfoList, cert.Name, "pem", fmt.Sprintf("Failed to decode any certificate in '%s'", cert.Name), failOnError)
 	}
 
 	return certificateInfoList, nil

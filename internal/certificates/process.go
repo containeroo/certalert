@@ -19,7 +19,7 @@ func Process(certificates []Certificate, failOnError bool) (certificatesInfo []C
 
 		log.Debugf("Processing certificate '%s'", cert.Name)
 
-		certificateData, err := os.ReadFile(cert.Path)
+		certData, err := os.ReadFile(cert.Path)
 		if err != nil {
 			// Accessibility of the file is checked in the config validation, if reached
 			// here, the file exists but can't be read for some reason.
@@ -48,7 +48,7 @@ func Process(certificates []Certificate, failOnError bool) (certificatesInfo []C
 			continue
 		}
 
-		certs, err := extractFunc(cert.Name, certificateData, cert.Password, failOnError)
+		certs, err := extractFunc(cert, certData, failOnError)
 		if err != nil {
 			// err is only returned if failOnError is true
 			return nil, fmt.Errorf("Error extracting certificate information: %v", err)
