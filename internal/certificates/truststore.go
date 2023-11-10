@@ -7,14 +7,18 @@ import (
 	pkcs12 "software.sslmate.com/src/go-pkcs12"
 )
 
-// ExtractP12CertificatesInfo extracts certificate information from a P12 file
-func ExtractTrustStoreCertificatesInfo(name string, certificateData []byte, password string, failOnError bool) ([]CertificateInfo, error) {
+func init() {
+	registerCertificateType("truststore", ExtractTrustStoreCertificatesInfo, "ts", "truststore")
+}
+
+// ExtractP12CertificatesInfo extracts certificate information from a P12 TrustStore file.
+func ExtractTrustStoreCertificatesInfo(cert Certificate, certificateData []byte, failOnError bool) ([]CertificateInfo, error) {
 	var certificateInfoList []CertificateInfo
 
 	// Decode the P12 data
-	certificates, err := pkcs12.DecodeTrustStore(certificateData, password)
+	certificates, err := pkcs12.DecodeTrustStore(certificateData, cert.Password)
 	if err != nil {
-		return certificateInfoList, handleFailOnError(&certificateInfoList, name, "truststore", fmt.Sprintf("Failed to decode P12 file '%s': %v", name, err), failOnError)
+		return certificateInfoList, handleFailOnError(&certificateInfoList, cert.Name, "truststore", fmt.Sprintf("Failed to decode P12 file '%s': %v", cert.Name, err), failOnError)
 	}
 
 	// Extract certificates
@@ -22,7 +26,7 @@ func ExtractTrustStoreCertificatesInfo(name string, certificateData []byte, pass
 		subject := generateCertificateSubject(certificate.Subject.ToRDNSequence().String(), len(certificateInfoList)+1)
 
 		certificateInfo := CertificateInfo{
-			Name:    name,
+			Name:    cert.Name,
 			Subject: subject,
 			Epoch:   certificate.NotAfter.Unix(),
 			Type:    "truststore",

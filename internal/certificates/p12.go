@@ -7,14 +7,18 @@ import (
 	pkcs12 "software.sslmate.com/src/go-pkcs12"
 )
 
-// ExtractP12CertificatesInfo extracts certificate information from a P12 file
-func ExtractP12CertificatesInfo(name string, certificateData []byte, password string, failOnError bool) ([]CertificateInfo, error) {
+func init() {
+	registerCertificateType("p12", ExtractP12CertificatesInfo, "p12", "pkcs12", "pfx")
+}
+
+// ExtractP12CertificatesInfo extracts certificate information from a P12 file.
+func ExtractP12CertificatesInfo(cert Certificate, certificateData []byte, failOnError bool) ([]CertificateInfo, error) {
 	var certificateInfoList []CertificateInfo
 
 	// Decode the P12 data
-	_, certificate, caCerts, err := pkcs12.DecodeChain(certificateData, password)
+	_, certificate, caCerts, err := pkcs12.DecodeChain(certificateData, cert.Password)
 	if err != nil {
-		return certificateInfoList, handleFailOnError(&certificateInfoList, name, "p12", fmt.Sprintf("Failed to decode P12 file '%s': %v", name, err), failOnError)
+		return certificateInfoList, handleFailOnError(&certificateInfoList, cert.Name, "p12", fmt.Sprintf("Failed to decode P12 file '%s': %v", cert.Name, err), failOnError)
 	}
 
 	// Prepare for extraction
@@ -25,7 +29,7 @@ func ExtractP12CertificatesInfo(name string, certificateData []byte, password st
 		subject := generateCertificateSubject(certificate.Subject.ToRDNSequence().String(), len(certificateInfoList)+1)
 
 		certificateInfo := CertificateInfo{
-			Name:    name,
+			Name:    cert.Name,
 			Subject: subject,
 			Epoch:   certificate.NotAfter.Unix(),
 			Type:    "p12",

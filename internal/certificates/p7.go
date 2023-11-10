@@ -9,8 +9,12 @@ import (
 	"go.mozilla.org/pkcs7"
 )
 
-// ExtractP7CertificatesInfo extracts certificate information from a P7 file
-func ExtractP7CertificatesInfo(name string, certificateData []byte, password string, failOnError bool) ([]CertificateInfo, error) {
+func init() {
+	registerCertificateType("p7", ExtractP7CertificatesInfo, "p7", "p7b", "p7c")
+}
+
+// ExtractP7CertificatesInfo extracts certificate information from a P7 file.
+func ExtractP7CertificatesInfo(cert Certificate, certificateData []byte, failOnError bool) ([]CertificateInfo, error) {
 	var certificateInfoList []CertificateInfo
 
 	// Parse all PEM blocks and filter by type
@@ -25,7 +29,7 @@ func ExtractP7CertificatesInfo(name string, certificateData []byte, password str
 		case "PKCS7":
 			p7, err := pkcs7.Parse(certificateData)
 			if err != nil {
-				if err := handleFailOnError(&certificateInfoList, name, "p7", fmt.Sprintf("Failed to parse P7B file '%s': %v", name, err), failOnError); err != nil {
+				if err := handleFailOnError(&certificateInfoList, cert.Name, "p7", fmt.Sprintf("Failed to parse P7B file '%s': %v", cert.Name, err), failOnError); err != nil {
 					return certificateInfoList, err
 				}
 			}
@@ -34,7 +38,7 @@ func ExtractP7CertificatesInfo(name string, certificateData []byte, password str
 				subject := generateCertificateSubject(certificate.Subject.ToRDNSequence().String(), len(certificateInfoList)+1)
 
 				certificateInfo := CertificateInfo{
-					Name:    name,
+					Name:    cert.Name,
 					Subject: subject,
 					Epoch:   certificate.NotAfter.Unix(),
 					Type:    "p7",
@@ -46,7 +50,7 @@ func ExtractP7CertificatesInfo(name string, certificateData []byte, password str
 		case "CERTIFICATE":
 			certificate, err := x509.ParseCertificate(block.Bytes)
 			if err != nil {
-				if err := handleFailOnError(&certificateInfoList, name, "p7", fmt.Sprintf("Failed to parse certificate '%s': %v", name, err), failOnError); err != nil {
+				if err := handleFailOnError(&certificateInfoList, cert.Name, "p7", fmt.Sprintf("Failed to parse certificate '%s': %v", cert.Name, err), failOnError); err != nil {
 					return certificateInfoList, err
 				}
 			}
@@ -54,7 +58,7 @@ func ExtractP7CertificatesInfo(name string, certificateData []byte, password str
 			subject := generateCertificateSubject(certificate.Subject.ToRDNSequence().String(), len(certificateInfoList)+1)
 
 			certificateInfo := CertificateInfo{
-				Name:    name,
+				Name:    cert.Name,
 				Subject: subject,
 				Epoch:   certificate.NotAfter.Unix(),
 				Type:    "p7",
@@ -62,17 +66,16 @@ func ExtractP7CertificatesInfo(name string, certificateData []byte, password str
 			certificateInfoList = append(certificateInfoList, certificateInfo)
 
 			log.Debugf("Certificate '%s' expires on %s", subject, certificateInfo.ExpiryAsTime())
-
-			certificateData = rest // Move to the next PEM block
 		default:
 			log.Debugf("Skip PEM block of type '%s'", block.Type)
 		}
-		certificateData = rest
+
+		certificateData = rest // Move to the next PEM block
 		continue
 	}
 
 	if len(certificateInfoList) == 0 {
-		return certificateInfoList, handleFailOnError(&certificateInfoList, name, "pem", fmt.Sprintf("Failed to decode any certificate in '%s'", name), failOnError)
+		return certificateInfoList, handleFailOnError(&certificateInfoList, cert.Name, "pem", fmt.Sprintf("Failed to decode any certificate in '%s'", cert.Name), failOnError)
 	}
 
 	return certificateInfoList, nil
