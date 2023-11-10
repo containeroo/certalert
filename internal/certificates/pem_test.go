@@ -15,7 +15,7 @@ func TestExtractPEMCertificatesInfo(t *testing.T) {
 			ExpectedResults: []CertificateInfo{
 				{
 					Name:    "TestCert",
-					Subject: "1",
+					Subject: "Certificate 1",
 					Epoch:   1723889513,
 					Type:    "pem",
 				},
