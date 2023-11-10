@@ -8,7 +8,11 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// ExtractPEMCertificatesInfo extracts certificate information from a P7 file
+func init() {
+	registerCertificateType("pem", ExtractPEMCertificatesInfo, "pem", "crt")
+}
+
+// ExtractPEMCertificatesInfo extracts certificate information from a P7 file.
 func ExtractPEMCertificatesInfo(cert Certificate, certificateData []byte, failOnError bool) ([]CertificateInfo, error) {
 	var certificateInfoList []CertificateInfo
 

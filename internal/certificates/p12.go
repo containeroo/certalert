@@ -7,7 +7,11 @@ import (
 	pkcs12 "software.sslmate.com/src/go-pkcs12"
 )
 
-// ExtractP12CertificatesInfo extracts certificate information from a P12 file
+func init() {
+	registerCertificateType("p12", ExtractP12CertificatesInfo, "p12", "pkcs12", "pfx")
+}
+
+// ExtractP12CertificatesInfo extracts certificate information from a P12 file.
 func ExtractP12CertificatesInfo(cert Certificate, certificateData []byte, failOnError bool) ([]CertificateInfo, error) {
 	var certificateInfoList []CertificateInfo
 

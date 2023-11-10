@@ -9,7 +9,11 @@ import (
 	"go.mozilla.org/pkcs7"
 )
 
-// ExtractP7CertificatesInfo extracts certificate information from a P7 file
+func init() {
+	registerCertificateType("p7", ExtractP7CertificatesInfo, "p7", "p7b", "p7c")
+}
+
+// ExtractP7CertificatesInfo extracts certificate information from a P7 file.
 func ExtractP7CertificatesInfo(cert Certificate, certificateData []byte, failOnError bool) ([]CertificateInfo, error) {
 	var certificateInfoList []CertificateInfo
 

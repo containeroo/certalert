@@ -50,7 +50,7 @@ var rootCmd = &cobra.Command{
 	3. Use the 'print' command to print certificates in different formats.
 
 	For a full list of commands and options, use 'certalert --help'.
-	`, certificates.FileExtensionsTypesSortedString),
+	`, certificates.FileExtensionsTypesSorted),
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		// Enter here before any subcommand is executed
 		if printVersion {

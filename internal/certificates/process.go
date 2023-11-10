@@ -7,7 +7,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// Process extracts certificate information from the certificates and updates the Prometheus metrics
+// Process extracts certificate information from the certificates and updates the Prometheus metrics.
 func Process(certificates []Certificate, failOnError bool) (certificatesInfo []CertificateInfo, err error) {
 	var certInfoList []CertificateInfo
 

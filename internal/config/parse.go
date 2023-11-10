@@ -82,7 +82,7 @@ func (c *Config) parseCertificatesConfig() (err error) {
 
 		// The Type can be specified in the config file, but it must be one of the supported types
 		if !utils.IsInList(cert.Type, certificates.FileExtensionsTypesSorted) {
-			if err := handleFailOnError(cert, idx, fmt.Sprintf("Certificate '%s' has an invalid type '%s'. Must be one of %s.", cert.Name, cert.Type, certificates.FileExtensionsTypesSortedString)); err != nil {
+			if err := handleFailOnError(cert, idx, fmt.Sprintf("Certificate '%s' has an invalid type '%s'. Must be one of %s.", cert.Name, cert.Type, certificates.FileExtensionsTypesSorted)); err != nil {
 				return err
 			}
 		}

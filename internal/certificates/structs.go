@@ -4,7 +4,7 @@ import (
 	"time"
 )
 
-// Certificate represents a certificate configuration
+// Certificate represents a certificate configuration.
 type Certificate struct {
 	Name     string `mapstructure:"name"`
 	Enabled  *bool  `mapstructure:"enabled,omitempty" yaml:"enabled,omitempty"`
@@ -13,7 +13,7 @@ type Certificate struct {
 	Type     string `mapstructure:"type" yaml:"type,omitempty"`
 }
 
-// CertificateInfo represents the extracted certificate information
+// CertificateInfo represents the extracted certificate information.
 type CertificateInfo struct {
 	Name    string `mapstructure:"name"`
 	Subject string `mapstructure:"subject"`
@@ -22,7 +22,7 @@ type CertificateInfo struct {
 	Error   string `mapstructure:"error"`
 }
 
-// ExpiryAsTime returns the expiry date as a time.Time
+// ExpiryAsTime returns the expiry date as a time.Time.
 func (ci *CertificateInfo) ExpiryAsTime() time.Time {
 	return time.Unix(ci.Epoch, 0)
 }
