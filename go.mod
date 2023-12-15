@@ -11,7 +11,7 @@ require (
 	github.com/pavlo-v-chernykh/keystore-go/v4 v4.4.1
 	github.com/prometheus/client_golang v1.16.0
 	github.com/sirupsen/logrus v1.9.3
-	github.com/spf13/cobra v1.7.0
+	github.com/spf13/cobra v1.8.0
 	github.com/spf13/viper v1.16.0
 	github.com/stretchr/testify v1.8.4
 	go.mozilla.org/pkcs7 v0.0.0-20210826202110-33d05740a352
