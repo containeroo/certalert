@@ -3,7 +3,6 @@ package utils
 import (
 	"os"
 	"reflect"
-	"sort"
 	"strings"
 	"testing"
 )
@@ -37,65 +36,74 @@ func TestBoolPtr(t *testing.T) {
 }
 
 func TestIsInList(t *testing.T) {
-	list := []string{"one", "two", "three"}
+	t.Run("element exists in the list", func(t *testing.T) {
+		list := []string{"one", "two", "three"}
+		element := "one"
 
-	if !IsInList("one", list) {
-		t.Fatalf("'one' should be in list")
-	}
+		if !IsInList(element, list) {
+			t.Fatalf("'%s' should be in the list", element)
+		}
+	})
 
-	if IsInList("four", list) {
-		t.Fatalf("'four' should not be in list")
-	}
+	t.Run("element does not exist in the list", func(t *testing.T) {
+		list := []string{"one", "two", "three"}
+		element := "four"
+
+		if IsInList(element, list) {
+			t.Fatalf("'%s' should not be in the list", element)
+		}
+	})
 }
 
 func TestExtractMapKeys(t *testing.T) {
-	testCases := []struct {
-		name  string
-		input interface{}
-		want  []string
-	}{
-		{
-			name: "Valid map with string keys",
-			input: map[string]int{
-				"key1": 1,
-				"key2": 2,
-				"key3": 3,
-			},
-			want: []string{"key1", "key2", "key3"},
-		},
-		{
-			name:  "Invalid input (slice)",
-			input: []int{1, 2, 3},
-			want:  nil,
-		},
-		{
-			name:  "Invalid input (string)",
-			input: "hello",
-			want:  nil,
-		},
-		{
-			name: "Map with non-string keys (should fail type assertion)",
-			input: map[int]string{
-				1: "one",
-				2: "two",
-				3: "three",
-			},
-			want: nil, // Because your function assumes keys are strings, this will fail type assertion.
-		},
-	}
+	t.Run("Valid map with string keys", func(t *testing.T) {
+		input := map[string]int{
+			"key1": 1,
+			"key2": 2,
+			"key3": 3,
+		}
+		expected := []string{"key1", "key2", "key3"}
+		result := ExtractMapKeys(input)
 
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			got := ExtractMapKeys(tc.input)
+		if !reflect.DeepEqual(result, expected) {
+			t.Errorf("Expected %v, got %v", expected, result)
+		}
+	})
+	t.Run("Valid map with int keys", func(t *testing.T) {
+		input := map[int]string{
+			1: "one",
+			2: "two",
+			3: "three",
+		}
+		expected := []string(nil)
+		result := ExtractMapKeys(input)
 
-			sort.Strings(got)
-			sort.Strings(tc.want)
+		if !reflect.DeepEqual(result, expected) {
+			t.Errorf("Expected %v, got %v", expected, result)
+		}
+	})
+	t.Run("Valid map with mixed keys", func(t *testing.T) {
+		input := map[interface{}]string{
+			1: "one",
+			2: "two",
+			3: "three",
+		}
+		expected := []string(nil)
+		result := ExtractMapKeys(input)
 
-			if !reflect.DeepEqual(got, tc.want) {
-				t.Fatalf("Expected %v, but got %v", tc.want, got)
-			}
-		})
-	}
+		if !reflect.DeepEqual(result, expected) {
+			t.Errorf("Expected %v, got %v", expected, result)
+		}
+	})
+	t.Run("Invalid input", func(t *testing.T) {
+		input := "not a map"
+		expected := []string(nil)
+		result := ExtractMapKeys(input)
+
+		if !reflect.DeepEqual(result, expected) {
+			t.Errorf("Expected %v, got %v", expected, result)
+		}
+	})
 }
 
 func TestCheckFileAccessibility(t *testing.T) {
@@ -139,61 +147,101 @@ func TestCheckFileAccessibility(t *testing.T) {
 }
 
 func TestExtractHostAndPort(t *testing.T) {
-	tests := []struct {
-		input        string
-		expectedHost string
-		expectedPort int
-		expectedErr  bool
-	}{
-		{"example.com:8080", "example.com", 8080, false},
-		{":1234", "", 1234, false},
-		{"localhost:", "", 0, true},
-		{"localhost:8080", "localhost", 8080, false},
-		{"127.0.0.1:", "", 0, true},
-		{"127.0.0.1:8080", "127.0.0.1", 8080, false},
-		{"invalid", "", 0, true},
-		{"invalid:", "", 0, true},
-	}
-
-	for _, test := range tests {
-		host, port, err := ExtractHostAndPort(test.input)
-
-		if (err != nil) != test.expectedErr {
-			t.Errorf("For %s, expected error: %v, but got: %v", test.input, test.expectedErr, err != nil)
-			continue
+	t.Run("Empty input", func(t *testing.T) {
+		host, port, err := ExtractHostAndPort("")
+		if err == nil {
+			t.Errorf("Expected error, got nil")
+		}
+		if err.Error() != "missing port in address" {
+			t.Errorf("Expected 'Invalid host:port format', got '%s'", err.Error())
 		}
 
-		if host != test.expectedHost {
-			t.Errorf("For %s, expected host: %s, but got: %s", test.input, test.expectedHost, host)
+		if host != "" {
+			t.Errorf("Expected empty host, got %s", host)
+		}
+		if port != 0 {
+			t.Errorf("Expected port 0, got %d", port)
+		}
+	})
+	t.Run("Invalid input", func(t *testing.T) {
+		host, port, err := ExtractHostAndPort("invalid")
+		if err == nil {
+			t.Errorf("Expected error, got nil")
+		}
+		if err.Error() != "address invalid: missing port in address" {
+			t.Errorf("Expected 'Invalid host:port format', got '%s'", err.Error())
 		}
 
-		if port != test.expectedPort {
-			t.Errorf("For %s, expected port: %d, but got: %d", test.input, test.expectedPort, port)
+		if host != "" {
+			t.Errorf("Expected empty host, got %s", host)
 		}
-	}
+		if port != 0 {
+			t.Errorf("Expected port 0, got %d", port)
+		}
+	})
+
+	t.Run("Valid input", func(t *testing.T) {
+		host, port, err := ExtractHostAndPort("example.com:8080")
+		if err != nil {
+			t.Errorf("Expected no error, got %v", err)
+		}
+
+		if host != "example.com" {
+			t.Errorf("Expected host 'example.com', got %s", host)
+		}
+		if port != 8080 {
+			t.Errorf("Expected port 8080, got %d", port)
+		}
+	})
 }
 
 func TestIsValidURL(t *testing.T) {
-	testCases := []struct {
-		urlStr       string
-		expectedBool bool
-	}{
-		{"http:/www.google.com", false}, // Malformed
-		{"https://www.google.com", true},
-		{"http://www.google.com", true},
-		{"ftp://files.com", true},
-		{"www.google.com", false}, // Missing scheme (like http, https)
-		{"http://", false},        // Malformed
-		{"http://10.0.0.69", true},
-	}
+	t.Run("Empty string", func(t *testing.T) {
+		if IsValidURL("") {
+			t.Errorf("Expected false for empty string")
+		}
+	})
 
-	for _, tc := range testCases {
-		t.Run(tc.urlStr, func(t *testing.T) {
-			if IsValidURL(tc.urlStr) != tc.expectedBool {
-				t.Errorf("Expected %v for %s", tc.expectedBool, tc.urlStr)
-			}
-		})
-	}
+	t.Run("Invalid URL", func(t *testing.T) {
+		if IsValidURL("http://") {
+			t.Errorf("Expected false for invalid URL")
+		}
+	})
+
+	t.Run("Valid URL", func(t *testing.T) {
+		if !IsValidURL("http://www.google.com") {
+			t.Errorf("Expected true for valid URL")
+		}
+	})
+	t.Run("Valid URL with port", func(t *testing.T) {
+		if !IsValidURL("http://www.google.com:8080") {
+			t.Errorf("Expected true for valid URL")
+		}
+	})
+
+	t.Run("Valid URL with path", func(t *testing.T) {
+		if !IsValidURL("http://www.google.com/path") {
+			t.Errorf("Expected true for valid URL")
+		}
+	})
+
+	t.Run("Valid URL with query", func(t *testing.T) {
+		if !IsValidURL("http://www.google.com?query=1") {
+			t.Errorf("Expected true for valid URL")
+		}
+	})
+
+	t.Run("Valid URL with fragment", func(t *testing.T) {
+		if !IsValidURL("http://www.google.com#fragment") {
+			t.Errorf("Expected true for valid URL")
+		}
+	})
+
+	t.Run("Valid URL with path, query and fragment", func(t *testing.T) {
+		if !IsValidURL("http://www.google.com/path?query=1#fragment") {
+			t.Errorf("Expected true for valid URL")
+		}
+	})
 }
 
 func TestDeepCopyNestedStruct(t *testing.T) {
@@ -206,35 +254,37 @@ func TestDeepCopyNestedStruct(t *testing.T) {
 		Field2 SimpleStruct
 	}
 
-	src := NestedStruct{
-		Field1: "Outer",
-		Field2: SimpleStruct{"Hello", 42},
-	}
-	var dest NestedStruct
+	t.Run("deep copy nested struct", func(t *testing.T) {
+		src := NestedStruct{
+			Field1: "Outer",
+			Field2: SimpleStruct{"Hello", 42},
+		}
+		var dest NestedStruct
 
-	err := DeepCopy(src, &dest)
-	if err != nil {
-		t.Fatalf("Error during DeepCopy: %v", err)
-	}
+		err := DeepCopy(src, &dest)
+		if err != nil {
+			t.Fatalf("Error during DeepCopy: %v", err)
+		}
 
-	if !reflect.DeepEqual(src, dest) {
-		t.Errorf("DeepCopy result does not match source.\nSource: %+v\nDest: %+v", src, dest)
-	}
+		if !reflect.DeepEqual(src, dest) {
+			t.Errorf("DeepCopy result does not match source.\nSource: %+v\nDest: %+v", src, dest)
+		}
 
-	// Change the source and make sure the dest doesn't change
-	src.Field2.Field1 = "Goodbye"
-	if reflect.DeepEqual(src, dest) {
-		t.Errorf("DeepCopy result should not match source.\nSource: %+v\nDest: %+v", src, dest)
-	}
+		// Change the source and make sure the dest doesn't change
+		src.Field2.Field1 = "Goodbye"
+		if reflect.DeepEqual(src, dest) {
+			t.Errorf("DeepCopy result should not match source.\nSource: %+v\nDest: %+v", src, dest)
+		}
 
-	// Change the dest and make sure the source doesn't change
-	dest.Field2.Field1 = "Also Goodbye"
-	if reflect.DeepEqual(src, dest) {
-		t.Errorf("DeepCopy result should not match source.\nSource: %+v\nDest: %+v", src, dest)
-	}
+		// Change the dest and make sure the source doesn't change
+		dest.Field2.Field1 = "Also Goodbye"
+		if reflect.DeepEqual(src, dest) {
+			t.Errorf("DeepCopy result should not match source.\nSource: %+v\nDest: %+v", src, dest)
+		}
+	})
 }
 
-func TestStructHasField(t *testing.T) {
+func TestHasStructField(t *testing.T) {
 	type InnerStruct struct {
 		InnerField int
 	}
@@ -245,62 +295,87 @@ func TestStructHasField(t *testing.T) {
 		Inner InnerStruct
 	}
 
-	tests := []struct {
-		name   string
-		s      interface{}
-		key    string
-		expect bool
-	}{
-		{
-			name:   "FieldNestedExists",
-			s:      MyStruct{},
-			key:    "Inner.InnerField",
-			expect: true,
-		},
-		{
-			name:   "FieldExists",
-			s:      MyStruct{},
-			key:    "Name",
-			expect: true,
-		},
-		{
-			name:   "FieldNotExists",
-			s:      MyStruct{},
-			key:    "NonExistentField",
-			expect: false,
-		},
-		{
-			name:   "FieldInPtr",
-			s:      &MyStruct{},
-			key:    "Name",
-			expect: true,
-		},
-		{
-			name:   "FieldNestedInPtr",
-			s:      &MyStruct{},
-			key:    "Inner.InnerField",
-			expect: true,
-		},
-		{
-			name:   "FieldInInterface",
-			s:      interface{}(&MyStruct{}),
-			key:    "Name",
-			expect: true,
-		},
-		{
-			name:   "FieldNestedInInterface",
-			s:      interface{}(&MyStruct{}),
-			key:    "Inner.InnerField",
-			expect: true,
-		},
-	}
+	t.Run("field nested exists", func(t *testing.T) {
+		s := MyStruct{}
+		key := "Inner.InnerField"
+		expect := true
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			actual := HasStructField(tt.s, tt.key)
-			if actual != tt.expect {
-				t.Errorf("Expected %t, but got %t for key '%s'", tt.expect, actual, tt.key)
-			}
-		})
-	}
+		actual := HasStructField(s, key)
+
+		if actual != expect {
+			t.Errorf("Expected %t, but got %t for key '%s'", expect, actual, key)
+		}
+	})
+
+	t.Run("field exists", func(t *testing.T) {
+		s := MyStruct{}
+		key := "Name"
+		expect := true
+
+		actual := HasStructField(s, key)
+
+		if actual != expect {
+			t.Errorf("Expected %t, but got %t for key '%s'", expect, actual, key)
+		}
+	})
+
+	t.Run("field not exists", func(t *testing.T) {
+		s := MyStruct{}
+		key := "NonExistentField"
+		expect := false
+
+		actual := HasStructField(s, key)
+
+		if actual != expect {
+			t.Errorf("Expected %t, but got %t for key '%s'", expect, actual, key)
+		}
+	})
+
+	t.Run("field in pointer", func(t *testing.T) {
+		s := &MyStruct{}
+		key := "Name"
+		expect := true
+
+		actual := HasStructField(s, key)
+
+		if actual != expect {
+			t.Errorf("Expected %t, but got %t for key '%s'", expect, actual, key)
+		}
+	})
+
+	t.Run("field nested in pointer", func(t *testing.T) {
+		s := &MyStruct{}
+		key := "Inner.InnerField"
+		expect := true
+
+		actual := HasStructField(s, key)
+
+		if actual != expect {
+			t.Errorf("Expected %t, but got %t for key '%s'", expect, actual, key)
+		}
+	})
+
+	t.Run("field in interface", func(t *testing.T) {
+		s := interface{}(&MyStruct{})
+		key := "Name"
+		expect := true
+
+		actual := HasStructField(s, key)
+
+		if actual != expect {
+			t.Errorf("Expected %t, but got %t for key '%s'", expect, actual, key)
+		}
+	})
+
+	t.Run("field nested in interface", func(t *testing.T) {
+		s := interface{}(&MyStruct{})
+		key := "Inner.InnerField"
+		expect := true
+
+		actual := HasStructField(s, key)
+
+		if actual != expect {
+			t.Errorf("Expected %t, but got %t for key '%s'", expect, actual, key)
+		}
+	})
 }

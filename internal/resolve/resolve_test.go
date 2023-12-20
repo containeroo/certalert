@@ -1,11 +1,11 @@
 package resolve
 
 import (
-	"certalert/internal/test_helpers" // Make sure this path is correct
-
+	"certalert/internal/test_helpers"
 	"fmt"
 	"os"
 	"testing"
+	// Make sure this path is correct
 )
 
 func TestResolveVariable(t *testing.T) {
@@ -58,7 +58,6 @@ func TestResolveVariable(t *testing.T) {
 		if err != nil && err.Error() != expectedErrMsg {
 			t.Fatalf("Expected error '%s', got '%v'", expectedErrMsg, err)
 		}
-
 	})
 
 	t.Run("with env variable", func(t *testing.T) {
@@ -107,7 +106,6 @@ func TestResolveVariable(t *testing.T) {
 		if result != "value 2" {
 			t.Fatalf("Expected 'value 2', got '%s'", result)
 		}
-
 	})
 }
 
@@ -214,7 +212,6 @@ func TestResolveFileVariable(t *testing.T) {
 }
 
 func TestSearchKeyInFile(t *testing.T) {
-
 	t.Run("with file and key", func(t *testing.T) {
 		tmpfile, err := test_helpers.CreateTempFile("key1 =	value 1\nkey2=value 2\nkey3 =   value 3")
 		if err != nil {

@@ -5,8 +5,8 @@ import (
 )
 
 func TestExtractTrustStoreCertificatesInfo(t *testing.T) {
-	testCases := []testCase{
-		{
+	t.Run("Test TrustStore certificate - broken (FailOnError=true)", func(t *testing.T) {
+		tc := testCase{
 			Name: "Test TrustStore certificate - broken (FailOnError=true)",
 			Cert: Certificate{
 				Name:     "TestCert",
@@ -15,8 +15,14 @@ func TestExtractTrustStoreCertificatesInfo(t *testing.T) {
 			},
 			ExpectedResults: []CertificateInfo{},
 			ExpectedError:   "Failed to decode P12 file 'TestCert': pkcs12: error reading P12 data: asn1: structure error: tags don't match (16 vs {class:1 tag:2 length:114 isCompound:true}) {optional:false explicit:false application:false private:false defaultValue:<nil> tag:<nil> stringType:0 timeType:0 set:false omitEmpty:false} pfxPdu @2",
-		},
-		{
+		}
+		if err := runExtractCertificateUnitTest(tc, t, ExtractTrustStoreCertificatesInfo); err != nil {
+			t.Error(err)
+		}
+	})
+
+	t.Run("Test TrustStore certificate - valid", func(t *testing.T) {
+		tc := testCase{
 			Name: "Test TrustStore certificate - valid",
 			Cert: Certificate{
 				Name:     "TestCert",
@@ -32,8 +38,14 @@ func TestExtractTrustStoreCertificatesInfo(t *testing.T) {
 				},
 			},
 			ExpectedError: "",
-		},
-		{
+		}
+		if err := runExtractCertificateUnitTest(tc, t, ExtractTrustStoreCertificatesInfo); err != nil {
+			t.Error(err)
+		}
+	})
+
+	t.Run("Test TrustStore certificate - valid chain", func(t *testing.T) {
+		tc := testCase{
 			Name: "Test TrustStore certificate - valid chain",
 			Cert: Certificate{
 				Name:     "TestCert",
@@ -61,14 +73,9 @@ func TestExtractTrustStoreCertificatesInfo(t *testing.T) {
 				},
 			},
 			ExpectedError: "",
-		},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.Name, func(t *testing.T) {
-			if err := runExtractCertificateUnitTest(tc, t, ExtractTrustStoreCertificatesInfo); err != nil {
-				t.Error(err)
-			}
-		})
-	}
+		}
+		if err := runExtractCertificateUnitTest(tc, t, ExtractTrustStoreCertificatesInfo); err != nil {
+			t.Error(err)
+		}
+	})
 }

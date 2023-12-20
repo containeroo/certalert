@@ -8,14 +8,14 @@ import (
 )
 
 func TestProcess(t *testing.T) {
-	cases := []struct {
-		Name          string
-		Certificates  []Certificate
-		FailOnError   bool
-		ExpectedInfo  []CertificateInfo
-		ExpectedError string
-	}{
-		{
+	t.Run("skips invalid certificate", func(t *testing.T) {
+		tc := struct {
+			Name          string
+			Certificates  []Certificate
+			FailOnError   bool
+			ExpectedInfo  []CertificateInfo
+			ExpectedError string
+		}{
 			Name:        "skips invalid certificate",
 			FailOnError: true,
 			Certificates: []Certificate{
@@ -28,8 +28,25 @@ func TestProcess(t *testing.T) {
 			},
 			ExpectedInfo:  []CertificateInfo(nil),
 			ExpectedError: "Failed to read certificate file '../tests/certs/jks/broken.jks'. open ../tests/certs/jks/broken.jks: no such file or directory",
-		},
-		{
+		}
+		result, err := Process(tc.Certificates, tc.FailOnError)
+		if tc.ExpectedError != "" {
+			assert.NotNil(t, err)
+			assert.Equal(t, tc.ExpectedError, err.Error())
+		} else {
+			assert.Nil(t, err)
+			validateCertificateInfo(t, tc.ExpectedInfo, result)
+		}
+	})
+
+	t.Run("handles valid certificates", func(t *testing.T) {
+		tc := struct {
+			Name          string
+			Certificates  []Certificate
+			FailOnError   bool
+			ExpectedInfo  []CertificateInfo
+			ExpectedError string
+		}{
 			Name:        "handles valid certificates",
 			FailOnError: true,
 			Certificates: []Certificate{
@@ -62,8 +79,25 @@ func TestProcess(t *testing.T) {
 					Subject: "CN=with_password",
 				},
 			},
-		},
-		{
+		}
+		result, err := Process(tc.Certificates, tc.FailOnError)
+		if tc.ExpectedError != "" {
+			assert.NotNil(t, err)
+			assert.Equal(t, tc.ExpectedError, err.Error())
+		} else {
+			assert.Nil(t, err)
+			validateCertificateInfo(t, tc.ExpectedInfo, result)
+		}
+	})
+
+	t.Run("skips disabled certificate", func(t *testing.T) {
+		tc := struct {
+			Name          string
+			Certificates  []Certificate
+			FailOnError   bool
+			ExpectedInfo  []CertificateInfo
+			ExpectedError string
+		}{
 			Name:        "skips disabled certificate",
 			FailOnError: true,
 			Certificates: []Certificate{
@@ -75,8 +109,25 @@ func TestProcess(t *testing.T) {
 				},
 			},
 			ExpectedInfo: []CertificateInfo(nil),
-		},
-		{
+		}
+		result, err := Process(tc.Certificates, tc.FailOnError)
+		if tc.ExpectedError != "" {
+			assert.NotNil(t, err)
+			assert.Equal(t, tc.ExpectedError, err.Error())
+		} else {
+			assert.Nil(t, err)
+			validateCertificateInfo(t, tc.ExpectedInfo, result)
+		}
+	})
+
+	t.Run("fails on extraction error", func(t *testing.T) {
+		tc := struct {
+			Name          string
+			Certificates  []Certificate
+			FailOnError   bool
+			ExpectedInfo  []CertificateInfo
+			ExpectedError string
+		}{
 			Name:        "fails on extraction error",
 			FailOnError: true,
 			Certificates: []Certificate{
@@ -88,8 +139,25 @@ func TestProcess(t *testing.T) {
 				},
 			},
 			ExpectedError: "Failed to read certificate file 'fail'. open fail: no such file or directory",
-		},
-		{
+		}
+		result, err := Process(tc.Certificates, tc.FailOnError)
+		if tc.ExpectedError != "" {
+			assert.NotNil(t, err)
+			assert.Equal(t, tc.ExpectedError, err.Error())
+		} else {
+			assert.Nil(t, err)
+			validateCertificateInfo(t, tc.ExpectedInfo, result)
+		}
+	})
+
+	t.Run("fails on invalid type (failsOnError = true)", func(t *testing.T) {
+		tc := struct {
+			Name          string
+			Certificates  []Certificate
+			FailOnError   bool
+			ExpectedInfo  []CertificateInfo
+			ExpectedError string
+		}{
 			Name:        "fails on invalid type (failsOnError = true)",
 			FailOnError: true,
 			Certificates: []Certificate{
@@ -102,8 +170,25 @@ func TestProcess(t *testing.T) {
 				},
 			},
 			ExpectedError: "Unknown certificate type 'invalid'",
-		},
-		{
+		}
+		result, err := Process(tc.Certificates, tc.FailOnError)
+		if tc.ExpectedError != "" {
+			assert.NotNil(t, err)
+			assert.Equal(t, tc.ExpectedError, err.Error())
+		} else {
+			assert.Nil(t, err)
+			validateCertificateInfo(t, tc.ExpectedInfo, result)
+		}
+	})
+
+	t.Run("fails on invalid password (failsOnError = true)", func(t *testing.T) {
+		tc := struct {
+			Name          string
+			Certificates  []Certificate
+			FailOnError   bool
+			ExpectedInfo  []CertificateInfo
+			ExpectedError string
+		}{
 			Name:        "fails on invalid password (failsOnError = true)",
 			FailOnError: true,
 			Certificates: []Certificate{
@@ -116,40 +201,16 @@ func TestProcess(t *testing.T) {
 				},
 			},
 			ExpectedError: "Error extracting certificate information: Failed to decode P12 file 'InvalidPasswordCert': pkcs12: decryption password incorrect",
-		},
-	}
-
-	for _, tc := range cases {
-		t.Run(tc.Name, func(t *testing.T) {
-			result, err := Process(tc.Certificates, tc.FailOnError)
-			if tc.ExpectedError != "" {
-				assert.NotNil(t, err)
-				assert.Equal(t, tc.ExpectedError, err.Error())
-			} else {
-				assert.Nil(t, err)
-
-				// Check the length of the returned slice
-				if len(result) != len(tc.ExpectedInfo) {
-					t.Errorf("Expected %d certificates, got %d", len(tc.ExpectedInfo), len(result))
-					return
-				}
-
-				// Check if each certificate in the expected slice exists in the result slice
-				for _, expectedCert := range tc.ExpectedInfo {
-					if !certExistsInSlice(expectedCert, result) {
-						t.Errorf("Expected cert %v not found", expectedCert)
-					}
-				}
-
-				// Also check the opposite: each certificate in the result slice should exist in the expected slice
-				for _, resultCert := range result {
-					if !certExistsInSlice(resultCert, tc.ExpectedInfo) {
-						t.Errorf("Unexpected cert found: %v", resultCert)
-					}
-				}
-			}
-		})
-	}
+		}
+		result, err := Process(tc.Certificates, tc.FailOnError)
+		if tc.ExpectedError != "" {
+			assert.NotNil(t, err)
+			assert.Equal(t, tc.ExpectedError, err.Error())
+		} else {
+			assert.Nil(t, err)
+			validateCertificateInfo(t, tc.ExpectedInfo, result)
+		}
+	})
 
 	t.Run("fails on invalid type (failsOnError = false)", func(t *testing.T) {
 		certs := []Certificate{
@@ -186,5 +247,19 @@ func TestProcess(t *testing.T) {
 		assert.Equal(t, "jks", result[0].Type)
 		assert.Equal(t, "Failed to read certificate file 'fail'. open fail: no such file or directory", result[0].Error)
 	})
+}
 
+func validateCertificateInfo(t *testing.T, expectedInfo, result []CertificateInfo) {
+	// Check the length of the returned slice
+	assert.Equal(t, len(expectedInfo), len(result))
+
+	// Check if each certificate in the expected slice exists in the result slice
+	for _, expectedCert := range expectedInfo {
+		assert.True(t, certExistsInSlice(expectedCert, result), "Expected cert %v not found", expectedCert)
+	}
+
+	// Also check the opposite: each certificate in the result slice should exist in the expected slice
+	for _, resultCert := range result {
+		assert.True(t, certExistsInSlice(resultCert, expectedInfo), "Unexpected cert found: %v", resultCert)
+	}
 }

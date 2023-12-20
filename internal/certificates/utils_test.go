@@ -13,24 +13,19 @@ func TestGetCertificateByName(t *testing.T) {
 		{Name: "TestCert2"},
 	}
 
-	tt := []struct {
-		name string
-		want *Certificate
-		err  string
-	}{
-		{"TestCert1", &certs[0], ""},
-		{"TestCert3", nil, "Certificate 'TestCert3' not found"},
-	}
+	t.Run("TestCert1", func(t *testing.T) {
+		want := &certs[0]
+		got, err := GetCertificateByName("TestCert1", certs)
+		assert.Equal(t, want, got)
+		assert.Nil(t, err)
+	})
 
-	for _, tc := range tt {
-		t.Run(tc.name, func(t *testing.T) {
-			got, err := GetCertificateByName(tc.name, certs)
-			assert.Equal(t, tc.want, got)
-			if err != nil {
-				assert.Equal(t, err.Error(), tc.err)
-			}
-		})
-	}
+	t.Run("TestCert3", func(t *testing.T) {
+		want := (*Certificate)(nil)
+		got, err := GetCertificateByName("TestCert3", certs)
+		assert.Equal(t, want, got)
+		assert.Equal(t, "Certificate 'TestCert3' not found", err.Error())
+	})
 }
 
 func TestHandleFailOnError(t *testing.T) {
@@ -67,48 +62,28 @@ func TestCertExistsInSlice(t *testing.T) {
 	cert2 := CertificateInfo{Name: "cert2", Subject: "subject2", Type: "type2"}
 	cert3 := CertificateInfo{Name: "cert3", Subject: "subject3", Type: "type3"}
 
-	tests := []struct {
-		name      string
-		cert      CertificateInfo
-		certSlice []CertificateInfo
-		expected  bool
-	}{
-		{
-			name:      "Certificate exists in slice",
-			cert:      cert1,
-			certSlice: []CertificateInfo{cert1, cert2},
-			expected:  true,
-		},
-		{
-			name:      "Certificate does not exist in slice",
-			cert:      cert1,
-			certSlice: []CertificateInfo{cert2, cert3},
-			expected:  false,
-		},
-		{
-			name:      "Certificate with similar but not identical properties",
-			cert:      CertificateInfo{Name: "cert1", Subject: "subject2", Type: "type2"},
-			certSlice: []CertificateInfo{cert1, cert2},
-			expected:  false,
-		},
-		{
-			name:      "Slice is empty",
-			cert:      cert1,
-			certSlice: []CertificateInfo{},
-			expected:  false,
-		},
-		{
-			name:      "Slice contains multiple identical certificates",
-			cert:      cert1,
-			certSlice: []CertificateInfo{cert1, cert1},
-			expected:  true,
-		},
-	}
+	t.Run("Certificate exists in slice", func(t *testing.T) {
+		result := certExistsInSlice(cert1, []CertificateInfo{cert1, cert2})
+		assert.True(t, result)
+	})
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			result := certExistsInSlice(tt.cert, tt.certSlice)
-			assert.Equal(t, tt.expected, result)
-		})
-	}
+	t.Run("Certificate does not exist in slice", func(t *testing.T) {
+		result := certExistsInSlice(cert1, []CertificateInfo{cert2, cert3})
+		assert.False(t, result)
+	})
+
+	t.Run("Certificate with similar but not identical properties", func(t *testing.T) {
+		result := certExistsInSlice(CertificateInfo{Name: "cert1", Subject: "subject2", Type: "type2"}, []CertificateInfo{cert1, cert2})
+		assert.False(t, result)
+	})
+
+	t.Run("Slice is empty", func(t *testing.T) {
+		result := certExistsInSlice(cert1, []CertificateInfo{})
+		assert.False(t, result)
+	})
+
+	t.Run("Slice contains multiple identical certificates", func(t *testing.T) {
+		result := certExistsInSlice(cert1, []CertificateInfo{cert1, cert1})
+		assert.True(t, result)
+	})
 }
