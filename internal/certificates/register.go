@@ -30,8 +30,27 @@ var TypeToExtractionFunction = map[string]extractFunction{}
 // The canonical type is used to select the appropriate extraction function from 'TypeToExtractionFunction'.
 var FileExtensionsToType = map[string]string{}
 
-// registerCertificateType registers a certificate type and its corresponding extraction function and
-// the file extensions associated with the certificate type.
+// registerCertificateType registers a certificate type along with its extraction function and associated file extensions.
+//
+// This function adds an entry to the TypeToExtractionFunction map, mapping the provided certType to the
+// corresponding extractFunction. It also updates the FileExtensionsToType map to associate the specified
+// file extensions with the given certificate type. The sorted list of file extensions, FileExtensionsTypesSorted,
+// is updated accordingly.
+//
+// If the certType is already registered or if an extension is already mapped to a different certificate type,
+// the function panics with a corresponding error message.
+//
+// Parameters:
+//   - certType: string
+//     The certificate type to register.
+//   - e: extractFunction
+//     The extraction function associated with the certificate type.
+//   - extensions: ...string
+//     Variable number of file extensions associated with the certificate type.
+//
+// Panics:
+//   - If certType is already registered.
+//   - If an extension is already mapped to a different certificate type.
 func registerCertificateType(certType string, e extractFunction, extensions ...string) {
 	if _, exists := TypeToExtractionFunction[certType]; exists {
 		panic(fmt.Sprintf("Certificate type '%s' is already registered", certType))

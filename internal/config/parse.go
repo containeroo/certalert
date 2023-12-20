@@ -8,10 +8,16 @@ import (
 	"path/filepath"
 	"strings"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/rs/zerolog/log"
 )
 
-// Parse parse the config file and resolves variables
+// Parse parses the configuration settings from the specified sources.
+// It calls helper methods to parse the Pushgateway and Certificates configurations.
+// Additionally, it validates and extracts the hostname and port from the configured listen address.
+//
+// Returns:
+//   - error
+//     An error if there is any issue parsing or validating the configuration settings.
 func (c *Config) Parse() (err error) {
 	if err := c.parsePushgatewayConfig(); err != nil {
 		return err
@@ -21,10 +27,20 @@ func (c *Config) Parse() (err error) {
 		return err
 	}
 
+	_, _, err = utils.ExtractHostAndPort(c.Server.ListenAddress)
+	if err != nil {
+		return fmt.Errorf("Unable to extract hostname and port: %s", err)
+	}
+
 	return nil
 }
 
-// parseCertificatesConfig validates the certificates config
+// parseCertificatesConfig parses the Certificates configuration settings.
+// It validates and processes each certificate entry in the configuration.
+//
+// Returns:
+//   - error
+//     An error if there is any issue parsing or validating the certificate configurations.
 func (c *Config) parseCertificatesConfig() (err error) {
 	// handleFailOnError is a helper function to handle errors during certificate validation
 	handleFailOnError := func(cert certificates.Certificate, idx int, errMsg string) error {
@@ -32,13 +48,13 @@ func (c *Config) parseCertificatesConfig() (err error) {
 			c.Certs[idx] = cert
 			return fmt.Errorf(errMsg)
 		}
-		log.Warn(errMsg)
+		log.Warn().Msg(errMsg)
 		return nil
 	}
 
 	for idx, cert := range c.Certs {
 		if cert.Enabled != nil && !*cert.Enabled {
-			log.Debugf("Skip certificate '%s' because is disabled", cert.Name)
+			log.Debug().Msgf("Skip certificate '%s' because is disabled", cert.Name)
 			continue
 		}
 
@@ -101,14 +117,19 @@ func (c *Config) parseCertificatesConfig() (err error) {
 	return nil
 }
 
-// parsePushgatewayConfig validates the pushgateway config
+// parsePushgatewayConfig parses the Pushgateway configuration settings.
+// It validates and resolves variables in the pushgateway configuration.
+//
+// Returns:
+//   - error
+//     An error if there is any issue parsing or validating the pushgateway configuration.
 func (c *Config) parsePushgatewayConfig() (err error) {
 	// handleFailOnError is a helper function to handle errors during pushgateway validation
 	handleFailOnError := func(errMsg string) error {
 		if c.FailOnError {
 			return fmt.Errorf(errMsg)
 		}
-		log.Warn(errMsg)
+		log.Warn().Msg(errMsg)
 		return nil
 	}
 	if utils.HasStructField(c.Pushgateway, "Address") {

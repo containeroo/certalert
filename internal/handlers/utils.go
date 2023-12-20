@@ -3,18 +3,40 @@ package handlers
 import (
 	"bytes"
 	"certalert/internal/certificates"
+	"certalert/internal/server"
 	"fmt"
 	"strings"
 	"text/template"
 	"time"
 )
 
-// remainingDuration returns the remaining duration from the given epoch time
+// remainingDuration calculates the remaining duration from the given epoch time.
+//
+// Parameters:
+//   - epoch: int64
+//     The epoch time to calculate the remaining duration from.
+//
+// Returns:
+//   - time.Duration
+//     The remaining duration.
 var remainingDuration = func(epoch int64) time.Duration {
 	return time.Until(time.Unix(epoch, 0))
 }
 
-// getRowColor returns the color of the row based on the expiry date
+// getRowColor returns the color code for a row based on the expiry date.
+//
+// Parameters:
+//   - epoch: int64
+//     The epoch time representing the expiry date.
+//
+// Returns:
+//   - string
+//     The color code for the row.
+//     - "red-row" for expired certificates.
+//     - "orange-row" for certificates expiring in the next 30 days.
+//     - "yellow-row" for certificates expiring in the next 60 days.
+//     - An empty string for certificates with more than 60 days until expiration.
+
 func getRowColor(epoch int64) string {
 	if epoch == 0 {
 		return ""
@@ -45,7 +67,20 @@ func getRowColor(epoch int64) string {
 	return ""
 }
 
-// epochToHumanReadable converts the epoch time to human readable format
+// epochToHumanReadable converts the epoch time to a human-readable duration string.
+//
+// Parameters:
+//   - epoch: int64
+//     The epoch time to convert.
+//
+// Returns:
+//   - string
+//     A human-readable duration string representing the time until expiration or "now" if expired.
+//     The format is a comma-separated list of days, hours, minutes, and seconds.
+//     Examples:
+//   - "2 days, 4 hours"
+//   - "1 hour, 30 minutes"
+//   - "now" for expired certificates.
 func epochToHumanReadable(epoch int64) string {
 	if epoch == 0 {
 		return "-"
@@ -86,7 +121,17 @@ func epochToHumanReadable(epoch int64) string {
 	return fmt.Sprint(strings.Join(parts, ", "))
 }
 
-// formatTime formats the given time with the given format
+// formatTime formats the given time with the specified format.
+//
+// Parameters:
+//   - t: time.Time
+//     The time to format.
+//   - format: string
+//     The format string to use for formatting the time.
+//
+// Returns:
+//   - string
+//     The formatted time string or "-" if the time is zero or not set.
 func formatTime(t time.Time, format string) string {
 	// check if the time is zero or time is not set
 	if t.IsZero() || t.Unix() == 0 {
@@ -95,7 +140,21 @@ func formatTime(t time.Time, format string) string {
 	return t.Format(format)
 }
 
-// renderTemplate renders the given template with the given data
+// renderTemplate renders the specified template with the provided data using text/template package.
+//
+// Parameters:
+//   - baseTplStr: string
+//     The content of the base template.
+//   - tplStr: string
+//     The content of the specific template to be rendered.
+//   - data: interface{}
+//     The data to be passed to the template for rendering.
+//
+// Returns:
+//   - string
+//     The rendered template as a string.
+//   - error
+//     An error if rendering the template fails.
 func renderTemplate(baseTplStr string, tplStr string, data interface{}) (string, error) {
 	funcMap := template.FuncMap{
 		"formatTime":    formatTime,
@@ -123,11 +182,13 @@ func renderTemplate(baseTplStr string, tplStr string, data interface{}) (string,
 	return buf.String(), nil
 }
 
-// TemplateData is the data that is passed to the template
+// TemplateData represents the data structure passed to the HTML templates.
+// It includes information such as CSS and JavaScript resources, a list of server endpoints,
+// and a slice of certificate information for rendering.
 type TemplateData struct {
 	CSS       string
 	JS        string
-	Endpoints []Endpoint
+	Endpoints []server.Handler
 	CertInfos []certificates.CertificateInfo
 }
 

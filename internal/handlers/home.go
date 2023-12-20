@@ -1,61 +1,30 @@
 package handlers
 
 import (
+	"certalert/internal/server"
 	"net/http"
 )
 
 func init() {
-	Register("/", Home, "GET", "POST")
+	server.Register("/", "Shows this page (the endpoints)", Home, "GET", "POST")
 }
 
-// Endpoint is a struct that represents an endpoint
-type Endpoint struct {
-	Path        string   `json:"path"`
-	Methods     []string `json:"method"`
-	Description string   `json:"description"`
-}
-
-// Endpoints is a list of all the endpoints
-var Endpoints = []Endpoint{
-	{
-		Path:        "/",
-		Methods:     []string{"GET", "POST"},
-		Description: "Shows this page (the endpoints)",
-	},
-	{
-		Path:        "/certificates",
-		Methods:     []string{"GET", "POST"},
-		Description: "Fetches and displays all the certificates in a tabular format",
-	},
-	{
-		Path:        "/-/reload",
-		Methods:     []string{"GET", "POST"},
-		Description: "Reloads the configuration",
-	},
-	{
-		Path:        "/config",
-		Methods:     []string{"GET", "POST"},
-		Description: "Provides the currently active configuration file. Plaintext passwords are redacted",
-	},
-	{
-		Path:        "/metrics",
-		Methods:     []string{"GET", "POST"},
-		Description: "Delivers metrics for Prometheus to scrape",
-	},
-	{
-		Path:        "/healthz",
-		Methods:     []string{"GET", "POST"},
-		Description: "Returns the health of the application",
-	},
-}
-
-// Home is the handler for the / route
-// It displays all the endpoints
+// Home is an HTTP handler for the / route.
+//
+// This handler displays all the available endpoints in an HTML format. It sets
+// the "Content-Type" header to "text/html" and renders the HTML template with
+// information about the registered endpoints.
+//
+// Parameters:
+//   - w: http.ResponseWriter
+//     The HTTP response writer.
+//   - r: *http.Request
+//     The HTTP request.
 func Home(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
 
 	tplData := TemplateData{
-		Endpoints: Endpoints,
+		Endpoints: server.Handlers,
 		CSS:       CSS,
 	}
 	tpl, err := renderTemplate(tplBase, tplEndpoints, tplData)

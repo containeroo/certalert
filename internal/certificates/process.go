@@ -4,20 +4,42 @@ import (
 	"fmt"
 	"os"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/rs/zerolog/log"
 )
 
-// Process extracts certificate information from the certificates and updates the Prometheus metrics.
+// Process processes a list of certificates and extracts certificate information.
+//
+// This function takes a slice of Certificate structs, indicating the certificates to process,
+// and a flag indicating whether to fail on error. It returns a slice of CertificateInfo containing
+// information about each certificate.
+//
+// The function iterates through each certificate, checking for disabled status and logging
+// processing details. It reads the raw certificate data from the specified file, infers the type
+// if not explicitly specified, and calls the corresponding extraction function. The extracted
+// certificate information is then added to the result list.
+//
+// Parameters:
+//   - certificates: []Certificate
+//     A slice of Certificate structs representing the certificates to process.
+//   - failOnError: bool
+//     A flag indicating whether to fail immediately on encountering an error.
+//
+// Returns:
+//   - []CertificateInfo
+//     A slice of CertificateInfo structs containing information about each processed certificate.
+//   - error
+//     An error, if any, encountered during the processing. If failOnError is false, the function may
+//     return a non-nil error along with the partial list of CertificateInfo.
 func Process(certificates []Certificate, failOnError bool) (certificatesInfo []CertificateInfo, err error) {
 	var certInfoList []CertificateInfo
 
 	for _, cert := range certificates {
 		if cert.Enabled != nil && !*cert.Enabled {
-			log.Debugf("Skip certificate '%s' as it is disabled", cert.Name)
+			log.Debug().Msgf("Skip certificate '%s' as it is disabled", cert.Name)
 			continue
 		}
 
-		log.Debugf("Processing certificate '%s'", cert.Name)
+		log.Debug().Msgf("Processing certificate '%s'", cert.Name)
 
 		certData, err := os.ReadFile(cert.Path)
 		if err != nil {

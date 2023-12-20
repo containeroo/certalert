@@ -21,12 +21,10 @@ import (
 	"certalert/internal/utils"
 
 	"github.com/fsnotify/fsnotify"
-	log "github.com/sirupsen/logrus"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
-
-var listenAddress string
 
 // serveCmd represents the serve command
 var serveCmd = &cobra.Command{
@@ -53,31 +51,29 @@ Endpoints:
 
 `,
 	Run: func(cmd *cobra.Command, args []string) {
-
 		// Watch for config changes
 		viper.OnConfigChange(func(e fsnotify.Event) {
-			log.Infof("Config file changed: %s", e.Name)
+			log.Info().Msgf("Config file changed: %s", e.Name)
 
 			if err := config.App.Read(viper.ConfigFileUsed()); err != nil {
-				log.Fatalf("Error reading config file: %v", err)
+				log.Fatal().Msgf("Error reading config file: %v", err)
 			}
 
 			if err := utils.DeepCopy(config.App, &config.AppCopy); err != nil {
-				log.Fatalf("Unable to copy config: %s", err)
+				log.Fatal().Msgf("Unable to copy config: %s", err)
 			}
 
 			if err := config.App.Parse(); err != nil {
-				log.Fatalf("Unable to parse config: %s", err)
+				log.Fatal().Msgf("Unable to parse config: %s", err)
 			}
 
 			if err := config.RedactConfig(&config.AppCopy); err != nil {
-				log.Fatalf("Unable to redact config: %s", err)
+				log.Fatal().Msgf("Unable to redact config: %s", err)
 			}
-
 		})
 
 		if config.App.AutoReloadConfig {
-			log.Debug("Auto reloading configuration is enabled")
+			log.Debug().Msg("Auto reloading configuration is enabled")
 			viper.WatchConfig()
 		}
 
@@ -85,29 +81,24 @@ Endpoints:
 
 		// this is only necessary if starting the web server
 		if err := utils.DeepCopy(config.App, &config.AppCopy); err != nil {
-			log.Fatalf("Unable to copy config: %s", err)
+			log.Fatal().Msgf("Unable to copy config: %s", err)
 		}
 
 		if err := config.App.Parse(); err != nil {
-			log.Fatalf("Error parsing config file: %v", err)
+			log.Fatal().Msgf("Error parsing config file: %v", err)
 		}
 
 		if err := config.RedactConfig(&config.AppCopy); err != nil {
-			log.Fatalf("Unable to redact config: %s", err)
+			log.Fatal().Msgf("Unable to redact config: %s", err)
 		}
 
-		hostname, port, err := utils.ExtractHostAndPort(listenAddress)
-		if err != nil {
-			log.Fatalf("Unable to extract hostname and port: %s", err)
-		}
-
-		server.Run(hostname, port)
+		server.Run(config.App.Server.ListenAddress)
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(serveCmd)
 
-	serveCmd.Flags().StringVar(&listenAddress, "listen-address", ":8080", "The address to listen on for HTTP requests.")
+	serveCmd.Flags().StringVar(&config.App.Server.ListenAddress, "listen-address", ":8080", "The address to listen on for HTTP requests.")
 	serveCmd.Flags().BoolVar(&config.App.AutoReloadConfig, "auto-reload-config", true, "Detects config changes and reloads the configuration file.")
 }

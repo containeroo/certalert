@@ -12,7 +12,21 @@ import (
 	"github.com/prometheus/client_golang/prometheus/push"
 )
 
-// createPusher creates a configured pusher
+// createPusher creates a configured Pusher for pushing metrics to the specified Pushgateway.
+//
+// Parameters:
+//   - address: string
+//     The address of the Pushgateway.
+//   - job: string
+//     The job label to associate with the pushed metrics.
+//   - auth: config.Auth
+//     The authentication configuration for the Pusher.
+//   - insecureSkipVerify: bool
+//     Whether to skip TLS certificate verification when communicating with the Pushgateway.
+//
+// Returns:
+//   - *push.Pusher
+//     A configured Pusher for pushing metrics.
 func createPusher(address, job string, auth config.Auth, insecureSkipVerify bool) *push.Pusher {
 	var httpClient *http.Client
 	if insecureSkipVerify {
@@ -37,7 +51,17 @@ func createPusher(address, job string, auth config.Auth, insecureSkipVerify bool
 	return pusher
 }
 
-// pushToGateway pushes the certificate information to the pushgateway
+// pushToGateway pushes the certificate information to the Pushgateway.
+//
+// Parameters:
+//   - pusher: *push.Pusher
+//     The configured Pusher to use for pushing metrics.
+//   - cert: certificates.CertificateInfo
+//     The certificate information to push to the Pushgateway.
+//
+// Returns:
+//   - error
+//     An error if the push to the Pushgateway fails.
 func pushToGateway(pusher *push.Pusher, cert certificates.CertificateInfo) error {
 	gauge := metrics.CertificateEpoch.WithLabelValues(cert.Name, cert.Type, cert.Subject)
 	gauge.Set(float64(cert.Epoch))

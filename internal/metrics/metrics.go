@@ -7,6 +7,7 @@ import (
 var PromMetrics Metrics
 
 var (
+	// New metric to track certificate expiration date as epoch
 	CertificateEpoch = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name: "certalert_certificate_epoch_seconds",
@@ -35,7 +36,12 @@ func init() {
 	PromMetrics = *NewMetrics()
 }
 
-// NewMetrics registers all prometheus metrics
+// NewMetrics creates a new instance of the Metrics struct, initializing a Prometheus registry,
+// and registering global metrics like CertificateEpoch and CertificateExtractionStatus.
+//
+// Returns:
+//   - *Metrics
+//     A pointer to the newly created Metrics instance.
 func NewMetrics() *Metrics {
 	reg := prometheus.NewRegistry()
 	reg.Register(CertificateEpoch)            // Register the global metric

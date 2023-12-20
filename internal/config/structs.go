@@ -23,8 +23,7 @@ type Config struct {
 
 // Server represents the server config
 type Server struct {
-	Hostname string `mapstructure:"hostname,omitempty" yaml:"hostname,omitempty"`
-	Port     int    `mapstructure:"port,omitempty" yaml:"port,omitempty"`
+	ListenAddress string `mapstructure:"listenAddress,omitempty" yaml:"listenAddress,omitempty"`
 }
 
 // Pushgateway represents the pushgateway config

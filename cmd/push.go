@@ -20,8 +20,9 @@ import (
 	"certalert/internal/config"
 	"certalert/internal/pushgateway"
 	"fmt"
-	"log"
 	"os"
+
+	"github.com/rs/zerolog/log"
 
 	"github.com/spf13/cobra"
 )
@@ -50,11 +51,10 @@ Examples:
 `,
 
 	Run: func(cmd *cobra.Command, args []string) {
-
 		// Parse config file in subcommand, because it is not needed for all subcommands
 		// or there is a special order in which the flags should be parsed
 		if err := config.App.Parse(); err != nil {
-			log.Fatalf("Error parsing config file: %v", err)
+			log.Fatal().Msgf("Error parsing config file: %v", err)
 		}
 
 		if pushAll {
@@ -66,7 +66,7 @@ Examples:
 				config.App.Certs,
 				config.App.Pushgateway.InsecureSkipVerify,
 				config.App.FailOnError); err != nil {
-				log.Fatal(err)
+				log.Fatal().Err(err)
 			}
 			return
 		}
@@ -81,7 +81,7 @@ Examples:
 		for _, arg := range args {
 			certificate, err := certificates.GetCertificateByName(arg, config.App.Certs)
 			if err != nil {
-				log.Panic(err)
+				log.Panic().Err(err)
 			}
 			if err := pushgateway.Send(
 				config.App.Pushgateway.Address,
@@ -90,7 +90,7 @@ Examples:
 				[]certificates.Certificate{*certificate},
 				config.App.Pushgateway.InsecureSkipVerify,
 				config.App.FailOnError); err != nil {
-				log.Panic(err)
+				log.Panic().Err(err)
 			}
 		}
 	},

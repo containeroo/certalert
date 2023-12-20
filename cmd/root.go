@@ -18,12 +18,14 @@ package cmd
 import (
 	"certalert/internal/certificates"
 	"certalert/internal/config"
+	"certalert/internal/utils"
 	"fmt"
 	"os"
+	"time"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
-
 	"github.com/spf13/viper"
 )
 
@@ -58,12 +60,26 @@ var rootCmd = &cobra.Command{
 			os.Exit(0)
 		}
 
+		// Configure zerolog
+		zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
+		output := zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.RFC3339}
+		log.Logger = zerolog.New(output).With().Timestamp().Logger()
+
+		// Retrieve debug and trace flags from environment variables if not explicitly set
+		if !verbose || !silent {
+			var err error
+			if verbose, silent, err = utils.GetDebugAndTrace(); err != nil {
+				log.Fatal().Msgf("Failed to retrieve debug and trace flags. %s", err)
+			}
+		}
+
+		// Set the log level
 		if verbose {
-			log.SetLevel(log.DebugLevel)
-			log.Debugf("Verbose output enabled")
+			zerolog.SetGlobalLevel(zerolog.DebugLevel)
+			log.Debug().Msgf("Verbose output enabled")
 		} else if silent {
-			log.SetLevel(log.ErrorLevel)
-			log.Debugf("Silent output enabled")
+			zerolog.SetGlobalLevel(zerolog.TraceLevel)
+			log.Debug().Msgf("Silent output enabled")
 		}
 	},
 	Run: func(cmd *cobra.Command, args []string) {
@@ -71,7 +87,7 @@ var rootCmd = &cobra.Command{
 
 		// Parse config to see if there are any errors
 		if err := config.App.Parse(); err != nil {
-			log.Fatalf("Error parsing config file: %v", err)
+			log.Fatal().Msgf("Error parsing config file: %v", err)
 		}
 
 		if printVersion {
@@ -121,6 +137,6 @@ func initConfig() {
 	viper.AutomaticEnv() // read in environment variables that match
 
 	if err := config.App.Read(viper.ConfigFileUsed()); err != nil {
-		log.Fatalf("Error reading config file: %v", err)
+		log.Fatal().Msgf("Error reading config file: %v", err)
 	}
 }

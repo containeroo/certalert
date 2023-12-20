@@ -5,7 +5,8 @@ import (
 	"encoding/pem"
 	"fmt"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/rs/zerolog/log"
+
 	"go.mozilla.org/pkcs7"
 )
 
@@ -13,7 +14,31 @@ func init() {
 	registerCertificateType("p7", ExtractP7CertificatesInfo, "p7", "p7b", "p7c")
 }
 
-// ExtractP7CertificatesInfo extracts certificate information from a P7 file.
+// ExtractP7CertificatesInfo extracts certificate information from a PKCS#7 (P7B) file.
+//
+// This function takes a Certificate struct, the raw certificate data as a byte slice, and a
+// flag indicating whether to fail on error. It returns a slice of CertificateInfo containing
+// information about each certificate found in the P7B file.
+//
+// The function parses all PEM blocks from the input certificateData, filters by type, and
+// extracts certificate information. The supported types are "PKCS7" and "CERTIFICATE". The
+// function logs information about each certificate, including its subject, expiration time,
+// and type.
+//
+// Parameters:
+//   - cert: Certificate
+//     A Certificate struct representing the P7B file, including its name and other details.
+//   - certificateData: []byte
+//     The raw binary data of the P7B file.
+//   - failOnError: bool
+//     A flag indicating whether to fail immediately on encountering an error.
+//
+// Returns:
+//   - []CertificateInfo
+//     A slice of CertificateInfo structs containing information about each certificate in the P7B file.
+//   - error
+//     An error, if any, encountered during the extraction process. If failOnError is false, the
+//     function may return a non-nil error along with the partial list of CertificateInfo.
 func ExtractP7CertificatesInfo(cert Certificate, certificateData []byte, failOnError bool) ([]CertificateInfo, error) {
 	var certificateInfoList []CertificateInfo
 
@@ -45,7 +70,7 @@ func ExtractP7CertificatesInfo(cert Certificate, certificateData []byte, failOnE
 				}
 				certificateInfoList = append(certificateInfoList, certificateInfo)
 
-				log.Debugf("Certificate '%s' expires on %s", subject, certificateInfo.ExpiryAsTime())
+				log.Debug().Msgf("Certificate '%s' expires on %s", subject, certificateInfo.ExpiryAsTime())
 			}
 		case "CERTIFICATE":
 			certificate, err := x509.ParseCertificate(block.Bytes)
@@ -65,9 +90,9 @@ func ExtractP7CertificatesInfo(cert Certificate, certificateData []byte, failOnE
 			}
 			certificateInfoList = append(certificateInfoList, certificateInfo)
 
-			log.Debugf("Certificate '%s' expires on %s", subject, certificateInfo.ExpiryAsTime())
+			log.Debug().Msgf("Certificate '%s' expires on %s", subject, certificateInfo.ExpiryAsTime())
 		default:
-			log.Debugf("Skip PEM block of type '%s'", block.Type)
+			log.Debug().Msgf("Skip PEM block of type '%s'", block.Type)
 		}
 
 		certificateData = rest // Move to the next PEM block

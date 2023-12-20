@@ -10,7 +10,17 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// convertToYaml converts the output to yaml
+// convertToYaml converts the provided data to YAML format.
+//
+// Parameters:
+//   - output: interface{}
+//     The data to convert to YAML format.
+//
+// Returns:
+//   - string
+//     The YAML-formatted output as a string.
+//   - error
+//     An error if the conversion fails.
 func convertToYaml(output interface{}) (string, error) {
 	var b bytes.Buffer
 	yamlEncoder := yaml.NewEncoder(&b)
@@ -21,7 +31,17 @@ func convertToYaml(output interface{}) (string, error) {
 	return b.String(), nil
 }
 
-// convertToJson converts the output to json
+// convertToJson converts the provided data to JSON format.
+//
+// Parameters:
+//   - output: interface{}
+//     The data to convert to JSON format.
+//
+// Returns:
+//   - string
+//     The JSON-formatted output as a string.
+//   - error
+//     An error if the conversion fails.
 func convertToJson(output interface{}) (string, error) {
 	var b bytes.Buffer
 	jsonEncoder := json.NewEncoder(&b)
@@ -32,7 +52,17 @@ func convertToJson(output interface{}) (string, error) {
 	return b.String(), nil
 }
 
-// ConvertToTable converts the provided data to a table format.
+// convertToTable converts the provided data to a table format.
+//
+// Parameters:
+//   - data: interface{}
+//     The data to convert to a table format.
+//
+// Returns:
+//   - string
+//     The table-formatted output as a string.
+//   - error
+//     An error if the conversion fails.
 func convertToTable(data interface{}) (string, error) {
 	var output bytes.Buffer
 	table := tablewriter.NewWriter(&output)

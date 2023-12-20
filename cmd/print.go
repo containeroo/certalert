@@ -24,14 +24,16 @@ import (
 	"os"
 	"strings"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/rs/zerolog/log"
 
 	"github.com/spf13/cobra"
 )
 
-var printAll bool
-var outputFormat string
-var supportedOutputFormats = []string{"text", "json", "yaml"}
+var (
+	printAll               bool
+	outputFormat           string
+	supportedOutputFormats = []string{"text", "json", "yaml"}
+)
 
 // printCmd represents the print command
 var printCmd = &cobra.Command{
@@ -62,14 +64,14 @@ Examples:
 		// Parse config file in subcommand, because it is not needed for all subcommands
 		// or there is a special order in which the flags should be parsed
 		if err := config.App.Parse(); err != nil {
-			log.Fatalf("Error parsing config file: %v", err)
+			log.Fatal().Msgf("Error parsing config file: %v", err)
 		}
 
 		if printAll {
 			// Handle --all flag
 			output, err := print.ConvertCertificatesToFormat(outputFormat, config.App.Certs, config.App.FailOnError)
 			if err != nil {
-				log.Fatal(err)
+				log.Fatal().Err(err)
 			}
 			fmt.Println(output)
 			return
@@ -87,7 +89,7 @@ Examples:
 		for _, arg := range args {
 			certificate, err := certificates.GetCertificateByName(arg, config.App.Certs)
 			if err != nil {
-				log.Fatal(err)
+				log.Fatal().Err(err)
 			}
 			certs = append(certs, *certificate)
 		}
@@ -95,7 +97,7 @@ Examples:
 		// Print the certificates
 		output, err := print.ConvertCertificatesToFormat(outputFormat, certs, config.App.FailOnError)
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal().Err(err)
 		}
 		fmt.Println(output)
 	},

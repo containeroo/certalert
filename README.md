@@ -19,8 +19,8 @@ The primary function is to utilize the `serve` command to initiate a web server 
 ## Global Flags
 
 - `-c, --config`: Sets the path to the configuration file (Default: `$HOME/.certalert.yaml`).
-- `-v, --verbose`: Activates verbose output for detailed logging.
-- `-s, --silent`: Enables silent mode, displaying only errors.
+- `-v, --verbose`: Activates verbose output for detailed logging. Can also be set as environment variable `CERTALERT_VERBOSE`.
+- `-s, --silent`: Enables silent mode, displaying only errors. Can also be set as environment variable `CERTALERT_SILENT`.
 - `-f, --fail-on-error`: Exits `certalert` immediately upon encountering an error.
 - `-V, --version`: Print the current version and exit.
 

@@ -5,15 +5,35 @@ import (
 	"crypto/x509"
 	"fmt"
 
+	"github.com/rs/zerolog/log"
+
 	"github.com/pavlo-v-chernykh/keystore-go/v4"
-	log "github.com/sirupsen/logrus"
 )
 
 func init() {
 	registerCertificateType("jks", ExtractJKSCertificatesInfo, "jks")
 }
 
-// ExtractJKSCertificatesInfo extracts certificate information from a JKS file.
+// ExtractJKSCertificatesInfo extracts certificate information from a Java KeyStore (JKS) file.
+//
+// This function takes a Certificate struct, the raw certificate data as a byte slice, and a
+// flag indicating whether to fail on error. It returns a slice of CertificateInfo containing
+// information about each certificate found in the JKS file.
+//
+// Parameters:
+//   - cert: Certificate
+//     A Certificate struct representing the JKS file, including its name, password, etc.
+//   - certificateData: []byte
+//     The raw binary data of the JKS file.
+//   - failOnError: bool
+//     A flag indicating whether to fail immediately on encountering an error.
+//
+// Returns:
+//   - []CertificateInfo
+//     A slice of CertificateInfo structs containing information about each certificate in the JKS file.
+//   - error
+//     An error, if any, encountered during the extraction process. If failOnError is false, the
+//     function may return a non-nil error along with the partial list of CertificateInfo.
 func ExtractJKSCertificatesInfo(cert Certificate, certificateData []byte, failOnError bool) ([]CertificateInfo, error) {
 	var certificateInfoList []CertificateInfo
 
@@ -68,7 +88,7 @@ func ExtractJKSCertificatesInfo(cert Certificate, certificateData []byte, failOn
 			}
 			certificateInfoList = append(certificateInfoList, certificateInfo)
 
-			log.Debugf("Certificate '%s' expires on %s", subject, certificateInfo.ExpiryAsTime())
+			log.Debug().Msgf("Certificate '%s' expires on %s", subject, certificateInfo.ExpiryAsTime())
 		}
 	}
 
