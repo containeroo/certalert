@@ -65,8 +65,10 @@ var rootCmd = &cobra.Command{
 		output := zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.RFC3339}
 		log.Logger = zerolog.New(output).With().Timestamp().Logger()
 
+		fmt.Println("Verbose: ", verbose)
+
 		// Retrieve debug and trace flags from environment variables if not explicitly set
-		if !verbose || !silent {
+		if !verbose && !silent {
 			var err error
 			if verbose, silent, err = utils.GetDebugAndTrace(); err != nil {
 				log.Fatal().Msgf("Failed to retrieve debug and trace flags. %s", err)
