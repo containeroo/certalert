@@ -17,6 +17,7 @@ package cmd
 
 import (
 	"certalert/internal/config"
+	"certalert/internal/handlers"
 	"certalert/internal/server"
 	"certalert/internal/utils"
 
@@ -92,6 +93,8 @@ Endpoints:
 			log.Fatal().Msgf("Unable to redact config: %s", err)
 		}
 
+		// Collect handlers and start the server
+		handlers.Collect()
 		server.Run(config.App.Server.ListenAddress)
 	},
 }

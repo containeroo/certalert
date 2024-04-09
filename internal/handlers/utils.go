@@ -10,6 +10,14 @@ import (
 	"time"
 )
 
+// Collect gathers and initializes the HTTP handlers.
+//
+// This function triggers the initialization functions from other files,
+// populating the Handlers slice in the server package with the registered
+// routes and their corresponding handler functions. It should be called
+// before starting the HTTP server to ensure all handlers are registered.
+func Collect() {}
+
 // remainingDuration calculates the remaining duration from the given epoch time.
 //
 // Parameters:
