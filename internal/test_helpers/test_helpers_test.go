@@ -1,7 +1,6 @@
 package test_helpers
 
 import (
-	"io/ioutil"
 	"os"
 	"testing"
 )
@@ -29,7 +28,7 @@ func TestCreateTempFile(t *testing.T) {
 func TestReadFile(t *testing.T) {
 	t.Run("successful file read", func(t *testing.T) {
 		content := "hello, world"
-		tmpfile, err := ioutil.TempFile("", "example.*.txt")
+		tmpfile, err := os.CreateTemp("", "example.*.txt")
 		if err != nil {
 			t.Fatalf("Failed to create temp file: %v", err)
 		}

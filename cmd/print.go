@@ -19,9 +19,9 @@ import (
 	"certalert/internal/certificates"
 	"certalert/internal/config"
 	"certalert/internal/print"
-	"certalert/internal/utils"
 	"fmt"
 	"os"
+	"slices"
 	"strings"
 
 	"github.com/rs/zerolog/log"
@@ -55,7 +55,7 @@ Examples:
 	certalert print my-cert --output yaml
 	`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if !utils.IsInList(outputFormat, supportedOutputFormats) {
+		if !slices.Contains(supportedOutputFormats, outputFormat) {
 			fmt.Printf("Unsupported output format: %s. Supported formats are: %s\n", outputFormat, strings.Join(supportedOutputFormats, ", "))
 			cmd.Help()
 			os.Exit(1)

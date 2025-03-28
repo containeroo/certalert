@@ -59,6 +59,6 @@ func TestReadConfig(t *testing.T) {
 		cfg := &Config{}
 		err = cfg.Read(filePath.Name())
 		assert.Error(t, err) // We expect an error because the file has incorrect content
-		assert.Contains(t, err.Error(), "Failed to unmarshal config file: 1 error(s) decoding:\n\n* cannot parse 'failOnError' as bool: strconv.ParseBool: parsing \"not_an_integer\": invalid syntax")
+		assert.Contains(t, err.Error(), "Failed to unmarshal config file: decoding failed due to the following error(s):\n\ncannot parse 'failOnError' as bool: strconv.ParseBool: parsing \"not_an_integer\": invalid syntax")
 	})
 }

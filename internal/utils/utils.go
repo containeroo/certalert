@@ -69,39 +69,19 @@ func BoolPtr(b bool) *bool {
 	return &b
 }
 
-// IsInList checks if a given value is present in a list of strings.
-//
-// Parameters:
-//   - value: string
-//     The value to check for in the list.
-//   - list: []string
-//     The list of strings to search for the specified value.
-//
-// Returns:
-//   - bool
-//     True if the value is found in the list, false otherwise.
-func IsInList(value string, list []string) bool {
-	for _, v := range list {
-		if value == v {
-			return true
-		}
-	}
-	return false
-}
-
-// ExtractMapKeys is a utility function that takes an interface{} argument,
+// ExtractMapKeys is a utility function that takes an any argument,
 // checks if it's a map, and then returns the keys of that map as a slice of strings.
 // If the argument is not a map or the map's keys are not strings, it returns nil.
 //
 // Parameters:
-//   - m: interface{}
+//   - m: any
 //     The input value, which is expected to be a map.
 //
 // Returns:
 //   - []string
 //     A slice of strings representing the keys of the map. If the input is not a map
 //     or if the map's keys are not strings, it returns nil.
-func ExtractMapKeys(m interface{}) []string {
+func ExtractMapKeys(m any) []string {
 	v := reflect.ValueOf(m) // Get the value of m
 
 	// Check if the value is of type 'Map'
@@ -194,15 +174,15 @@ func IsValidURL(str string) bool {
 // DeepCopy creates a deep copy of the source object and assigns it to the destination.
 //
 // Parameters:
-//   - src: interface{}
+//   - src: any
 //     The source object to be copied.
-//   - dest: interface{}
+//   - dest: any
 //     The destination object to which the copied value is assigned.
 //
 // Returns:
 //   - error
 //     An error if there was an issue during the copying process.
-func DeepCopy(src, dest interface{}) error {
+func DeepCopy(src, dest any) error {
 	copied, err := copystructure.Copy(src)
 	if err != nil {
 		return err
@@ -215,7 +195,7 @@ func DeepCopy(src, dest interface{}) error {
 // HasStructField checks if a struct has a field with the specified key.
 //
 // Parameters:
-//   - s: interface{}
+//   - s: any
 //     The struct object to be checked for the presence of the field.
 //   - key: string
 //     The key representing the field, which may include nested fields separated by dots.
@@ -223,8 +203,8 @@ func DeepCopy(src, dest interface{}) error {
 // Returns:
 //   - bool
 //     True if the field with the given key exists, false otherwise.
-func HasStructField(s interface{}, key string) bool {
-	v := reflect.ValueOf(s) // Obtain the Value of the passed interface{}
+func HasStructField(s any, key string) bool {
+	v := reflect.ValueOf(s) // Obtain the Value of the passed any
 
 	keys := strings.Split(key, ".") // Split the key string by dots to handle nested keys
 

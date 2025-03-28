@@ -1,6 +1,7 @@
 package certificates
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/rs/zerolog/log"
@@ -80,7 +81,7 @@ func certExistsInSlice(cert CertificateInfo, slice []CertificateInfo) bool {
 //     If failOnError is true, returns an error with the provided error message (errMsg); otherwise, returns nil.
 func handleFailOnError(certInfoList *[]CertificateInfo, certName, certType, errMsg string, failOnError bool) error {
 	if failOnError {
-		return fmt.Errorf(errMsg)
+		return errors.New(errMsg)
 	}
 	log.Warn().Msgf("Failed to extract certificate information: %v", errMsg)
 	*certInfoList = append(*certInfoList, CertificateInfo{

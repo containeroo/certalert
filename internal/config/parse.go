@@ -4,8 +4,10 @@ import (
 	"certalert/internal/certificates"
 	"certalert/internal/resolve"
 	"certalert/internal/utils"
+	"errors"
 	"fmt"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"github.com/rs/zerolog/log"
@@ -46,7 +48,7 @@ func (c *Config) parseCertificatesConfig() (err error) {
 	handleFailOnError := func(cert certificates.Certificate, idx int, errMsg string) error {
 		if c.FailOnError {
 			c.Certs[idx] = cert
-			return fmt.Errorf(errMsg)
+			return errors.New(errMsg)
 		}
 		log.Warn().Msg(errMsg)
 		return nil
@@ -97,7 +99,7 @@ func (c *Config) parseCertificatesConfig() (err error) {
 		}
 
 		// The Type can be specified in the config file, but it must be one of the supported types
-		if !utils.IsInList(cert.Type, certificates.FileExtensionsTypesSorted) {
+		if !slices.Contains(certificates.FileExtensionsTypesSorted, cert.Type) {
 			if err := handleFailOnError(cert, idx, fmt.Sprintf("Certificate '%s' has an invalid type '%s'. Must be one of %s.", cert.Name, cert.Type, certificates.FileExtensionsTypesSorted)); err != nil {
 				return err
 			}
@@ -127,7 +129,7 @@ func (c *Config) parsePushgatewayConfig() (err error) {
 	// handleFailOnError is a helper function to handle errors during pushgateway validation
 	handleFailOnError := func(errMsg string) error {
 		if c.FailOnError {
-			return fmt.Errorf(errMsg)
+			return errors.New(errMsg)
 		}
 		log.Warn().Msg(errMsg)
 		return nil

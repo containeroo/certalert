@@ -35,26 +35,6 @@ func TestBoolPtr(t *testing.T) {
 	})
 }
 
-func TestIsInList(t *testing.T) {
-	t.Run("element exists in the list", func(t *testing.T) {
-		list := []string{"one", "two", "three"}
-		element := "one"
-
-		if !IsInList(element, list) {
-			t.Fatalf("'%s' should be in the list", element)
-		}
-	})
-
-	t.Run("element does not exist in the list", func(t *testing.T) {
-		list := []string{"one", "two", "three"}
-		element := "four"
-
-		if IsInList(element, list) {
-			t.Fatalf("'%s' should not be in the list", element)
-		}
-	})
-}
-
 func TestExtractMapKeys(t *testing.T) {
 	t.Run("Valid map with string keys", func(t *testing.T) {
 		input := map[string]int{
@@ -83,7 +63,7 @@ func TestExtractMapKeys(t *testing.T) {
 		}
 	})
 	t.Run("Valid map with mixed keys", func(t *testing.T) {
-		input := map[interface{}]string{
+		input := map[any]string{
 			1: "one",
 			2: "two",
 			3: "three",
@@ -123,7 +103,8 @@ func TestCheckFileAccessibility(t *testing.T) {
 		defer tmpFile.Close()
 		defer os.Remove(tmpFile.Name())
 
-		os.Chmod(tmpFile.Name(), 0222) // Write-only permissions
+		// Write-only permissions
+		os.Chmod(tmpFile.Name(), 0222) // nolint: errcheck
 		err = CheckFileAccessibility(tmpFile.Name())
 		if err == nil {
 			t.Errorf("Expected a 'failed to open file' error, got nil")
@@ -138,7 +119,8 @@ func TestCheckFileAccessibility(t *testing.T) {
 		defer tmpFile.Close()
 		defer os.Remove(tmpFile.Name())
 
-		os.Chmod(tmpFile.Name(), 0444) // Read-only permissions
+		// Read-only permissions
+		os.Chmod(tmpFile.Name(), 0444) // nolint: errcheck
 		err = CheckFileAccessibility(tmpFile.Name())
 		if err != nil {
 			t.Errorf("Expected no error for readable file, got %v", err)
@@ -356,7 +338,7 @@ func TestHasStructField(t *testing.T) {
 	})
 
 	t.Run("field in interface", func(t *testing.T) {
-		s := interface{}(&MyStruct{})
+		s := any(&MyStruct{})
 		key := "Name"
 		expect := true
 
@@ -368,7 +350,7 @@ func TestHasStructField(t *testing.T) {
 	})
 
 	t.Run("field nested in interface", func(t *testing.T) {
-		s := interface{}(&MyStruct{})
+		s := any(&MyStruct{})
 		key := "Inner.InnerField"
 		expect := true
 
