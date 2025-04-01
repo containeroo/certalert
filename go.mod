@@ -2,14 +2,13 @@ module certalert
 
 go 1.24
 
-toolchain go1.24.1
+toolchain go1.24.2
 
 require (
 	github.com/fsnotify/fsnotify v1.8.0
 	github.com/gorilla/mux v1.8.1
 	github.com/kataras/tablewriter v0.0.0-20180708051242-e063d29b7c23
 	github.com/mitchellh/copystructure v1.2.0
-	github.com/mitchellh/mapstructure v1.5.0
 	github.com/pavlo-v-chernykh/keystore-go/v4 v4.5.0
 	github.com/prometheus/client_golang v1.21.1
 	github.com/rs/zerolog v1.34.0
