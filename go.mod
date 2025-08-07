@@ -2,7 +2,7 @@ module certalert
 
 go 1.24
 
-toolchain go1.24.5
+toolchain go1.24.6
 
 require (
 	github.com/fsnotify/fsnotify v1.9.0
