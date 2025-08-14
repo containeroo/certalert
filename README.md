@@ -1,3 +1,8 @@
+# DEPRECATION WARNING
+
+`certalert` is deprecated and will be removed in a future release.
+Use the java version [certalert](https://github.com/gi8lino/certalert) instead.
+
 # CertAlert
 
 `CertAlert` is a dynamic monitoring tool designed to extract the expiration dates of local SSL/TLS certificates stored in `PEM`, `PKCS12`, `P7`, `TrustStore` and `Java Keystore` formats. It then exposes these expiration dates as epoch-formatted metrics, enabling Prometheus to easily scrape and alert on certificate expiry.
@@ -28,60 +33,63 @@ The primary function is to utilize the `serve` command to initiate a web server 
 
 1. **serve**: Launches a web server to expose certificate metrics.
 
-    ```bash
-    certalert serve [flags]
-    ```
+   ```bash
+   certalert serve [flags]
+   ```
 
-    Flags:
-    - `--listen-address`: The address to listen on for HTTP requests. (Default: `:8080`).
-    - `--auto-reload-config`: Detects config changes and reloads the configuration file.
+   Flags:
 
-    Examples:
+   - `--listen-address`: The address to listen on for HTTP requests. (Default: `:8080`).
+   - `--auto-reload-config`: Detects config changes and reloads the configuration file.
 
-    ```bash
-    # Launch the web server on localhost:8080.
-    certalert serve --listen-address localhost:8080
-    ```
+   Examples:
+
+   ```bash
+   # Launch the web server on localhost:8080.
+   certalert serve --listen-address localhost:8080
+   ```
 
 2. **print**: Prints information about the certificates.
 
-    ```bash
-    certalert print [CERTIFICATE_NAME...] [flags]
-    ```
+   ```bash
+   certalert print [CERTIFICATE_NAME...] [flags]
+   ```
 
-    Flags:
-    - `-A, --all`: Prints all certificates.
-    - `-o, --output`: Specify the output format. Supported formats: `text`, `json`, `yaml`.
+   Flags:
 
-    Examples:
+   - `-A, --all`: Prints all certificates.
+   - `-o, --output`: Specify the output format. Supported formats: `text`, `json`, `yaml`.
 
-    ```bash
-    # Print all certificates in JSON format.
-    certalert print --all --output json
+   Examples:
 
-    # Print a specific certificate named 'example-cert' in the default format.
-    certalert print example-cert
-    ```
+   ```bash
+   # Print all certificates in JSON format.
+   certalert print --all --output json
+
+   # Print a specific certificate named 'example-cert' in the default format.
+   certalert print example-cert
+   ```
 
 3. **push**: Push certificate expiration as an epoch to a Prometheus Pushgateway instance.
 
-    ```bash
-    certalert push [CERTIFICATE_NAME...] [flags]
-    ```
+   ```bash
+   certalert push [CERTIFICATE_NAME...] [flags]
+   ```
 
-    Flags:
-    - `-A, --all`: Push all certificates.
-    - `-i, --insecure-skip-verify`: Skip TLS certificate verification.
+   Flags:
 
-    Examples:
+   - `-A, --all`: Push all certificates.
+   - `-i, --insecure-skip-verify`: Skip TLS certificate verification.
 
-    ```bash
-    # Push metadata for all certificates.
-    certalert push --all
+   Examples:
 
-    # Push metadata for a specific certificate named 'example-cert'.
-    certalert push example-cert
-    ```
+   ```bash
+   # Push metadata for all certificates.
+   certalert push --all
+
+   # Push metadata for a specific certificate named 'example-cert'.
+   certalert push example-cert
+   ```
 
 ## Certificate Management
 
@@ -105,17 +113,18 @@ The endpont `/-/reload` also reloads the configuration.
 Below are the available properties for the `Pushgateway` and its nested types:
 
 - **pushgateway**
-  - **address**: The URL of the Pushgateway server. *
-  - **job**: The job label to be attached to pushed metrics. *
+
+  - **address**: The URL of the Pushgateway server. \*
+  - **job**: The job label to be attached to pushed metrics. \*
   - **insecureSkipVerify** Skip TLS certificate verification. Defaults to `false`.
   - **auth**: This nested structure holds the authentication details needed for the Pushgateway server. It supports two types of authentication: `Basic` and `Bearer`.
 
 - **auth**
   - **basic**: This nested structure holds the basic authentication details.
-    - **username**: Username used for basic authentication. *
-    - **password**: Password used for basic authentication. *
+    - **username**: Username used for basic authentication. \*
+    - **password**: Password used for basic authentication. \*
   - **bearer**: This nested structure holds the bearer authentication details.
-    - **token**: Bearer token used for bearer authentication. *
+    - **token**: Bearer token used for bearer authentication. \*
 
 Please ensure each property is correctly configured to prevent any unexpected behaviors. Remember to provide necessary authentication details under the `Auth` structure based on the type of authentication your Pushgateway server uses.
 
@@ -139,7 +148,7 @@ Credentials such as passwords or tokens can be provided in one of the following 
 - **Environment Variable**: Use the `env:` prefix, followed by the name of the environment variable that stores the credentials.
 - **File**: Use the `file:` prefix, followed by the path of the file that contains the credentials. The file should contain only the credentials.
 
-    In case the file contains multiple key-value pairs, the specific key for the credentials can be selected by appending `//KEY` to the end of the path. Each key-value pair in the file must follow the `key = value` format. The system will use the value corresponding to the specified `//KEY`.
+  In case the file contains multiple key-value pairs, the specific key for the credentials can be selected by appending `//KEY` to the end of the path. Each key-value pair in the file must follow the `key = value` format. The system will use the value corresponding to the specified `//KEY`.
 
 Make sure each credential property is correctly configured to prevent any unexpected behaviors.
 
